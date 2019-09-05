@@ -18,6 +18,7 @@
 
 namespace Funky
 {
+	//TODO(ekicam2): implment IOSystem
 	struct IOSystem
 	{
 		enum class Key : unsigned
@@ -88,7 +89,7 @@ namespace Funky
 		Rendering::RenderingBackend RenderingBackend;
 		Scene MainScene;
 
-		HWND hwnd;
+		HWND hWnd;
 		HINSTANCE hInstance = GetModuleHandle(NULL);
 
 		//editor

@@ -11,7 +11,7 @@
 #include "Rendering/Texture.h"
 #include "Rendering/ParticleSystem.h"
 
-#include "DX11/DX11ImGUIFasade.h" 
+#include "Rendering/DX11/DX11ImGUIFasade.h" 
 
 #include "BasicTypes.h"
 #include "Core/Containers.h"
@@ -19,11 +19,11 @@
 
 #include "SDL.h"
 
-extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
-LRESULT CALLBACK ProcessInput(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ProcessInput(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
-	return Funky::FunkyEngine::GetEngine().ProcessInput(hWnd, message, wParam, lParam);
+	return Funky::FunkyEngine::GetEngine().ProcessInput(hWnd, Message, wParam, lParam);
 }
 
 namespace Funky
@@ -48,14 +48,14 @@ namespace Funky
 		return *Engine;
 	}
 
-	LRESULT __stdcall FunkyEngine::ProcessInput(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK FunkyEngine::ProcessInput(HWND InhWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
-		if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+		if (ImGui_ImplWin32_WndProcHandler(InhWnd, Message, wParam, lParam))
 			return true;
 		// else fill IO struct
 			
 		// sort through and find what code to run for the message given
-		switch (message)
+		switch (Message)
 		{
 		case WM_SIZE:
 			{
@@ -78,7 +78,7 @@ namespace Funky
 		}
 
 		// Handle any messages the switch statement didn't
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		return DefWindowProc(InhWnd, Message, wParam, lParam);
 	}
 
 	bool FunkyEngine::Init()
@@ -116,10 +116,10 @@ namespace Funky
 
 		ImGui::StyleColorsDark();
 
-		ImGui_ImplWin32_Init(hwnd);
+		ImGui_ImplWin32_Init(hWnd);
 		// IMGUI END
 
-		if (!RenderingBackend.Init(hwnd))
+		if (!RenderingBackend.Init(hWnd))
 			return false;
 
 		return true;
@@ -148,7 +148,7 @@ namespace Funky
 
 		RawMesh* CubeMesh = MeshUtils::CreateCube();
 
-		char const* textures[] = {
+		char const* Textures[] = {
  			"Resource/Textures/mp_troubled/troubled-waters_rt.tga",
  			"Resource/Textures/mp_troubled/troubled-waters_lf.tga",
  			"Resource/Textures/mp_troubled/troubled-waters_up.tga",
@@ -156,35 +156,37 @@ namespace Funky
  			"Resource/Textures/mp_troubled/troubled-waters_bk.tga",
  			"Resource/Textures/mp_troubled/troubled-waters_ft.tga"
  		};
-		CubemapTexture* SkyTexture = CubemapTexture::CreateFromFile(textures);
+		CubemapTexture* SkyTexture = CubemapTexture::CreateFromFile(Textures);
+		CHECK(SkyTexture != nullptr);
 		SkyTexture->Proxy = RenderingBackend.CreateCubemap(SkyTexture->GetData(), SkyTexture->Size);
+		CHECK(SkyTexture != nullptr);
 
 		RawMesh* SkySphere = MeshUtils::CreateSphere(2000.0f, true);
 		SkySphere->Proxy = RenderingBackend.CreateMeshProxy(SkySphere);
 
 		//DirectUtils::InputLayout::PositionColorUV;
-		Rendering::RenderingBackend::VertexShader skyvs = [&]() {
-			std::ifstream input("Shaders\\SkyVertexShader.cso", std::ios::binary);
-			darray<byte> ShaderBinaryBuffer(std::istreambuf_iterator<char>(input), {});
-			input.close();
+		Rendering::RenderingBackend::VertexShader Skyvs = [&]() {
+			std::ifstream Input("Shaders\\SkyVertexShader.cso", std::ios::binary);
+			darray<byte> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
+			Input.close();
 			return RenderingBackend.CreateVertexShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
 		}();
 
-		Rendering::RenderingBackend::PixelShader skyps = [&]() {
-			std::ifstream input("Shaders\\SkyPixelShader.cso", std::ios::binary);
-			darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(input), {});
-			input.close();
+		Rendering::RenderingBackend::PixelShader Skyps = [&]() {
+			std::ifstream Input("Shaders\\SkyPixelShader.cso", std::ios::binary);
+			darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
+			Input.close();
 			return RenderingBackend.CreatePixelShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
 		}();
 
-		Rendering::RenderingBackend::VertexShader depthvs = [&]() {
+		Rendering::RenderingBackend::VertexShader Depthvs = [&]() {
 			std::ifstream input("Shaders\\DepthVertexShader.cso", std::ios::binary);
 			darray<byte> ShaderBinaryBuffer(std::istreambuf_iterator<char>(input), {});
 			input.close();
 			return RenderingBackend.CreateVertexShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
 		}();
 
-		Rendering::RenderingBackend::PixelShader depthps = [&]() {
+		Rendering::RenderingBackend::PixelShader Depthps = [&]() {
 			std::ifstream input("Shaders\\DepthPixelShader.cso", std::ios::binary);
 			darray<byte> ShaderBinaryBuffer(std::istreambuf_iterator<char>(input), {});
 			input.close();
@@ -192,7 +194,7 @@ namespace Funky
 		}();
 
 		RECT ClientArea;
-		GetClientRect(hwnd, &ClientArea);
+		GetClientRect(hWnd, &ClientArea);
 
 		f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
 		f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
@@ -201,8 +203,6 @@ namespace Funky
 		//SceneCamera.MakeOrtho((DeltaX / DeltaY) * 1.0f, 1.0f, 0.01f, 10000.0f);
 
 
-		//TODO(ekicam2): need to create depth buffer for render target of the same size!!!!!!
-		//TODO(ekicam2): and when binding render target I need to bind associated DB as well
 		Rendering::RenderingBackend::RenderTarget ProjectionRenderTarget = RenderingBackend.CreateRenderTarget({ (u32)DeltaX, (u32)DeltaY });
 		Camera ProjectionCamera(DeltaX / DeltaY, 90.0f, 1.0f, 26.5f);
 		//ProjectionCamera.MakeOrtho(DeltaX / DeltaY, 1.0f, 1.0, 15.0f);
@@ -214,17 +214,17 @@ namespace Funky
 
 		RenderingBackend.UpdateConstantBuffer(ShadowCBHandle, (Rendering::RenderingBackend::ConstantBufferData)(&ShadowCB));
 
-		Rendering::RenderingBackend::VertexShader vs = [&]() {
-			std::ifstream input("Shaders\\SampleVertexShader.cso", std::ios::binary);
-			darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(input), {});
-			input.close();
+		Rendering::RenderingBackend::VertexShader Vs = [&]() {
+			std::ifstream Input("Shaders\\SampleVertexShader.cso", std::ios::binary);
+			darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
+			Input.close();
 			return RenderingBackend.CreateVertexShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
 		}(); 
 
-		Rendering::RenderingBackend::PixelShader ps = [&]() {
-			std::ifstream input("Shaders\\SamplePixelShader.cso", std::ios::binary);
-			darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(input), {});
-			input.close();
+		Rendering::RenderingBackend::PixelShader Ps = [&]() {
+			std::ifstream Input("Shaders\\SamplePixelShader.cso", std::ios::binary);
+			darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
+			Input.close();
 			return RenderingBackend.CreatePixelShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
 		}();
 
@@ -250,25 +250,25 @@ namespace Funky
 		bool bGotMsg;
 		bool bPrevFrameRMB;
 
-		MSG  msg;
-		msg.message = WM_NULL;
-		while (WM_QUIT != msg.message)
+		MSG  Msg;
+		Msg.message = WM_NULL;
+		while (WM_QUIT != Msg.message)
 		{
-			bGotMsg = (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE) != 0);
+			bGotMsg = (PeekMessage(&Msg, NULL, 0U, 0U, PM_REMOVE) != 0);
 			if (bGotMsg)
 			{
 				// Translate and dispatch the message
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+				TranslateMessage(&Msg);
+				DispatchMessage(&Msg);
 
-				if (msg.message == WM_SIZE)
+				if (Msg.message == WM_SIZE)
 				{
 					[[maybe_unused]] i32 i = 0;
 				}
 
-				[=](HWND hwnd, bool& bPrevFrameRMB, Camera& SceneCamera)
+				[=](HWND hWnd, bool& bPrevFrameRMB, Camera& SceneCamera)
 				{
-					constexpr unsigned char PressedMask = 1 << 7;
+					constexpr byte PressedMask = 1 << 7;
 					 
 					if (!ImGui::GetIO().WantCaptureKeyboard)
 					{
@@ -289,7 +289,7 @@ namespace Funky
 					if (!ImGui::GetIO().WantCaptureMouse && PressedMask & GetKeyState(VK_RBUTTON))
 					{
 					 	RECT WindowRect = { 0 };
-					 	GetWindowRect(hwnd, &WindowRect); //get window rect of control relative to screen
+					 	GetWindowRect(hWnd, &WindowRect); //get window rect of control relative to screen
 					 	//GetClientRect(hwnd, &WindowRect);
 					 	POINT CursorPosition = { 0, 0 };
 					 	GetCursorPos(&CursorPosition);
@@ -321,14 +321,16 @@ namespace Funky
 					{
 					 	bPrevFrameRMB = false;
 					}
-				}(hwnd, bPrevFrameRMB, SceneCamera);
+				}(hWnd, bPrevFrameRMB, SceneCamera);
 			}
 			else
 			{
 				// DeltaTime is not used atm
 				PS.Update(1.0f/60.0f);
 
-				auto renderScene = [&MVPBuffer, &SceneCamera, &MVPBufferHandle, &CubeMesh, &vs, &ps, &skyvs, &skyps, SkySphere, SkyTexture, this, &PS, &ProjectionRenderTarget, &ProjectionCamera, &depthvs, &depthps, &ShadowCBHandle]() {
+
+				//TODO(ekicam2): separate this lambda to more classes such as: Renderer, AssetManager and Scene
+				auto renderScene = [&MVPBuffer, &SceneCamera, &MVPBufferHandle, &CubeMesh, &Vs, &Ps, &Skyvs, &Skyps, SkySphere, SkyTexture, this, &PS, &ProjectionRenderTarget, &ProjectionCamera, &Depthvs, &Depthps, &ShadowCBHandle]() {
 
 					//projection
 					{
@@ -359,8 +361,8 @@ namespace Funky
 								// DRAW SCENE
 								RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
 
-								RenderingBackend.BindVertexShader(depthvs);
-								RenderingBackend.BindPixelShader(depthps);
+								RenderingBackend.BindVertexShader(Depthvs);
+								RenderingBackend.BindPixelShader(Depthps);
 								RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, MVPBufferHandle);
 								RenderingBackend.DrawMesh(Temp->Mesh->Proxy);
 								// DRAW SCENE END
@@ -394,8 +396,8 @@ namespace Funky
 
 						RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
 
-						RenderingBackend.BindVertexShader(vs);
-						RenderingBackend.BindPixelShader(ps);
+						RenderingBackend.BindVertexShader(Vs);
+						RenderingBackend.BindPixelShader(Ps);
 						RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, MVPBufferHandle);
 
 						//TODO(ekicam2): remove this HACK
@@ -424,8 +426,8 @@ namespace Funky
 
 							// DRAW SCENE
 							RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
-							RenderingBackend.BindVertexShader(vs);
-							RenderingBackend.BindPixelShader(ps);
+							RenderingBackend.BindVertexShader(Vs);
+							RenderingBackend.BindPixelShader(Ps);
 							RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, MVPBufferHandle);
 							RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, ShadowCBHandle, 1u);
 							RenderingBackend.BindTexture(Rendering::RenderingBackend::ShaderResourceStage::Fragment, ProjectionRenderTarget);
@@ -452,8 +454,8 @@ namespace Funky
 									// DRAW SCENE
 									RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
 
-									RenderingBackend.BindVertexShader(vs);
-									RenderingBackend.BindPixelShader(ps);
+									RenderingBackend.BindVertexShader(Vs);
+									RenderingBackend.BindPixelShader(Ps);
 									RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, MVPBufferHandle);
 									RenderingBackend.DrawMesh(TerrainProxy);
 									// DRAW SCENE END
@@ -466,8 +468,8 @@ namespace Funky
 					MVPBuffer.MVP = MVPBuffer.Model * SceneCamera.GetView() * SceneCamera.GetProjection();
 					RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
 
-					RenderingBackend.BindVertexShader(skyvs);
-					RenderingBackend.BindPixelShader(skyps);
+					RenderingBackend.BindVertexShader(Skyvs);
+					RenderingBackend.BindPixelShader(Skyps);
 					RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, MVPBufferHandle);
 					RenderingBackend.BindTexture(Rendering::RenderingBackend::ShaderResourceStage::Fragment, SkyTexture->Proxy);
 					RenderingBackend.DrawMesh(SkySphere->Proxy);
@@ -495,12 +497,7 @@ namespace Funky
 
 	void FunkyEngine::RenderScene()
 	{
-		//			PREPARE FRAME
-		RenderingBackend.BindDefaultRenderTarget();
-		RenderingBackend.ClearRenderTargetWithColor({ 0.392156899f, 0.584313750f, 0.929411829f });
-		RenderingBackend.ClearDepthStencil(1.0f, 0u);
-		RenderingBackend.SetPrimitiveTopology(Rendering::RenderingBackend::PrimitiveTopology::Trianglelist);
-		//			PREPARE FRAME END 
+		
 	}
 
 	void FunkyEngine::DrawGUI()
@@ -529,26 +526,26 @@ namespace Funky
 	{
 		constexpr charx const * const WND_CLASS_NAME = TEXT("MainWindowClass");
 
-		WNDCLASSW wcx;
-		wcx.style = CS_HREDRAW | CS_VREDRAW;
-		wcx.lpfnWndProc = ::ProcessInput;							// points to window procedure 
-		wcx.cbClsExtra = 0;											// no extra class memory 
-		wcx.cbWndExtra = 0;											// no extra window memory 
-		wcx.hInstance = hInstance;									// handle to instance 
-		wcx.hIcon = LoadIcon(NULL, IDI_APPLICATION);				// predefined app. icon 
-		wcx.hCursor = LoadCursor(NULL, IDC_ARROW);					// predefined arrow 
-		wcx.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);	// white background brush 
-		wcx.lpszMenuName = TEXT("MainMenu");								// name of menu resource 
-		wcx.lpszClassName = WND_CLASS_NAME;							// name of window class 
-		if (!RegisterClass(&wcx))
+		WNDCLASSW Wcx;
+		Wcx.style			= CS_HREDRAW | CS_VREDRAW;
+		Wcx.lpfnWndProc		= ::ProcessInput;						// points to window procedure 
+		Wcx.cbClsExtra		= 0;							  		// no extra class memory 
+		Wcx.cbWndExtra		= 0;							  		// no extra window memory 
+		Wcx.hInstance		= hInstance;					  		// handle to instance 
+		Wcx.hIcon			= LoadIcon(NULL, IDI_APPLICATION);		// predefined app. icon 
+		Wcx.hCursor			= LoadCursor(NULL, IDC_ARROW);	  		// predefined arrow 
+		Wcx.hbrBackground	= (HBRUSH)GetStockObject(WHITE_BRUSH);	// white background brush 
+		Wcx.lpszMenuName	= TEXT("MainMenu");						// name of menu resource 
+		Wcx.lpszClassName	= WND_CLASS_NAME;						// name of window class 
+		if (!RegisterClass(&Wcx))
 		{
 			BREAK();
 			LOG_ERROR_FUNKY(TEXT("couldn't register a class with name "), WND_CLASS_NAME);
 			return false;
 		}
 
-		hwnd = CreateWindow(WND_CLASS_NAME, TEXT("Window name"), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, windowSize.X, windowSize.Y, NULL, NULL, hInstance, NULL);
-		if (!hwnd)
+		hWnd = CreateWindow(WND_CLASS_NAME, TEXT("Window name"), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, windowSize.X, windowSize.Y, NULL, NULL, hInstance, NULL);
+		if (!hWnd)
 		{
 			BREAK();
 			LOG_ERROR_FUNKY(TEXT("couldn't create the window with class: "), WND_CLASS_NAME);
@@ -556,7 +553,7 @@ namespace Funky
 			return false;
 		}
 
-		ShowWindow(hwnd, SW_SHOW);
+		ShowWindow(hWnd, SW_SHOW);
 
 		return true;
 	}

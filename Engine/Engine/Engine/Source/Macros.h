@@ -9,7 +9,6 @@
 #ifdef FORCEINLINE
 #undef FORCEINLINE
 #endif
-
 #define FORCEINLINE __forceinline
 
 #define _CONCAT_(First, Second) First ## Second

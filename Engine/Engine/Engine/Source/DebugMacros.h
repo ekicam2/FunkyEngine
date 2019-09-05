@@ -9,11 +9,13 @@
 
 #ifdef _DEBUG
 
+//TODO(ekicam2): abstract strcpy and play with more templates for charx deduction
 #if !UNICODE
 #error "UNICODE switch has to be turned on, Properties -> General -> Character Set"
 #endif
 
-namespace {
+namespace 
+{
 	template <typename T>
 	bool OnceOnly(T const &)
 	{
@@ -22,7 +24,7 @@ namespace {
 		return false;
 	}
 
-	bool ShowAssertionBox(wchar_t const * pMsg, wchar_t const * const pCond, wchar_t const * const pFile, int iLine)
+	bool ShowAssertionBox(wchar_t const * const pCond, wchar_t const * const pFile, int iLine, wchar_t const * pMsg = nullptr)
 	{
 		wchar_t pRealMsg[512];
 		wcscpy_s(pRealMsg, 512, TEXT("Assertion failed: "));
@@ -36,7 +38,7 @@ namespace {
 		swprintf(pRealLine, 5, TEXT("%d"), iLine);
 		wcscat_s(pRealMsg, pRealLine);
 
-		int answear = MessageBox(0, pRealMsg, TEXT("CRASHED"), MB_ABORTRETRYIGNORE | MB_SYSTEMMODAL);
+		int answear = MessageBox(0, pRealMsg, TEXT("Error occured: "), MB_ABORTRETRYIGNORE | MB_SYSTEMMODAL);
 		switch (answear)
 		{
 			case IDABORT:
@@ -55,8 +57,12 @@ namespace {
 	}
 }
 
-#define ASSERT_ONCE(condition, msg) if(!(condition) && OnceOnly([]{})) { if(ShowAssertionBox(msg, TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) __debugbreak(); }
-#define ASSERT(condition, msg) if(!(condition)) { LOG_ERROR(msg); if(ShowAssertionBox(msg, TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) __debugbreak(); }
+#define ASSERT_ONCE(condition, msg) if(!(condition) && OnceOnly([]{})) { if(ShowAssertionBox(msg, TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__, msg)) __debugbreak(); }
+#define ASSERT(condition, msg) if(!(condition)) { LOG_ERROR(msg); if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__, msg)) __debugbreak(); }
+
+#define CHECK_ONCE(condition) if(!(condition) && OnceOnly([]{})) { if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) __debugbreak(); }
+#define CHECK(condition) if(!(condition)) { if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) __debugbreak(); }
+
 
 #define DEATH_PATH(...) ASSERT(false, TEXT("death path reached"))
 #define BREAK(...) (__noop, __debugbreak())
@@ -67,12 +73,14 @@ namespace {
 
 #else
 
-#define DEATH_PATH _assume(false)
+#define DEATH_PATH(...) _assume(0)
 #define ASSERT_ONCE(...)
 #define ASSERT(...)
-#define TRY(expression) expression
+#define CHECK_ONCE(...) 
+#define CHECK(...)
 #define BREAK(...) 
 #define DEF_DEBUG_SCOPE_TIMER(...)
-
+#define DEF_DEBUG_SCOPE_TIMER_MICRO(...)
+#define DEF_DEBUG_SCOPE_TIMER_SEC(...)
 
 #endif

@@ -120,7 +120,7 @@ namespace Funky
 					}
 
 
-
+//TODO(ekicam2): something is wrong in here investigate it
 #ifdef GetFreeSpace
 #undef GetFreeSpace
 #endif
@@ -276,7 +276,7 @@ void Funky::Core::Memory::MemoryPool::Bucket::Free(byte* Data)
 	if (bPrevUnused)
 	{
 		MyDesc->Prev->Size += MyDesc->Size;
-		// remember to mark my descriptor as garbare!
+		// remember to mark my descriptor as garbage!
 		MyDesc->Prev->Size += Bucket::ChunkDescSize;
 		MyDesc->Prev->Next = MyDesc->Next;
 		UsedSpace -= Bucket::ChunkDescSize;

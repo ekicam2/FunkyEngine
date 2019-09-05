@@ -1,9 +1,9 @@
-#include "DX11/DX11Core.h"
+#include "Rendering/DX11/DX11Core.h"
 #include "Rendering/RawMesh.h"
 
 #include "LogMacros.h"
 
-#include "DX11/DX11ImGUIFasade.h"
+#include "Rendering/DX11/DX11ImGUIFasade.h"
 #include <d3d11_1.h>
 #include "atlbase.h"
 

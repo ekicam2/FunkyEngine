@@ -174,7 +174,6 @@
     <ClInclude Include="Source\3rd\TinyObjectLoader.h" />
     <ClInclude Include="Source\BasicTypes.h" />
     <ClInclude Include="Source\Core\Containers.h" />
-    <ClInclude Include="Source\Core\Memory\Allocator.h" />
     <ClInclude Include="Source\Core\Memory\Memory.h" />
     <ClInclude Include="Source\Core\Memory\MemoryPool.h" />
     <ClInclude Include="Source\Core\Modules\IModule.h" />
@@ -184,9 +183,9 @@
     <ClInclude Include="Source\Core\Timer.h" />
     <ClInclude Include="Source\Core\Utils.h" />
     <ClInclude Include="Source\DebugMacros.h" />
-    <ClInclude Include="Source\DX11\DirectUtils.h" />
-    <ClInclude Include="Source\DX11\DX11Core.h" />
-    <ClInclude Include="Source\DX11\DX11ImGUIFasade.h" />
+    <ClInclude Include="Source\Rendering\DX11\DirectUtils.h" />
+    <ClInclude Include="Source\Rendering\DX11\DX11Core.h" />
+    <ClInclude Include="Source\Rendering\DX11\DX11ImGUIFasade.h" />
     <ClInclude Include="Source\FunkyEngine.h" />
     <ClInclude Include="Source\LogMacros.h" />
     <ClInclude Include="Source\Macros.h" />
@@ -213,8 +212,8 @@
     <ClCompile Include="Source\3rd\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Source\3rd\TinyObjectLoader.cpp" />
     <ClCompile Include="Source\Core\Timer.cpp" />
-    <ClCompile Include="Source\DX11\DX11Core.cpp" />
-    <ClCompile Include="Source\DX11\DX11ImGUIFasade.cpp" />
+    <ClCompile Include="Source\Rendering\DX11\DX11Core.cpp" />
+    <ClCompile Include="Source\Rendering\DX11\DX11ImGUIFasade.cpp" />
     <ClCompile Include="Source\FunkyEngine.cpp" />
     <ClCompile Include="Source\Rendering\RenderingBackend.cpp" />
     <ClCompile Include="Source\Source.cpp" />
