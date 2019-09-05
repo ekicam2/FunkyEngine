@@ -12,6 +12,7 @@
 #include "Rendering/ParticleSystem.h"
 
 #include "Rendering/DX11/DX11ImGUIFasade.h" 
+#include "Rendering/OpenGL/OGL_ImGUIFasade.h"
 
 #include "BasicTypes.h"
 #include "Core/Containers.h"
@@ -502,7 +503,16 @@ namespace Funky
 
 	void FunkyEngine::DrawGUI()
 	{
-		ImGui_ImplDX11_NewFrame();
+		switch (RenderingBackend.GetBackendAPI())
+		{
+		case Rendering::RenderingBackend::API::DX11:
+			ImGui_ImplDX11_NewFrame();
+			break;
+		case Rendering::RenderingBackend::API::OGL:
+			ImGui_ImplOpenGL3_NewFrame();
+			break;
+		}
+
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
@@ -519,7 +529,15 @@ namespace Funky
 
 		ImGui::Render();
 
-		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+		switch (RenderingBackend.GetBackendAPI())
+		{
+		case Rendering::RenderingBackend::API::DX11:
+			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+			break;
+		case Rendering::RenderingBackend::API::OGL:
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			break;
+		}
 	}
 
 	bool FunkyEngine::CreateAndShowWindow(Math::Vector2u const & windowSize)

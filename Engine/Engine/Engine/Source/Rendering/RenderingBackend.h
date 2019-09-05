@@ -45,7 +45,8 @@ namespace Funky
 			enum class API
 			{
 				UNKNOWN,
-				DX11
+				DX11,
+				OGL
 			};
 
 			enum class ShaderResourceStage

@@ -6,7 +6,7 @@
 #include "Rendering/DX11/DX11ImGUIFasade.h"
 #include <d3d11_1.h>
 #include "atlbase.h"
-
+#include "Templates.h"
 
 namespace Funky
 {
@@ -51,7 +51,7 @@ namespace Funky
 			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView = nullptr;
 			Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   pRenderTargetView = nullptr;
 
-			RenderTargets.push_back(std::move(DX11GPURenderTarget()));
+			RenderTargets.push_back(Move(DX11GPURenderTarget()));
 
 			D3D11_TEXTURE2D_DESC RenderTargetTextureDesc;
 			ZeroMemory(&RenderTargetTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
@@ -99,7 +99,7 @@ namespace Funky
 			HRESULT hr = pDevice->CreateVertexShader(VertexShaderData, DataSize, nullptr, Returner.pVertexShader.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create simple vertex shader");
 
-			std::vector<D3D11_INPUT_ELEMENT_DESC> InputLayoutDesc;
+			darray<D3D11_INPUT_ELEMENT_DESC> InputLayoutDesc;
 			DirectUtils::GetInputLayoutDesc(Returner.InputLayoutDesc, InputLayoutDesc);
 
 			hr = pDevice->CreateInputLayout(InputLayoutDesc.data(), (u32)InputLayoutDesc.size(), VertexShaderData, DataSize, Returner.pInputLayout.GetAddressOf());
@@ -107,7 +107,7 @@ namespace Funky
 
 			if (hr == S_OK)
 			{
-				VertexShaders.push_back(std::move(Returner));
+				VertexShaders.push_back(Move(Returner));
 				return VertexShaders.size() - 1;
 			}
 
@@ -123,7 +123,7 @@ namespace Funky
 
 			if (hr == S_OK)
 			{
-				PixelShaders.push_back(std::move(Returner));
+				PixelShaders.push_back(Move(Returner));
 				return PixelShaders.size() - 1;
 			}
 
@@ -159,7 +159,7 @@ namespace Funky
 
 		RenderingBackend::Texture DX11::CreateTexture2D(byte const * const Data, Math::Vector2u const & Size)
 		{
-			Textures.push_back(std::move(
+			Textures.push_back(Move(
 				[Size]()
 				{
 					DX11GPUTexture Returner;
@@ -189,7 +189,7 @@ namespace Funky
 			TextureView.Format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
 			TextureView.ViewDimension = D3D_SRV_DIMENSION::D3D_SRV_DIMENSION_TEXTURE2D;
 			TextureView.Texture2D.MipLevels = 1;
-			TextureView.Texture2D.MostDetailedMip = 0;
+			TextureView.Texture2D.MoetailedMip = 0;
 
 			hr = pDevice->CreateShaderResourceView(Textures[Index].pTexture.Get(), &TextureView, Textures[Index].pTextureView.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"couldn't create texture view");
@@ -201,7 +201,7 @@ namespace Funky
 		{
 			constexpr unsigned TexCount = 6u;
 
-			Textures.push_back(std::move(
+			Textures.push_back(Move(
 				[Size, TexCount]()
 				{
 					DX11GPUTexture Returner;
@@ -284,7 +284,7 @@ namespace Funky
 			{
 				Returner.IndicesCount = Mesh->GetIndicesCount();
 
-				Meshes.push_back(std::move(Returner));
+				Meshes.push_back(Move(Returner));
 				return Meshes.size() - 1;
 			}
 

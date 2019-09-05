@@ -38,7 +38,7 @@ void DebugMemoryPool()
 
 
 	i32 allocations = std::rand() % 100;
-	std::vector<void*> AllocatedDumbs;
+	darray<void*> AllocatedDumbs;
 	for (i32 i = 0; i < allocations; ++i)
 	{
 		AllocatedDumbs.push_back((void*)MP.Alloc<Tester10MB>());

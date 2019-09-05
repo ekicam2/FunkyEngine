@@ -61,7 +61,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d3d11.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;SDL2.lib;SDL2_image.lib;Opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>Build\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -81,6 +81,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Source\3rd\gl3w\include\GL\gl3w.h" />
+    <ClInclude Include="Source\3rd\gl3w\include\GL\glcorearb.h" />
+    <ClInclude Include="Source\3rd\gl3w\include\KHR\khrplatform.h" />
     <ClInclude Include="Source\3rd\imgui\imconfig.h" />
     <ClInclude Include="Source\3rd\imgui\imgui.h" />
     <ClInclude Include="Source\3rd\imgui\imgui_internal.h" />
@@ -197,15 +200,19 @@
     <ClInclude Include="Source\Rendering\Camera.h" />
     <ClInclude Include="Source\Rendering\Light.h" />
     <ClInclude Include="Source\Rendering\MeshManager.h" />
+    <ClInclude Include="Source\Rendering\OpenGL\OGLCore.h" />
+    <ClInclude Include="Source\Rendering\OpenGL\OGL_ImGUIFasade.h" />
     <ClInclude Include="Source\Rendering\ParticleSystem.h" />
     <ClInclude Include="Source\Rendering\RawMesh.h" />
     <ClInclude Include="Source\Rendering\RenderingBackend.h" />
     <ClInclude Include="Source\Rendering\RenderingBackendImpl.h" />
     <ClInclude Include="Source\Rendering\Scene.h" />
     <ClInclude Include="Source\Rendering\Texture.h" />
+    <ClInclude Include="Source\Templates.h" />
     <ClInclude Include="Source\Utils\NoiseGenerator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\3rd\gl3w\src\gl3w.c" />
     <ClCompile Include="Source\3rd\imgui\imgui.cpp" />
     <ClCompile Include="Source\3rd\imgui\imgui_demo.cpp" />
     <ClCompile Include="Source\3rd\imgui\imgui_draw.cpp" />
@@ -215,6 +222,8 @@
     <ClCompile Include="Source\Rendering\DX11\DX11Core.cpp" />
     <ClCompile Include="Source\Rendering\DX11\DX11ImGUIFasade.cpp" />
     <ClCompile Include="Source\FunkyEngine.cpp" />
+    <ClCompile Include="Source\Rendering\OpenGL\OGLCore.cpp" />
+    <ClCompile Include="Source\Rendering\OpenGL\OGL_ImGUIFasade.cpp" />
     <ClCompile Include="Source\Rendering\RenderingBackend.cpp" />
     <ClCompile Include="Source\Source.cpp" />
     <ClCompile Include="Source\Utils\NoiseGenerator.cpp" />
