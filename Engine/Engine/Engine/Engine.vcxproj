@@ -182,6 +182,7 @@
     <ClInclude Include="Source\Core\Modules\IModule.h" />
     <ClInclude Include="Source\Core\Modules\ModulesManager.h" />
     <ClInclude Include="Source\Core\Path.h" />
+    <ClInclude Include="Source\Core\Platform.h" />
     <ClInclude Include="Source\Core\String.h" />
     <ClInclude Include="Source\Core\Timer.h" />
     <ClInclude Include="Source\Core\Utils.h" />
@@ -197,17 +198,19 @@
     <ClInclude Include="Source\Math\LinearColor.h" />
     <ClInclude Include="Source\Math\Vector2.h" />
     <ClInclude Include="Source\Math\Vector3.h" />
-    <ClInclude Include="Source\Rendering\Camera.h" />
+    <ClInclude Include="Source\Math\Camera.h" />
     <ClInclude Include="Source\Rendering\Light.h" />
+    <ClInclude Include="Source\Rendering\Material.h" />
     <ClInclude Include="Source\Rendering\MeshManager.h" />
     <ClInclude Include="Source\Rendering\OpenGL\OGLCore.h" />
+    <ClInclude Include="Source\Rendering\OpenGL\OGLUtils.h" />
     <ClInclude Include="Source\Rendering\OpenGL\OGL_ImGUIFasade.h" />
     <ClInclude Include="Source\Rendering\ParticleSystem.h" />
     <ClInclude Include="Source\Rendering\RawMesh.h" />
     <ClInclude Include="Source\Rendering\RenderingBackend.h" />
     <ClInclude Include="Source\Rendering\RenderingBackendImpl.h" />
     <ClInclude Include="Source\Rendering\Scene.h" />
-    <ClInclude Include="Source\Rendering\Texture.h" />
+    <ClInclude Include="Source\Rendering\TextureBase.h" />
     <ClInclude Include="Source\Templates.h" />
     <ClInclude Include="Source\Utils\NoiseGenerator.h" />
   </ItemGroup>

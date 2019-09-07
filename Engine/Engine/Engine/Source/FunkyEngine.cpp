@@ -7,8 +7,8 @@
 #define SDL_MAIN_HANDLED
 #include "3rd/SDL_image.h"
 
-#include "Rendering/Camera.h"
-#include "Rendering/Texture.h"
+#include "Math/Camera.h"
+#include "Rendering/TextureBase.h"
 #include "Rendering/ParticleSystem.h"
 
 #include "Rendering/DX11/DX11ImGUIFasade.h" 
@@ -19,6 +19,19 @@
 #include "Core/String.h"
 
 #include "SDL.h"
+
+DEFINE_CONSTANT_BUFFER_BEGIN(BaseConstantBuffer)
+BaseConstantBuffer() : LookAt(0.0f, 0.0f, 0.0f) {}
+DirectX::XMMATRIX MVP;
+DirectX::XMMATRIX Model;
+Funky::Math::Vector3f LookAt;
+DEFINE_CONSTANT_BUFFER_END(BaseConstantBuffer)
+
+DEFINE_CONSTANT_BUFFER_BEGIN(ShadowConstantBuffer)
+ShadowConstantBuffer() {}
+DirectX::XMMATRIX View;
+DirectX::XMMATRIX Projection;
+DEFINE_CONSTANT_BUFFER_END(ShadowConstantBuffer)
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
@@ -128,26 +141,25 @@ namespace Funky
 
 	void FunkyEngine::Run()
 	{
-		DEFINE_CONSTANT_BUFFER_BEGIN(BaseConstantBuffer)
-			BaseConstantBuffer() : LookAt(0.0f, 0.0f, 0.0f) {}
-			DirectX::XMMATRIX MVP;
-			DirectX::XMMATRIX Model;
-			Funky::Math::Vector3f LookAt;
-		DEFINE_CONSTANT_BUFFER_END(BaseConstantBuffer)
+		RECT ClientArea;
+		GetClientRect(hWnd, &ClientArea);
+		f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
+		f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
+
+		// Shadow target
+		Rendering::RenderingBackend::RenderTarget ShadowsRT = RenderingBackend.CreateRenderTarget({ (u32)DeltaX, (u32)DeltaY });
 
 		BaseConstantBuffer MVPBuffer;
-		Rendering::RenderingBackend::ConstantBuffer MVPBufferHandle = RenderingBackend.CreateConstantBuffer(sizeof(BaseConstantBuffer));
-
-		DEFINE_CONSTANT_BUFFER_BEGIN(ShadowConstantBuffer)
-			ShadowConstantBuffer() {}
-			DirectX::XMMATRIX View;
-			DirectX::XMMATRIX Projection;
-		DEFINE_CONSTANT_BUFFER_END(ShadowConstantBuffer)
-
 		ShadowConstantBuffer ShadowCB;
+
+		Rendering::RenderingBackend::ConstantBuffer MVPBufferHandle = RenderingBackend.CreateConstantBuffer(sizeof(BaseConstantBuffer));
 		Rendering::RenderingBackend::ConstantBuffer ShadowCBHandle = RenderingBackend.CreateConstantBuffer(sizeof(ShadowConstantBuffer));
 
+
 		RawMesh* CubeMesh = MeshUtils::CreateCube();
+		RawMesh* SkySphere = MeshUtils::CreateSphere(2000.0f, true);
+		SkySphere->Proxy = RenderingBackend.CreateMeshProxy(SkySphere);
+
 
 		char const* Textures[] = {
  			"Resource/Textures/mp_troubled/troubled-waters_rt.tga",
@@ -162,90 +174,76 @@ namespace Funky
 		SkyTexture->Proxy = RenderingBackend.CreateCubemap(SkyTexture->GetData(), SkyTexture->Size);
 		CHECK(SkyTexture != nullptr);
 
-		RawMesh* SkySphere = MeshUtils::CreateSphere(2000.0f, true);
-		SkySphere->Proxy = RenderingBackend.CreateMeshProxy(SkySphere);
+		
+		Material SkyMaterial{
+			[&]() {
+				std::ifstream Input("Shaders\\SkyVertexShader.cso", std::ios::binary);
+				darray<byte> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
+				Input.close();
+				return RenderingBackend.CreateVertexShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
+			}(),
+			[&]() {
+				std::ifstream Input("Shaders\\SkyPixelShader.cso", std::ios::binary);
+				darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
+				Input.close();
+				return RenderingBackend.CreatePixelShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
+			}(),
+			{MVPBufferHandle}
+		};
+		Material DepthMaterial{
+			[&]() {
+				std::ifstream input("Shaders\\DepthVertexShader.cso", std::ios::binary);
+				darray<byte> ShaderBinaryBuffer(std::istreambuf_iterator<char>(input), {});
+				input.close();
+				return RenderingBackend.CreateVertexShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
+			}(),
+			[&]() {
+				std::ifstream input("Shaders\\DepthPixelShader.cso", std::ios::binary);
+				darray<byte> ShaderBinaryBuffer(std::istreambuf_iterator<char>(input), {});
+				input.close();
+				return RenderingBackend.CreatePixelShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
+			}(),
+			{ MVPBufferHandle, ShadowCBHandle }
+		};
+		Material LitMaterial{
+			[&]() {
+				std::ifstream Input("Shaders\\SampleVertexShader.cso", std::ios::binary);
+				darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
+				Input.close();
+				return RenderingBackend.CreateVertexShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
+			}(),
+			[&]() {
+				std::ifstream Input("Shaders\\SamplePixelShader.cso", std::ios::binary);
+				darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
+				Input.close();
+				return RenderingBackend.CreatePixelShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
+			}(),
+			{ MVPBufferHandle }
+		};
 
-		//DirectUtils::InputLayout::PositionColorUV;
-		Rendering::RenderingBackend::VertexShader Skyvs = [&]() {
-			std::ifstream Input("Shaders\\SkyVertexShader.cso", std::ios::binary);
-			darray<byte> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
-			Input.close();
-			return RenderingBackend.CreateVertexShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
-		}();
 
-		Rendering::RenderingBackend::PixelShader Skyps = [&]() {
-			std::ifstream Input("Shaders\\SkyPixelShader.cso", std::ios::binary);
-			darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
-			Input.close();
-			return RenderingBackend.CreatePixelShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
-		}();
-
-		Rendering::RenderingBackend::VertexShader Depthvs = [&]() {
-			std::ifstream input("Shaders\\DepthVertexShader.cso", std::ios::binary);
-			darray<byte> ShaderBinaryBuffer(std::istreambuf_iterator<char>(input), {});
-			input.close();
-			return RenderingBackend.CreateVertexShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
-		}();
-
-		Rendering::RenderingBackend::PixelShader Depthps = [&]() {
-			std::ifstream input("Shaders\\DepthPixelShader.cso", std::ios::binary);
-			darray<byte> ShaderBinaryBuffer(std::istreambuf_iterator<char>(input), {});
-			input.close();
-			return RenderingBackend.CreatePixelShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
-		}();
-
-		RECT ClientArea;
-		GetClientRect(hWnd, &ClientArea);
-
-		f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
-		f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
-
-		Camera SceneCamera(DeltaX / DeltaY, 90.0f, 0.01f, 3000.0f);
+		//Camera setup
+		Math::Camera SceneCamera(DeltaX / DeltaY, 90.0f, 0.01f, 3000.0f);
 		//SceneCamera.MakeOrtho((DeltaX / DeltaY) * 1.0f, 1.0f, 0.01f, 10000.0f);
 
-
-		Rendering::RenderingBackend::RenderTarget ProjectionRenderTarget = RenderingBackend.CreateRenderTarget({ (u32)DeltaX, (u32)DeltaY });
-		Camera ProjectionCamera(DeltaX / DeltaY, 90.0f, 1.0f, 26.5f);
+		Math::Camera ShadowCamera(DeltaX / DeltaY, 90.0f, 1.0f, 26.5f);
 		//ProjectionCamera.MakeOrtho(DeltaX / DeltaY, 1.0f, 1.0, 15.0f);
-		ProjectionCamera.Translate({ 10.0f, 0.0f, 0.0f });
-		ProjectionCamera.Rotate({ 0.0f, -90.0f, 0.0f });
-
-		ShadowCB.Projection = ProjectionCamera.GetProjection();
-		ShadowCB.View = ProjectionCamera.GetView();
-
+		ShadowCamera.Translate({ 10.0f, 0.0f, 0.0f });
+		ShadowCamera.Rotate({ 0.0f, -90.0f, 0.0f });
+		ShadowCB.Projection = ShadowCamera.GetProjection();
+		ShadowCB.View = ShadowCamera.GetView();
 		RenderingBackend.UpdateConstantBuffer(ShadowCBHandle, (Rendering::RenderingBackend::ConstantBufferData)(&ShadowCB));
 
-		Rendering::RenderingBackend::VertexShader Vs = [&]() {
-			std::ifstream Input("Shaders\\SampleVertexShader.cso", std::ios::binary);
-			darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
-			Input.close();
-			return RenderingBackend.CreateVertexShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
-		}(); 
-
-		Rendering::RenderingBackend::PixelShader Ps = [&]() {
-			std::ifstream Input("Shaders\\SamplePixelShader.cso", std::ios::binary);
-			darray<BYTE> ShaderBinaryBuffer(std::istreambuf_iterator<char>(Input), {});
-			Input.close();
-			return RenderingBackend.CreatePixelShader(ShaderBinaryBuffer.data(), ShaderBinaryBuffer.size());
-		}();
 
 		for (u8 i = 0; i < 4; ++i)
 		{
 			auto NewDrawable = new Scene::Drawable();
-			NewDrawable->Mesh = CubeMesh;
+			NewDrawable->Mesh.Mat = LitMaterial;
+			NewDrawable->Mesh.Targets.push_back(ShadowsRT);
+			NewDrawable->Mesh.Data = CubeMesh;
 			NewDrawable->Name = str("drawableObj_").append(std::to_string(i));
 			NewDrawable->Position = Math::Vector3f(0.0f, 0.0f, 1.0f) * i;
 			MainScene.SceneNodes.push_back(NewDrawable);
-		}
-
-		ParticleSystem PS;
-		PS.Emiters.push_back(ParticleSystem::ParticleEmitter());
-
-		for (u32 i = 0; i < 10; ++i)
-		{
-			ParticleSystem::ParticleEmitter::Particle Particle;
-			Particle.Lifetime = 1.0f;
-			PS.Emiters[0].Particles.push_back(std::move(Particle));
 		}
 
 		bool bGotMsg;
@@ -267,7 +265,7 @@ namespace Funky
 					[[maybe_unused]] i32 i = 0;
 				}
 
-				[=](HWND hWnd, bool& bPrevFrameRMB, Camera& SceneCamera)
+				[=](HWND hWnd, bool& bPrevFrameRMB, Math::Camera& SceneCamera)
 				{
 					constexpr byte PressedMask = 1 << 7;
 					 
@@ -326,52 +324,49 @@ namespace Funky
 			}
 			else
 			{
-				// DeltaTime is not used atm
-				PS.Update(1.0f/60.0f);
-
-
 				//TODO(ekicam2): separate this lambda to more classes such as: Renderer, AssetManager and Scene
-				auto renderScene = [&MVPBuffer, &SceneCamera, &MVPBufferHandle, &CubeMesh, &Vs, &Ps, &Skyvs, &Skyps, SkySphere, SkyTexture, this, &PS, &ProjectionRenderTarget, &ProjectionCamera, &Depthvs, &Depthps, &ShadowCBHandle]() {
+				auto renderScene = [&MVPBuffer, &SceneCamera, &MVPBufferHandle, &CubeMesh, &DepthMaterial, &SkyMaterial, SkySphere, SkyTexture, this, &ShadowsRT, &ShadowCamera, &ShadowCBHandle]() {
 
 					//projection
 					{
 						//			PREPARE FRAME
-						RenderingBackend.BindRenderTarget(ProjectionRenderTarget);
-						RenderingBackend.ClearRenderTargetWithColor({ 0.0f, 0.0f, 0.0f }, ProjectionRenderTarget);
+						RenderingBackend.BindRenderTarget(ShadowsRT);
+						RenderingBackend.ClearRenderTargetWithColor({ 0.0f, 0.0f, 0.0f }, ShadowsRT);
 						RenderingBackend.ClearDepthStencil(1.0f, 0u);
 						RenderingBackend.SetPrimitiveTopology(Rendering::RenderingBackend::PrimitiveTopology::Trianglelist);
 						//			PREPARE FRAME END 
 
-						MVPBuffer.LookAt = ProjectionCamera.GetLookat().Normalize();
+						MVPBuffer.LookAt = ShadowCamera.GetLookat().Normalize();
 
 						for (u64 i = 0; i < MainScene.SceneNodes.size(); ++i)
 						{
 							Scene::Drawable* Temp = dynamic_cast<Scene::Drawable*>(MainScene.SceneNodes[i]);
-							if (Temp && Temp->Mesh && Temp->bVisible)
+							if (Temp && Temp->bVisible)
 							{
-								if (!Temp->Mesh->HasValidProxy())
+								if (!Temp->Mesh.Data->HasValidProxy())
 								{
-									Temp->Mesh->Proxy = RenderingBackend.CreateMeshProxy(Temp->Mesh);
+									Temp->Mesh.Data->Proxy = RenderingBackend.CreateMeshProxy(Temp->Mesh.Data);
 								}
 
 								MVPBuffer.Model = DirectX::XMMatrixScaling(Temp->Scale.X, Temp->Scale.Y, Temp->Scale.Z)
 									* DirectX::XMMatrixRotationRollPitchYaw(Math::ToRad(Temp->Rotation.X), Math::ToRad(Temp->Rotation.Y), Math::ToRad(Temp->Rotation.Z))
 									* DirectX::XMMatrixTranslation(Temp->Position.X, Temp->Position.Y, Temp->Position.Z);
-								MVPBuffer.MVP = MVPBuffer.Model * ProjectionCamera.GetView() * ProjectionCamera.GetProjection();
+								MVPBuffer.MVP = MVPBuffer.Model * ShadowCamera.GetView() * ShadowCamera.GetProjection();
 
 								// DRAW SCENE
 								RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
 
-								RenderingBackend.BindVertexShader(Depthvs);
-								RenderingBackend.BindPixelShader(Depthps);
+								
+								RenderingBackend.BindVertexShader(DepthMaterial.VS);
+								RenderingBackend.BindPixelShader(DepthMaterial.PS);
 								RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, MVPBufferHandle);
-								RenderingBackend.DrawMesh(Temp->Mesh->Proxy);
+								RenderingBackend.DrawMesh(Temp->Mesh.Data->Proxy);
 								// DRAW SCENE END
 							}
 						}
 
 						MVPBuffer.Model = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
-						MVPBuffer.MVP = MVPBuffer.Model * ProjectionCamera.GetView() * ProjectionCamera.GetProjection();
+						MVPBuffer.MVP = MVPBuffer.Model * ShadowCamera.GetView() * ShadowCamera.GetProjection();
 						RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
 
 						RenderingBackend.BindDefaultRenderTarget();
@@ -386,38 +381,14 @@ namespace Funky
 
 					MVPBuffer.LookAt = SceneCamera.GetLookat().Normalize();
 
-
-					for (u32 i = 0; i < PS.Emiters[0].Particles.size(); ++i)
-					{
-						auto& Particle = PS.Emiters[0].Particles[i];
-
-						MVPBuffer.Model = DirectX::XMMatrixScaling(0.2f, 0.2f, 0.2f)
-							* DirectX::XMMatrixTranslation(Particle.Position.X + i, Particle.Position.Y, Particle.Position.Z);
-						MVPBuffer.MVP = MVPBuffer.Model * SceneCamera.GetView() * SceneCamera.GetProjection();
-
-						RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
-
-						RenderingBackend.BindVertexShader(Vs);
-						RenderingBackend.BindPixelShader(Ps);
-						RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, MVPBufferHandle);
-
-						//TODO(ekicam2): remove this HACK
-						Scene::Drawable* Temp = dynamic_cast<Scene::Drawable*>(MainScene.SceneNodes[1]);
-						if (!Temp->Mesh->HasValidProxy())
-						{
-							Temp->Mesh->Proxy = RenderingBackend.CreateMeshProxy(Temp->Mesh);
-						}
-						RenderingBackend.DrawMesh(Temp->Mesh->Proxy);
-					}
-
 					for (u64 i = 0; i < MainScene.SceneNodes.size(); ++i)
 					{
 						Scene::Drawable* Drawable = dynamic_cast<Scene::Drawable*>(MainScene.SceneNodes[i]);
-						if (Drawable && Drawable->Mesh && Drawable->bVisible)
+						if (Drawable && Drawable->bVisible)
 						{
-							if (!Drawable->Mesh->HasValidProxy())
+							if (!Drawable->Mesh.Data->HasValidProxy())
 							{
-								Drawable->Mesh->Proxy = RenderingBackend.CreateMeshProxy(Drawable->Mesh);
+								Drawable->Mesh.Data->Proxy = RenderingBackend.CreateMeshProxy(Drawable->Mesh.Data);
 							}
 
 							MVPBuffer.Model = DirectX::XMMatrixScaling(Drawable->Scale.X, Drawable->Scale.Y, Drawable->Scale.Z)
@@ -427,50 +398,50 @@ namespace Funky
 
 							// DRAW SCENE
 							RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
-							RenderingBackend.BindVertexShader(Vs);
-							RenderingBackend.BindPixelShader(Ps);
+							RenderingBackend.BindVertexShader(Drawable->Mesh.Mat.VS);
+							RenderingBackend.BindPixelShader(Drawable->Mesh.Mat.PS);
 							RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, MVPBufferHandle);
 							RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, ShadowCBHandle, 1u);
-							RenderingBackend.BindTexture(Rendering::RenderingBackend::ShaderResourceStage::Fragment, ProjectionRenderTarget);
-							RenderingBackend.DrawMesh(Drawable->Mesh->Proxy);
+							RenderingBackend.BindTexture(Rendering::RenderingBackend::ShaderResourceStage::Fragment, ShadowsRT);
+							RenderingBackend.DrawMesh(Drawable->Mesh.Data->Proxy);
 							// DRAW SCENE END
 						}
-						else
-						{
-							static Rendering::RenderingBackend::MeshProxy TerrainProxy = Rendering::RenderingBackend::INVALID_INDEX;
-
-							Scene::Terrain* Terrain = dynamic_cast<Scene::Terrain*>(MainScene.SceneNodes[i]);
-							if (Terrain && Terrain->bVisible)
-							{
-								for (auto& TerrainNode : Terrain->TerrainNodes)
-								{
-									if (TerrainProxy == Rendering::RenderingBackend::INVALID_INDEX)
-									{
-										TerrainProxy = RenderingBackend.CreateMeshProxy(TerrainNode);
-									}
-
-									MVPBuffer.Model = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-									MVPBuffer.MVP = MVPBuffer.Model * SceneCamera.GetView() * SceneCamera.GetProjection();
-
-									// DRAW SCENE
-									RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
-
-									RenderingBackend.BindVertexShader(Vs);
-									RenderingBackend.BindPixelShader(Ps);
-									RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, MVPBufferHandle);
-									RenderingBackend.DrawMesh(TerrainProxy);
-									// DRAW SCENE END
-								}
-							}
-						}
+						//else
+						//{
+						//	static Rendering::RenderingBackend::MeshProxy TerrainProxy = Rendering::RenderingBackend::INVALID_INDEX;
+						//
+						//	Scene::Terrain* Terrain = dynamic_cast<Scene::Terrain*>(MainScene.SceneNodes[i]);
+						//	if (Terrain && Terrain->bVisible)
+						//	{
+						//		for (auto& TerrainNode : Terrain->TerrainNodes)
+						//		{
+						//			if (TerrainProxy == Rendering::RenderingBackend::INVALID_INDEX)
+						//			{
+						//				TerrainProxy = RenderingBackend.CreateMeshProxy(TerrainNode);
+						//			}
+						//
+						//			MVPBuffer.Model = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+						//			MVPBuffer.MVP = MVPBuffer.Model * SceneCamera.GetView() * SceneCamera.GetProjection();
+						//
+						//			// DRAW SCENE
+						//			RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
+						//
+						//			RenderingBackend.BindVertexShader(Vs);
+						//			RenderingBackend.BindPixelShader(Ps);
+						//			RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, MVPBufferHandle);
+						//			RenderingBackend.DrawMesh(TerrainProxy);
+						//			// DRAW SCENE END
+						//		}
+						//	}
+						//}
 					}
 
 					MVPBuffer.Model = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
 					MVPBuffer.MVP = MVPBuffer.Model * SceneCamera.GetView() * SceneCamera.GetProjection();
 					RenderingBackend.UpdateConstantBuffer(MVPBufferHandle, (Rendering::RenderingBackend::ConstantBufferData)(&MVPBuffer));
 
-					RenderingBackend.BindVertexShader(Skyvs);
-					RenderingBackend.BindPixelShader(Skyps);
+					RenderingBackend.BindVertexShader(SkyMaterial.VS);
+					RenderingBackend.BindPixelShader(SkyMaterial.PS);
 					RenderingBackend.BindConstantBuffer(Rendering::RenderingBackend::ShaderResourceStage::Vertex, MVPBufferHandle);
 					RenderingBackend.BindTexture(Rendering::RenderingBackend::ShaderResourceStage::Fragment, SkyTexture->Proxy);
 					RenderingBackend.DrawMesh(SkySphere->Proxy);

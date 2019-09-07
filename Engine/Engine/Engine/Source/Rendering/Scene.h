@@ -7,11 +7,27 @@
 
 #include "Rendering/MeshManager.h"
 #include "Math/Math.h"
+#include "Material.h"
 
 namespace Funky
 {
 	struct Scene
 	{
+		struct NodeComponent
+		{
+			std::string Name;
+
+			virtual void DrawGUI() = 0;
+		};
+
+		struct MeshComponent
+		{
+			Material Mat;
+			RawMesh* Data;
+			darray<struct TextureBase*> Textures;
+			darray<Rendering::RenderingBackend::RenderTarget> Targets;
+		};
+
 		struct Node
 		{
 			std::string Name;
@@ -90,7 +106,7 @@ namespace Funky
 			{
 			}
 
-			class RawMesh* Mesh = nullptr;
+			MeshComponent Mesh;
 
 			bool bVisible;
 

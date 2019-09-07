@@ -29,4 +29,15 @@ namespace Funky
 	typename AddReference<T>::Rvalue Declval() noexcept;
 
 	template <typename T> typename RemoveReference<T>::Type&& Move(T&& In) { return (typename RemoveReference<T>::Type&&)(In); }
+
+
+	struct False
+	{
+		static constexpr bool Value = false;
+	};
+
+	struct True
+	{
+		static constexpr bool Value = true;
+	};
 }

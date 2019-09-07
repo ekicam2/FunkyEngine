@@ -189,7 +189,7 @@ namespace Funky
 			TextureView.Format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
 			TextureView.ViewDimension = D3D_SRV_DIMENSION::D3D_SRV_DIMENSION_TEXTURE2D;
 			TextureView.Texture2D.MipLevels = 1;
-			TextureView.Texture2D.MoetailedMip = 0;
+			TextureView.Texture2D.MostDetailedMip = 0;
 
 			hr = pDevice->CreateShaderResourceView(Textures[Index].pTexture.Get(), &TextureView, Textures[Index].pTextureView.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"couldn't create texture view");

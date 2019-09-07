@@ -5,6 +5,8 @@
 #include "3rd/gl3w/include/GL/gl3w.h"
 #include "Core/Containers.h"
 
+#include "Templates.h"
+
 #include "Math/Vector2.h"
 
 

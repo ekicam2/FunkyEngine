@@ -57,15 +57,18 @@ namespace
 	}
 }
 
-#define ASSERT_ONCE(condition, msg) if(!(condition) && OnceOnly([]{})) { if(ShowAssertionBox(msg, TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__, msg)) __debugbreak(); }
-#define ASSERT(condition, msg) if(!(condition)) { LOG_ERROR(msg); if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__, msg)) __debugbreak(); }
+#define BREAK(...) (__noop, __debugbreak())
 
-#define CHECK_ONCE(condition) if(!(condition) && OnceOnly([]{})) { if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) __debugbreak(); }
-#define CHECK(condition) if(!(condition)) { if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) __debugbreak(); }
+#define ASSERT_ONCE(condition, msg) if(!(condition) && OnceOnly([]{})) { if(ShowAssertionBox(msg, TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__, msg)) BREAK(); }
+#define ASSERT(condition, msg) if(!(condition)) { LOG_ERROR(msg); if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__, msg)) BREAK(); }
 
+#define CHECK_ONCE(condition) if(!(condition) && OnceOnly([]{})) { if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) BREAK(); }
+#define CHECK(condition) if(!(condition)) { if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) BREAK(); }
+
+#define ALERT(msg) { if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) BREAK(); }
+#define ALERT_ONCE(msg) if(OnceOnly([]{})){ if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) BREAK(); }
 
 #define DEATH_PATH(...) ASSERT(false, TEXT("death path reached"))
-#define BREAK(...) (__noop, __debugbreak())
 
 #define DEF_DEBUG_SCOPE_TIMER(TimerName) ScopeTimer<Timer::EResolution::Mills> CONCAT(ScopeTimer, __LINE__)(TimerName)
 #define DEF_DEBUG_SCOPE_TIMER_MICRO(TimerName) ScopeTimer<Timer::EResolution::Micro> CONCAT(ScopeTimer, __LINE__)(TimerName)

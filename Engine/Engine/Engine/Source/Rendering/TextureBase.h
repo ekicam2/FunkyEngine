@@ -11,12 +11,19 @@ namespace Funky
 {
 	struct TextureBase
 	{
+		enum class TextureType
+		{
+			UNKNOWN, // !< Not supported as well
+			Tex_1D,
+			Tex_6D, Tex_Cube = Tex_6D, //!< It's the same
+		};
+
 		str FilePath;
 		Math::Vector2u Size = Math::Vector2u(0u, 0u);
 		Rendering::RenderingBackend::Texture Proxy = Rendering::RenderingBackend::INVALID_INDEX;
 		
 		virtual byte* GetData() const = 0;
-		bool HasValidProxy() const { return Proxy == Rendering::RenderingBackend::INVALID_INDEX; }
+		bool HasValidProxy() const { return Proxy != Rendering::RenderingBackend::INVALID_INDEX; }
 	};
 
 	struct Texture2D : TextureBase

@@ -1,16 +1,12 @@
 #include "FunkyEngine.h"
 
-#include "Rendering/RawMesh.h"
-#include "Rendering/Camera.h"
-#include "Rendering/Light.h"
-#include "Rendering/Texture.h"
 
+
+#ifdef MEMORY_TEST
 #include <fstream>
 #include <iterator>
 #include <vector>
 #include <locale>
-
-#ifdef MEMORY_TEST
 
 #include "Core/Memory/MemoryPool.h"
 
