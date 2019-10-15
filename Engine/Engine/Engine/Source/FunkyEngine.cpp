@@ -162,12 +162,12 @@ namespace Funky
 
 
 		char const* Textures[] = {
- 			"Resource/Textures/mp_troubled/troubled-waters_rt.tga",
- 			"Resource/Textures/mp_troubled/troubled-waters_lf.tga",
+ 			"Resource/Textures/mp_troubled/troubled-waters_ft.tga",
+			"Resource/Textures/mp_troubled/troubled-waters_bk.tga",
  			"Resource/Textures/mp_troubled/troubled-waters_up.tga",
  			"Resource/Textures/mp_troubled/troubled-waters_dn.tga",
- 			"Resource/Textures/mp_troubled/troubled-waters_bk.tga",
- 			"Resource/Textures/mp_troubled/troubled-waters_ft.tga"
+ 			"Resource/Textures/mp_troubled/troubled-waters_rt.tga",
+ 			"Resource/Textures/mp_troubled/troubled-waters_lf.tga"
  		};
 		CubemapTexture* SkyTexture = CubemapTexture::CreateFromFile(Textures);
 		CHECK(SkyTexture != nullptr);
@@ -260,11 +260,6 @@ namespace Funky
 				TranslateMessage(&Msg);
 				DispatchMessage(&Msg);
 
-				if (Msg.message == WM_SIZE)
-				{
-					[[maybe_unused]] i32 i = 0;
-				}
-
 				[=](HWND hWnd, bool& bPrevFrameRMB, Math::Camera& SceneCamera)
 				{
 					constexpr byte PressedMask = 1 << 7;
@@ -304,7 +299,6 @@ namespace Funky
 					 
 					 	if (bPrevFrameRMB)
 					 	{
-					 		//SetCursorPos(WindowCenter.x, WindowCenter.y);
 					 		SceneCamera.RotateClamped(
 								Funky::Math::Vector3f(MouseOffset.y * CameraY, MouseOffset.x * CameraX, 0.0f),
 								Funky::Math::Vector3f(1.0f, 0.0f, 0.0f),

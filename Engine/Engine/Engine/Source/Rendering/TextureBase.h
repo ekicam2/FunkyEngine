@@ -13,9 +13,9 @@ namespace Funky
 	{
 		enum class TextureType
 		{
-			UNKNOWN, // !< Not supported as well
+			UNKNOWN, // !< Not supported
 			Tex_1D,
-			Tex_6D, Tex_Cube = Tex_6D, //!< It's the same
+			Tex_6D
 		};
 
 		str FilePath;
