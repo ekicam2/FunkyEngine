@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Math/Vector3.h"
+#include "Math/Math.h"
 
 namespace Funky
 {
@@ -33,16 +34,16 @@ namespace Funky
 
 			FORCEINLINE DirectX::XMMATRIX const & GetProjection() const { return Projection; }
 
-			FORCEINLINE DirectX::XMMATRIX const & GetView()
+			FORCEINLINE DirectX::XMMATRIX const & GetView() const
 			{
 				if (bViewDirty)
 					RecalculateView();
-				return m_mView;
+				return View;
 			}
 
-			FORCEINLINE Funky::Math::Vector3f const & GetLookat() { return LookAt; }
+			FORCEINLINE Funky::Math::Vector3f const & GetLookat() const { return LookAt; }
 
-			FORCEINLINE Funky::Math::Vector3f const & GetPosition() { return Position; }
+			FORCEINLINE Funky::Math::Vector3f const & GetPosition() const { return Position; }
 
 			void Translate(Funky::Math::Vector3f const & vTranslation)
 			{
@@ -85,7 +86,7 @@ namespace Funky
 			}
 
 		private:
-			void RecalculateView()
+			void RecalculateView() const
 			{
 				Funky::Math::Vector3f Forward(0.0f, 0.0f, 100.f);
 
@@ -95,7 +96,7 @@ namespace Funky
 
 				LookAt = Position + Forward;
 
-				m_mView = DirectX::XMMatrixLookAtLH(
+				View = DirectX::XMMatrixLookAtLH(
 					DirectX::XMVectorSet(Position.X, Position.Y, Position.Z, 0.0f),
 					DirectX::XMVectorSet(LookAt.X, LookAt.Y, LookAt.Z, 0.0f),
 					DirectX::XMVectorSet(Up.X, Up.Y, Up.Z, 0.0f)
@@ -104,16 +105,16 @@ namespace Funky
 				bViewDirty = false;
 			}
 
-			bool bViewDirty = false;
+			mutable bool bViewDirty = false;
 
 			Funky::Math::Vector3f Position;
 			Funky::Math::Vector3f Rotation;
-			Funky::Math::Vector3f LookAt;
+			mutable Funky::Math::Vector3f LookAt;
 			const Funky::Math::Vector3f Up;
 
 			DirectX::XMMATRIX Projection;
 
-			DirectX::XMMATRIX m_mView = DirectX::XMMatrixLookAtLH(
+			mutable DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(
 				DirectX::XMVectorSet(Position.X, Position.Y, Position.Z, 0.0f),
 				DirectX::XMVectorSet(LookAt.X, LookAt.Y, LookAt.Z, 0.0f),
 				DirectX::XMVectorSet(Up.X, Up.Y, Up.Z, 0.0f)

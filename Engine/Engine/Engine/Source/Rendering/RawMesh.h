@@ -95,27 +95,19 @@ namespace Funky
 
 		virtual ~RawMesh() = default;
 
-		inline size_t GetIndicesCount() const
+		FORCEINLINE size_t GetIndicesCount() const
 		{
 			return Indices.size();
 		}
 
-		inline size_t GetVerticesCount() const
+		FORCEINLINE size_t GetVerticesCount() const
 		{
 			return Vertices.size();
 		}
 
-		inline bool HasValidProxy() const
+		FORCEINLINE bool HasValidProxy() const
 		{
 			return Proxy != Rendering::RenderingBackend::INVALID_INDEX;
 		}
-
-		//void Bind(ID3D11DeviceContext* pDeviceContext)
-		//{
-		//	constexpr unsigned stride = sizeof(Vertex), offset = 0;
-		//
-		//	pDeviceContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &stride, &offset);
-		//	pDeviceContext->IASetIndexBuffer(m_pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
-		//}
 	};
 }

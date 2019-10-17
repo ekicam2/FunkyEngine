@@ -1,25 +1,12 @@
 #pragma once
 
 #include "RawMesh.h"
-#include <DirectXMath.h>
 #include "3rd/TinyObjectLoader.h"
 #include "3rd/imgui/imgui.h"
+#include "Math/Math.h"
 
 namespace Funky
 {
-	struct MeshManager
-	{
-		 
-		void DrawGUI()
-		{
-			//ImGuiWindowFlags WindowFlags = 0;
-			//WindowFlags |= ImGuiWindowFlags_NoCollapse;
-			//ImGui::Begin("MeshManager", NULL, WindowFlags);
-			//
-			//ImGui::End();
-		}
-	};
-
 	class MeshUtils
 	{
 	public: 
@@ -73,7 +60,6 @@ namespace Funky
 
 			return Returner;
 		}
-
 		static RawMesh* CreateCube()
 		{
 			RawMesh* Returner = new RawMesh();
@@ -113,7 +99,6 @@ namespace Funky
 
 			return Returner;
 		}
-
 		static RawMesh* CreateCube(float Colors[3], bool CCW = false)
 		{
 			RawMesh* Returner = new RawMesh();
@@ -158,7 +143,6 @@ namespace Funky
 
 			return Returner;
 		}
-
 		static RawMesh* LoadOBJFromFile(char const * const pFilePath)
 		{
 			tinyobj::attrib_t Attribs;
@@ -215,7 +199,6 @@ namespace Funky
 
 			return Returner;
 		}
-
 		static RawMesh* CreateSphere(float Radius, bool CCW = false)
 		{
 			RawMesh* Returner = new RawMesh();

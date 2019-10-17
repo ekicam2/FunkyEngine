@@ -176,17 +176,18 @@
     <ClInclude Include="Source\3rd\SDL_image.h" />
     <ClInclude Include="Source\3rd\TinyObjectLoader.h" />
     <ClInclude Include="Source\BasicTypes.h" />
+    <ClInclude Include="Source\Core\Assets\AssetManager.h" />
+    <ClInclude Include="Source\Core\Assets\Cubemap.h" />
+    <ClInclude Include="Source\Core\Assets\IAsset.h" />
+    <ClInclude Include="Source\Core\Assets\Texture.h" />
     <ClInclude Include="Source\Core\Containers.h" />
     <ClInclude Include="Source\Core\Memory\Memory.h" />
     <ClInclude Include="Source\Core\Memory\MemoryPool.h" />
-    <ClInclude Include="Source\Core\Modules\IModule.h" />
-    <ClInclude Include="Source\Core\Modules\ModulesManager.h" />
     <ClInclude Include="Source\Core\Path.h" />
-    <ClInclude Include="Source\Core\Platform.h" />
     <ClInclude Include="Source\Core\String.h" />
     <ClInclude Include="Source\Core\Timer.h" />
-    <ClInclude Include="Source\Core\Utils.h" />
     <ClInclude Include="Source\DebugMacros.h" />
+    <ClInclude Include="Source\Rendering\Renderer.h" />
     <ClInclude Include="Source\Rendering\DX11\DirectUtils.h" />
     <ClInclude Include="Source\Rendering\DX11\DX11Core.h" />
     <ClInclude Include="Source\Rendering\DX11\DX11ImGUIFasade.h" />
@@ -200,8 +201,8 @@
     <ClInclude Include="Source\Math\Vector3.h" />
     <ClInclude Include="Source\Math\Camera.h" />
     <ClInclude Include="Source\Rendering\Light.h" />
-    <ClInclude Include="Source\Rendering\Material.h" />
-    <ClInclude Include="Source\Rendering\MeshManager.h" />
+    <ClInclude Include="Source\Core\Assets\Material.h" />
+    <ClInclude Include="Source\Rendering\MeshUtils.h" />
     <ClInclude Include="Source\Rendering\OpenGL\OGLCore.h" />
     <ClInclude Include="Source\Rendering\OpenGL\OGLUtils.h" />
     <ClInclude Include="Source\Rendering\OpenGL\OGL_ImGUIFasade.h" />
@@ -210,7 +211,7 @@
     <ClInclude Include="Source\Rendering\RenderingBackend.h" />
     <ClInclude Include="Source\Rendering\RenderingBackendImpl.h" />
     <ClInclude Include="Source\Rendering\Scene.h" />
-    <ClInclude Include="Source\Rendering\TextureBase.h" />
+    <ClInclude Include="Source\Core\Assets\ITexture.h" />
     <ClInclude Include="Source\Templates.h" />
     <ClInclude Include="Source\Utils\NoiseGenerator.h" />
   </ItemGroup>
@@ -221,10 +222,14 @@
     <ClCompile Include="Source\3rd\imgui\imgui_draw.cpp" />
     <ClCompile Include="Source\3rd\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Source\3rd\TinyObjectLoader.cpp" />
+    <ClCompile Include="Source\Core\Assets\Cubemap.cpp" />
+    <ClCompile Include="Source\Core\Assets\ITexture.cpp" />
+    <ClCompile Include="Source\Core\Assets\Texture.cpp" />
     <ClCompile Include="Source\Core\Timer.cpp" />
     <ClCompile Include="Source\Rendering\DX11\DX11Core.cpp" />
     <ClCompile Include="Source\Rendering\DX11\DX11ImGUIFasade.cpp" />
     <ClCompile Include="Source\FunkyEngine.cpp" />
+    <ClCompile Include="Source\Core\Assets\Material.cpp" />
     <ClCompile Include="Source\Rendering\OpenGL\OGLCore.cpp" />
     <ClCompile Include="Source\Rendering\OpenGL\OGL_ImGUIFasade.cpp" />
     <ClCompile Include="Source\Rendering\RenderingBackend.cpp" />

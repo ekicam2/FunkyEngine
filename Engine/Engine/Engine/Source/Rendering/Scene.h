@@ -5,26 +5,22 @@
 #include "Core/String.h"
 #include "Core/Containers.h"
 
-#include "Rendering/MeshManager.h"
 #include "Math/Math.h"
-#include "Material.h"
+#include "Core/Assets/Material.h"
+#include "MeshUtils.h"
 
 namespace Funky
 {
 	struct Scene
 	{
-		struct NodeComponent
-		{
-			std::string Name;
-
-			virtual void DrawGUI() = 0;
-		};
-
+		//TODO(ekicam2: it shouldn't be here
 		struct MeshComponent
 		{
-			Material Mat;
+			Asset::Material* Mat = nullptr;
 			RawMesh* Data;
-			darray<struct TextureBase*> Textures;
+			darray<struct ITexture*> Textures;
+
+			//TODO(ekicam2): mesh component should not care about RTs
 			darray<Rendering::RenderingBackend::RenderTarget> Targets;
 		};
 
@@ -35,6 +31,7 @@ namespace Funky
 			virtual void DrawGUI() = 0;
 		};
 
+		//TODO(ekicam2: it shouldn't be here
 		struct Terrain : Node
 		{
 			bool bVisible;
@@ -208,6 +205,7 @@ namespace Funky
 		};
 		
 		Terrain MainTerrain;
+		MeshComponent* SkySphere;
 		std::vector<Node*> SceneNodes;
 
 		Scene()

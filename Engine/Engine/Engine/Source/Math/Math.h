@@ -5,3 +5,4 @@
 #include "MathGlobals.h"
 #include "Vector2.h"
 #include "Vector3.h"
+#include <DirectXMath.h>

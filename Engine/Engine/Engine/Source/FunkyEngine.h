@@ -13,8 +13,8 @@
 
 #include "Rendering/RenderingBackend.h"
 
-#include "Rendering/MeshManager.h"
 #include "Rendering/Scene.h"
+#include "Rendering/Renderer.h"
 
 namespace Funky
 {
@@ -67,17 +67,16 @@ namespace Funky
 	public:
 		FunkyEngine();
 		static IOSystem const & GetIO();
-		static FunkyEngine & GetEngine();
+		static FunkyEngine* GetEngine();
 
 		LRESULT __stdcall ProcessInput(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 		bool Init();
 		void Run();
 		bool Shutdown();
-
-		void RenderScene();
-
 		void DrawGUI();
+
+		Rendering::RenderingBackend* GetRenderingBackend() { return &RenderingBackend; }
 
 	private:
 		bool CreateAndShowWindow(Math::Vector2u const & windowSize);
@@ -85,8 +84,8 @@ namespace Funky
 		static FunkyEngine* Engine;
 		static IOSystem* IO;
 
-		MeshManager MeshMgr;
 		Rendering::RenderingBackend RenderingBackend;
+		Rendering::Renderer* Renderer;
 		Scene MainScene;
 
 		HWND hWnd;
