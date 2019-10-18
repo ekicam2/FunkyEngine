@@ -1,13 +1,16 @@
 #pragma once
 
 
+#include "DebugMacros.h"
+
 #include "3rd/imgui/imgui.h"
+
 #include "Core/String.h"
 #include "Core/Containers.h"
+#include "Core/Assets/Material.h"
+#include "Core/Assets/RawMesh.h"
 
 #include "Math/Math.h"
-#include "Core/Assets/Material.h"
-#include "MeshUtils.h"
 
 namespace Funky
 {
@@ -17,7 +20,7 @@ namespace Funky
 		struct MeshComponent
 		{
 			Asset::Material* Mat = nullptr;
-			RawMesh* Data;
+			Asset::RawMesh* Data;
 			darray<struct ITexture*> Textures;
 
 			//TODO(ekicam2): mesh component should not care about RTs
@@ -42,7 +45,7 @@ namespace Funky
 			f32 ChunkEdgeSize = 0.0f;
 
 
-			std::vector<RawMesh*> TerrainNodes;
+			darray<Asset::RawMesh*> TerrainNodes;
 
 
 			Terrain()
@@ -85,7 +88,8 @@ namespace Funky
 					else
 					{
 						//TODO(ekicam2): 
-						TerrainNodes.push_back(MeshUtils::CreateTerrainPlane(ChunkResolution, ChunkResolution, ChunkEdgeSize));
+						//TerrainNodes.push_back(MeshUtils::CreateTerrainPlane(ChunkResolution, ChunkResolution, ChunkEdgeSize));
+						BREAK();
 					}
 				}
 

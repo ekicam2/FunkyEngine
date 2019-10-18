@@ -1,7 +1,7 @@
 #include "Rendering/OpenGL/OGLCore.h"
-#include "Rendering/RawMesh.h"
 
 #include "LogMacros.h"
+#include "DebugMacros.h"
 
 #include "OGL_ImGUIFasade.h"
 
@@ -112,7 +112,7 @@ namespace Funky
 			return Index;
 		}
 
-		RenderingBackend::MeshProxy OGL::CreateMeshProxy([[maybe_unused]] Funky::RawMesh const * Mesh)
+		Funky::Rendering::RenderingBackend::MeshProxy OGL::CreateMeshProxy([[maybe_unused]] Asset::RawMesh const * Mesh)
 		{
 			//TODO(ekicam2): Create VAO and fill VBOS attached to VAO
 			//TODO(ekicam2): need to rethink way of binding which would be correct with DX11

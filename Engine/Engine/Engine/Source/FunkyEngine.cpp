@@ -5,17 +5,19 @@
 #define SDL_MAIN_HANDLED
 #include "3rd/SDL_image.h"
 
+#include "BasicTypes.h"
+
 #include "Math/Camera.h"
 #include "Rendering/ParticleSystem.h"
 
 #include "Rendering/DX11/DX11ImGUIFasade.h" 
 #include "Rendering/OpenGL/OGL_ImGUIFasade.h"
-#include "Rendering/MeshUtils.h"
 #include "Rendering/Renderer.h"
 
-#include "BasicTypes.h"
 #include "Core/Containers.h"
 #include "Core/String.h"
+
+#include "Utils/MeshUtils.h"
 
 #include "SDL.h"
 
@@ -135,9 +137,8 @@ namespace Funky
 		f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
 		f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
 
-		RawMesh* CubeMesh = MeshUtils::CreateCube();
-		RawMesh* SkySphere = MeshUtils::CreateSphere(2000.0f, true);
-		SkySphere->Proxy = RenderingBackend.CreateMeshProxy(SkySphere);
+		std::unique_ptr<Asset::RawMesh> CubeMesh = std::make_unique<Asset::RawMesh>(MeshUtils::CreateCube());
+		std::unique_ptr <Asset::RawMesh> SkySphere = std::make_unique<Asset::RawMesh>(MeshUtils::CreateSphere(2000.0f, true));
 
 		str Textures[6] = {
  			"Resource/Textures/mp_troubled/troubled-waters_ft.tga",
@@ -177,14 +178,14 @@ namespace Funky
 			auto NewDrawable = new Scene::Drawable();
 			NewDrawable->Mesh.Mat = &LitMaterial;
 			//NewDrawable->Mesh.Targets.push_back(ShadowsRT);
-			NewDrawable->Mesh.Data = CubeMesh;
+			NewDrawable->Mesh.Data = CubeMesh.get();
 			NewDrawable->Name = str("drawableObj_").append(std::to_string(i));
 			NewDrawable->Position = Math::Vector3f(0.0f, 0.0f, 1.0f) * i;
 			MainScene.SceneNodes.push_back(NewDrawable);
 		}
 
 		MainScene.SkySphere = new Scene::MeshComponent();
-		MainScene.SkySphere->Data = SkySphere;
+		MainScene.SkySphere->Data = SkySphere.get();
 		MainScene.SkySphere->Mat = &SkyMaterial;
 		MainScene.SkySphere->Textures.push_back((ITexture*)SkyTexture);
 
@@ -267,7 +268,6 @@ namespace Funky
 			}
 		}
 
-		delete CubeMesh;
 		delete MainScene.SkySphere;
 	}
 

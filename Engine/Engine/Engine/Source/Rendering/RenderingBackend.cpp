@@ -1,8 +1,6 @@
 #include "RenderingBackend.h"
 #include "DX11/DX11Core.h"
 
-#include "RawMesh.h"
-
 namespace Funky
 {
 	namespace Rendering
@@ -61,7 +59,7 @@ namespace Funky
 			return Impl->CreateCubemap(Data, Size);
 		}
 
-		Funky::Rendering::RenderingBackend::MeshProxy RenderingBackend::CreateMeshProxy(Funky::RawMesh const * Mesh)
+		Funky::Rendering::RenderingBackend::MeshProxy RenderingBackend::CreateMeshProxy(Asset::RawMesh const * Mesh)
 		{
 			return Impl->CreateMeshProxy(Mesh);
 		}
@@ -126,8 +124,5 @@ namespace Funky
 		{
 			Impl->Present();
 		}
-
-		std::vector<Vertex> const & RenderingBackendImpl::GetVertices(Funky::RawMesh const * Mesh) { return Mesh->Vertices; }
-		std::vector<unsigned short> const & RenderingBackendImpl::GetIndices(Funky::RawMesh const * Mesh) { return Mesh->Indices; }
 	}
 }

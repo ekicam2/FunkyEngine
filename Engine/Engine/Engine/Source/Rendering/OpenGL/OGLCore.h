@@ -37,7 +37,7 @@ namespace Funky
 			virtual RenderingBackend::Texture CreateTexture2D(byte const * const Data, Math::Vector2u const & Size) override;
 			virtual RenderingBackend::Texture CreateCubemap(byte const * const Data, Math::Vector2u const & Size) override;
 
-			virtual RenderingBackend::MeshProxy CreateMeshProxy(Funky::RawMesh const * Mesh) override;
+			virtual RenderingBackend::MeshProxy CreateMeshProxy(Asset::RawMesh const * Mesh) override;
 
 			virtual void BindRenderTarget(RenderingBackend::RenderTarget RenderTargetToBind) override;
 			virtual void BindDefaultRenderTarget() override;

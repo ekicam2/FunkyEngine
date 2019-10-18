@@ -1,19 +1,22 @@
 #pragma once
 
-#include "RawMesh.h"
 #include "3rd/TinyObjectLoader.h"
-#include "3rd/imgui/imgui.h"
 #include "Math/Math.h"
+
+#include "Core/Timer.h"
+#include "Utils/NoiseGenerator.h"
 
 namespace Funky
 {
 	class MeshUtils
 	{
 	public: 
+		using MeshLoad = std::pair<darray<Vertex>, darray<u16>>;
 
-		static RawMesh* CreateTerrainPlane(u32 GridCellsX, u32 GridCellsY, f32 StepBetweenGridPoints = 0.0f)
+		static MeshLoad CreateTerrainPlane(u32 GridCellsX, u32 GridCellsY, f32 StepBetweenGridPoints = 0.0f)
 		{
-			RawMesh* Returner = new RawMesh();
+			MeshLoad Ret;
+			auto& [Vertices, Indices] = Ret;
 
 			const u32 TerrainCellsX = GridCellsX;
 			const u32 TerrainCellsY = GridCellsY;
@@ -21,10 +24,10 @@ namespace Funky
 			const f32 xGridOffset = StepBetweenGridPoints ? StepBetweenGridPoints : 1.f / TerrainCellsX;
 			const f32 yGridOffset = StepBetweenGridPoints ? StepBetweenGridPoints : 1.f / TerrainCellsY;
 
-			Returner->Vertices.reserve((TerrainCellsY + 1) * (TerrainCellsX + 1));
-			Returner->Indices.reserve(TerrainCellsY * TerrainCellsX * 6);
+			Vertices.reserve((TerrainCellsY + 1) * (TerrainCellsX + 1));
+			Indices.reserve(TerrainCellsY * TerrainCellsX * 6);
 
-			NoiseGenerator Ng;
+			Utils::NoiseGenerator Ng;
 			for (u64 y = 0; y < (TerrainCellsY + 1); ++y)
 			{
 				for (u32 x = 0; x < (TerrainCellsX + 1); ++x)
@@ -33,7 +36,7 @@ namespace Funky
 
 					f32 absval = (NoisedHeight < 0 ? -NoisedHeight : NoisedHeight);
 
-					Returner->Vertices.push_back(
+					Vertices.push_back(
 						Vertex(
 							{ x * xGridOffset, NoisedHeight, y *  -yGridOffset },  // pos
 							{ absval * 0.1f, 0.0f, 0.0f } // color
@@ -47,23 +50,26 @@ namespace Funky
 				for (u32 x = 0; x < TerrainCellsX; ++x, ++index)
 				{
 					// first triangle
-					Returner->Indices.push_back((u16)(index + (TerrainCellsX + 1) + 1));
-					Returner->Indices.push_back((u16)(index + (TerrainCellsX + 1)));
-					Returner->Indices.push_back((u16)(index));
+					Indices.push_back((u16)(index + (TerrainCellsX + 1) + 1));
+					Indices.push_back((u16)(index + (TerrainCellsX + 1)));
+					Indices.push_back((u16)(index));
 
 					// second triangle
-					Returner->Indices.push_back((u16)(index + 1));
-					Returner->Indices.push_back((u16)(index + (TerrainCellsX + 1) + 1));
-					Returner->Indices.push_back((u16)(index));
+					Indices.push_back((u16)(index + 1));
+					Indices.push_back((u16)(index + (TerrainCellsX + 1) + 1));
+					Indices.push_back((u16)(index));
 				}
 			}
 
-			return Returner;
+			return Ret;
 		}
-		static RawMesh* CreateCube()
+
+		static MeshLoad CreateCube()
 		{
-			RawMesh* Returner = new RawMesh();
-			Returner->Vertices =
+			MeshLoad Ret;
+			auto& [Vertices, Indices] = Ret;
+
+			Vertices =
 			{
 				{DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f), DirectX::XMFLOAT3(0,   0,   0)},
 				{DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f), DirectX::XMFLOAT3(0,   0,   1)},
@@ -76,7 +82,7 @@ namespace Funky
 				{DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), DirectX::XMFLOAT3(1,   1,   1)},
 			};
 
-			Returner->Indices =
+			Indices =
 			{
 				1,2,0, // -x
 				3,2,1,
@@ -97,12 +103,15 @@ namespace Funky
 				5,7,1,
 			};
 
-			return Returner;
+			return Ret;
 		}
-		static RawMesh* CreateCube(float Colors[3], bool CCW = false)
+		
+		static MeshLoad CreateCube(f32 Colors[3], bool CCW = false)
 		{
-			RawMesh* Returner = new RawMesh();
-			Returner->Vertices =
+			MeshLoad Ret;
+			auto& [Vertices, Indices] = Ret;
+
+			Vertices =
 			{
 				{DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f), DirectX::XMFLOAT3(Colors[0], Colors[1], Colors[2])},
 				{DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f), DirectX::XMFLOAT3(Colors[0], Colors[1], Colors[2])},
@@ -115,7 +124,7 @@ namespace Funky
 				{DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), DirectX::XMFLOAT3(Colors[0], Colors[1], Colors[2])},
 			};
 
-			Returner->Indices =
+			Indices =
 			{
 				1,2,0, // -x
 				3,2,1,
@@ -138,12 +147,13 @@ namespace Funky
 
 			if (CCW)
 			{
-				std::reverse(std::begin(Returner->Indices), std::end(Returner->Indices));
+				std::reverse(std::begin(Indices), std::end(Indices));
 			}
 
-			return Returner;
+			return Ret;
 		}
-		static RawMesh* LoadOBJFromFile(char const * const pFilePath)
+		
+		static MeshLoad LoadOBJFromFile(char const * const pFilePath)
 		{
 			tinyobj::attrib_t Attribs;
 			std::vector<tinyobj::shape_t> Shapes;
@@ -162,11 +172,11 @@ namespace Funky
 			{
 				LOG_ERROR_FUNKY(TEXT("Error was: "), Error.c_str());
 				BREAK();
-				return nullptr;
+				return {};
 			}
 
-			RawMesh* Returner = new RawMesh();
-
+			MeshLoad Ret;
+			auto& [Vertices, Indices] = Ret;
 			{
 				DEF_DEBUG_SCOPE_TIMER(TEXT("Creating mesh"));
 
@@ -187,26 +197,28 @@ namespace Funky
 
 						if (UniqueVerts.count(PropVert) == 0)
 						{
-							UniqueVerts[PropVert] = static_cast<unsigned>(Returner->Vertices.size());
-							Returner->Vertices.push_back(PropVert);
+							UniqueVerts[PropVert] = static_cast<unsigned>(Vertices.size());
+							Vertices.push_back(PropVert);
 						}
 
-						Returner->Indices.push_back((u16)UniqueVerts[PropVert]);
+						Indices.push_back((u16)UniqueVerts[PropVert]);
 						//std::reverse(Returner->m_Indices.begin(), Returner->m_Indices.end());
 					}
 				}
 			}
 
-			return Returner;
+			return Ret;
 		}
-		static RawMesh* CreateSphere(float Radius, bool CCW = false)
+		
+		static MeshLoad CreateSphere(float Radius, bool CCW = false)
 		{
-			RawMesh* Returner = new RawMesh();
+			MeshLoad Ret;
+			auto& [Vertices, Indices] = Ret;
 
 			const u32 X_SEGMENTS = 12;
 			const u32 Y_SEGMENTS = 12;
 
-			Returner->Vertices.reserve(X_SEGMENTS * X_SEGMENTS);
+			Vertices.reserve(X_SEGMENTS * X_SEGMENTS);
 
 			for (u32 y = 0; y <= Y_SEGMENTS; ++y)
 			{
@@ -218,7 +230,7 @@ namespace Funky
 					f32 yPos = Math::Cos(ySegment * Math::PI<f32>) * Radius;
 					f32 zPos = Math::Sin(xSegment * 2.0f * Math::PI<f32>) * Math::Sin(ySegment * Funky::Math::PI<f32>) * Radius;
 
-					Returner->Vertices.push_back(
+					Vertices.push_back(
 						{ DirectX::XMFLOAT3(xPos, yPos, zPos), DirectX::XMFLOAT3(xPos / Radius, yPos / Radius, zPos / Radius), DirectX::XMFLOAT2(xSegment, ySegment) }
 					);
 				}
@@ -231,22 +243,22 @@ namespace Funky
 					u64 first = (latNumber * (X_SEGMENTS + 1)) + longNumber;
 					u64 second = first + X_SEGMENTS + 1;
 
-					Returner->Indices.push_back((u16)(first + 1));
-					Returner->Indices.push_back((u16)(second));
-					Returner->Indices.push_back((u16)(first));
+					Indices.push_back((u16)(first + 1));
+					Indices.push_back((u16)(second));
+					Indices.push_back((u16)(first));
 
-					Returner->Indices.push_back((u16)(first + 1));
-					Returner->Indices.push_back((u16)(second + 1));
-					Returner->Indices.push_back((u16)(second));
+					Indices.push_back((u16)(first + 1));
+					Indices.push_back((u16)(second + 1));
+					Indices.push_back((u16)(second));
 				}
 			}
 
 			if (CCW)
 			{
-				std::reverse(std::begin(Returner->Indices), std::end(Returner->Indices));
+				std::reverse(std::begin(Indices), std::end(Indices));
 			}
 
-			return Returner;
+			return Ret;
 		}
 	};
 }

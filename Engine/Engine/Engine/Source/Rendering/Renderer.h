@@ -8,8 +8,6 @@
 #include "Core/Assets/ITexture.h"
 #include "Core/Assets/Cubemap.h"
 
-#include "MeshUtils.h"
-
 DEFINE_CONSTANT_BUFFER_BEGIN(BaseConstantBuffer)
 BaseConstantBuffer() : LookAt(0.0f, 0.0f, 0.0f) {}
 DirectX::XMMATRIX MVP;

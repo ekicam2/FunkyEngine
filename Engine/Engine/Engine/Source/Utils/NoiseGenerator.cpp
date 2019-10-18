@@ -1,6 +1,6 @@
 #include "NoiseGenerator.h"
 
-NoiseGenerator::NoiseGenerator()
+Utils::NoiseGenerator::NoiseGenerator()
 {
 	_permutation = {
 	151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,
@@ -20,7 +20,7 @@ NoiseGenerator::NoiseGenerator()
 	_permutation.insert(_permutation.end(), _permutation.begin(), _permutation.end());
 }
 
-double NoiseGenerator::noise(double x, double y, double z) const
+double Utils::NoiseGenerator::noise(double x, double y, double z) const
 {
 	int X = (int)floor(x) & 255;
 	int Y = (int)floor(y) & 255;
@@ -51,12 +51,12 @@ double NoiseGenerator::noise(double x, double y, double z) const
 				grad(_permutation[BB + 1], x - 1, y - 1, z - 1))));
 }
 
-double NoiseGenerator::fade(double t) const
+double Utils::NoiseGenerator::fade(double t) const
 {
 	return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
-double NoiseGenerator::grad(int hash, double x, double y, double z) const
+double Utils::NoiseGenerator::grad(int hash, double x, double y, double z) const
 {
 	int h = hash & 15;
 	double u = h < 8 ? x : y, v = h < 4 ? y : h == 12 || h == 14 ? x : z;
@@ -64,7 +64,7 @@ double NoiseGenerator::grad(int hash, double x, double y, double z) const
 	return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }
 
-double NoiseGenerator::lerp(double t, double a, double b) const
+double Utils::NoiseGenerator::lerp(double t, double a, double b) const
 {
 	return (1.0 - t) * a + t * b;
 }

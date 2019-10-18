@@ -35,7 +35,10 @@ private:													  \
 
 namespace Funky
 {
-	class RawMesh;
+	namespace Asset
+	{
+		class RawMesh; //TODO(ekicam2): we should not operate on rawmesh directly, instead use GPUMesh
+	}
 
 	namespace Rendering
 	{
@@ -96,7 +99,7 @@ namespace Funky
 			Texture CreateTexture2D(byte const * const Data, Math::Vector2u const & Size);
 			Texture CreateCubemap(byte const * const Data, Math::Vector2u const & Size);
 
-			MeshProxy CreateMeshProxy(Funky::RawMesh const * Mesh);
+			MeshProxy CreateMeshProxy(Asset::RawMesh const * Mesh);
 
 			void BindRenderTarget(RenderTarget RenderTargetToBind);
 

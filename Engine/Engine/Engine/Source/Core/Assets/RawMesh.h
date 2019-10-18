@@ -1,19 +1,16 @@
 #pragma once
 
-#include <DirectXMath.h>
+#include "Math/Math.h"
 
 #include <unordered_map>
 
 #include "DebugMacros.h"
 #include "LogMacros.h"
-#include "Core/Timer.h"
-#include "RenderingBackend.h"
+
+#include "Rendering/RenderingBackend.h"
 
 #include "Core/Containers.h"
-
-#include "Math/MathGlobals.h"
-
-#include "Utils/NoiseGenerator.h"
+#include "Core/Assets/IAsset.h"
 
 namespace Funky
 {
@@ -76,38 +73,57 @@ namespace Funky
 	namespace Rendering
 	{
 		class RenderingBackendImpl;
+		class Renderer;
 	}
 
-	class RawMesh
+	namespace Asset
 	{
-		friend class MeshUtils;
-		friend class Rendering::RenderingBackendImpl;
-
-		bool m_bIsValid = false;
-		darray<Vertex> Vertices;
-		darray<u16> Indices;
-
-
-		RawMesh() = default;
-
-	public:
-		Rendering::RenderingBackend::MeshProxy Proxy = Rendering::RenderingBackend::INVALID_INDEX;
-
-		virtual ~RawMesh() = default;
-
-		FORCEINLINE size_t GetIndicesCount() const
+		class RawMesh : public IAsset
 		{
-			return Indices.size();
-		}
+		public:
+			RawMesh(str const& Path);
+			RawMesh(std::pair<darray<Vertex>, darray<u16>>&& Load);
+			virtual ~RawMesh() = default;
 
-		FORCEINLINE size_t GetVerticesCount() const
-		{
-			return Vertices.size();
-		}
+			FORCEINLINE size_t GetIndicesCount() const
+			{
+				return Indices.size();
+			}
 
-		FORCEINLINE bool HasValidProxy() const
-		{
-			return Proxy != Rendering::RenderingBackend::INVALID_INDEX;
-		}
-	};
+			FORCEINLINE size_t GetVerticesCount() const
+			{
+				return Vertices.size();
+			}
+
+			FORCEINLINE bool HasValidProxy() const
+			{
+				return Proxy != Rendering::RenderingBackend::INVALID_INDEX;
+			}
+
+			FORCEINLINE darray<Vertex> const & GetVertices() const
+			{
+				return Vertices;
+			}
+
+			FORCEINLINE darray<u16> const& GetIndices() const
+			{
+				return Indices;
+			}
+
+		private:
+			friend class MeshUtils;
+			friend class Rendering::RenderingBackendImpl;
+			friend class Rendering::Renderer; //????!!!
+
+			Rendering::RenderingBackend::MeshProxy Proxy = Rendering::RenderingBackend::INVALID_INDEX;
+
+			darray<Vertex> Vertices;
+			darray<u16> Indices;
+
+			inline static u32 TagCounter = 0u;
+		};
+
+		//u32 RawMesh::TagCounter = 0u;
+
+	}
 }

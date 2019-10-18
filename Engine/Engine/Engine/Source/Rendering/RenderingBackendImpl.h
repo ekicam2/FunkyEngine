@@ -6,7 +6,6 @@
 	#define WINDOWS_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-#include "RawMesh.h"
 
 namespace Funky
 {
@@ -35,7 +34,7 @@ namespace Funky
 			virtual RenderingBackend::Texture CreateTexture2D(byte const * const Data, Math::Vector2u const & Size) = 0;
 			virtual RenderingBackend::Texture CreateCubemap(byte const * const Data, Math::Vector2u const & Size) = 0;
 
-			virtual RenderingBackend::MeshProxy CreateMeshProxy(Funky::RawMesh const * Mesh) = 0;
+			virtual RenderingBackend::MeshProxy CreateMeshProxy(Asset::RawMesh const * Mesh) = 0;
 
 			virtual void BindRenderTarget(RenderingBackend::RenderTarget RenderTargetToBind) = 0;
 			virtual void BindDefaultRenderTarget() = 0;
@@ -53,13 +52,6 @@ namespace Funky
 			virtual void DrawMesh(RenderingBackend::MeshProxy Mesh) = 0;
 
 			virtual void Present() = 0;
-
-
-		protected:
-			darray<Vertex> const & GetVertices(Funky::RawMesh const * Mesh);
-			darray<unsigned short> const & GetIndices(Funky::RawMesh const * Mesh);
-		
-
 		};
 	}
 }

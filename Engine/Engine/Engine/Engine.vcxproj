@@ -202,12 +202,12 @@
     <ClInclude Include="Source\Math\Camera.h" />
     <ClInclude Include="Source\Rendering\Light.h" />
     <ClInclude Include="Source\Core\Assets\Material.h" />
-    <ClInclude Include="Source\Rendering\MeshUtils.h" />
+    <ClInclude Include="Source\Utils\MeshUtils.h" />
     <ClInclude Include="Source\Rendering\OpenGL\OGLCore.h" />
     <ClInclude Include="Source\Rendering\OpenGL\OGLUtils.h" />
     <ClInclude Include="Source\Rendering\OpenGL\OGL_ImGUIFasade.h" />
     <ClInclude Include="Source\Rendering\ParticleSystem.h" />
-    <ClInclude Include="Source\Rendering\RawMesh.h" />
+    <ClInclude Include="Source\Core\Assets\RawMesh.h" />
     <ClInclude Include="Source\Rendering\RenderingBackend.h" />
     <ClInclude Include="Source\Rendering\RenderingBackendImpl.h" />
     <ClInclude Include="Source\Rendering\Scene.h" />
@@ -224,6 +224,7 @@
     <ClCompile Include="Source\3rd\TinyObjectLoader.cpp" />
     <ClCompile Include="Source\Core\Assets\Cubemap.cpp" />
     <ClCompile Include="Source\Core\Assets\ITexture.cpp" />
+    <ClCompile Include="Source\Core\Assets\RawMesh.cpp" />
     <ClCompile Include="Source\Core\Assets\Texture.cpp" />
     <ClCompile Include="Source\Core\Timer.cpp" />
     <ClCompile Include="Source\Rendering\DX11\DX11Core.cpp" />

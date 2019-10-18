@@ -1,5 +1,4 @@
 #include "Rendering/DX11/DX11Core.h"
-#include "Rendering/RawMesh.h"
 
 #include "LogMacros.h"
 
@@ -7,6 +6,9 @@
 #include <d3d11_1.h>
 #include "atlbase.h"
 #include "Templates.h"
+
+//TODO(ekicam2): there should not be any assets over here
+#include "Core/Assets/RawMesh.h"
 
 namespace Funky
 {
@@ -244,12 +246,12 @@ namespace Funky
 			return Index;
 		}
 
-		RenderingBackend::MeshProxy DX11::CreateMeshProxy(Funky::RawMesh const * Mesh)
+		Funky::Rendering::RenderingBackend::MeshProxy DX11::CreateMeshProxy(Asset::RawMesh const * Mesh)
 		{
 			DX11::DX11GPUMesh Returner;
 
 			D3D11_BUFFER_DESC VertexBufferDesc;
-			VertexBufferDesc.ByteWidth = (u32)(GetVertices(Mesh).size() * sizeof(Vertex));
+			VertexBufferDesc.ByteWidth = (u32)(Mesh->GetVerticesCount() * sizeof(Vertex));
 			VertexBufferDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
 			VertexBufferDesc.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
 			VertexBufferDesc.CPUAccessFlags = 0; // D3D11_CPU_ACCESS_FLAG 
@@ -258,14 +260,14 @@ namespace Funky
 
 			D3D11_SUBRESOURCE_DATA VertexData;
 			ZeroMemory(&VertexData, sizeof(D3D11_SUBRESOURCE_DATA));
-			VertexData.pSysMem = GetVertices(Mesh).data();
+			VertexData.pSysMem = Mesh->GetVertices().data();
 			ASSERT(VertexData.SysMemPitch == 0, L"memory was not ZEROED");
 
 			HRESULT hr1 = pDevice->CreateBuffer(&VertexBufferDesc, &VertexData, Returner.pVertexBuffer.GetAddressOf());
 			ASSERT(SUCCEEDED(hr1), L" Vertex buffer was not created properly!");
 
 			D3D11_BUFFER_DESC IndexBufferDesc;
-			IndexBufferDesc.ByteWidth = (u32)(GetIndices(Mesh).size() * sizeof(u16));
+			IndexBufferDesc.ByteWidth = (u32)(Mesh->GetIndices().size() * sizeof(u16));
 			IndexBufferDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
 				IndexBufferDesc.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE,
 				IndexBufferDesc.CPUAccessFlags = 0; // D3D11_CPU_ACCESS_FLAG 
@@ -274,7 +276,7 @@ namespace Funky
 
 			D3D11_SUBRESOURCE_DATA IndexData;
 			ZeroMemory(&IndexData, sizeof(D3D11_SUBRESOURCE_DATA));
-			IndexData.pSysMem = GetIndices(Mesh).data();
+			IndexData.pSysMem = Mesh->GetIndices().data();
 			ASSERT(IndexData.SysMemPitch == 0, L"memory was not ZEROED");
 
 			HRESULT hr2 = pDevice->CreateBuffer(&IndexBufferDesc, &IndexData, Returner.pIndexBuffer.GetAddressOf());
