@@ -1,9 +1,6 @@
 #pragma once
 
-#ifndef WINDOWS_LEAN_AND_MEAN
-#define WINDOWS_LEAN_AND_MEAN
-#endif
-#include <windows.h>
+#include "Core/Platform/Platform.h"
 
 #define ENDABLE_LOG
 #define LOG_EVERYWHERE
@@ -15,6 +12,9 @@
 
 #include "Rendering/Scene.h"
 #include "Rendering/Renderer.h"
+
+#include "Core/Tasks/TaskManager.h"
+#include "Core/Thread/ThreadPool.h"
 
 namespace Funky
 {
@@ -87,6 +87,9 @@ namespace Funky
 		Rendering::RenderingBackend RenderingBackend;
 		Rendering::Renderer* Renderer;
 		Scene MainScene;
+
+		Core::Task::TaskManager TaskManager;
+		Core::Thread::ThreadPool ThreadPool;
 
 		HWND hWnd;
 		HINSTANCE hInstance = GetModuleHandle(NULL);

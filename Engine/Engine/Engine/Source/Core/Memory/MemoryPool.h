@@ -120,7 +120,7 @@ namespace Funky
 					}
 
 
-//TODO(ekicam2): something is wrong in here investigate it
+//TODO(ekicam2): something is wrong in here, investigate it
 #ifdef GetFreeSpace
 #undef GetFreeSpace
 #endif

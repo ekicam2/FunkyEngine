@@ -1,6 +1,6 @@
 #include "FunkyEngine.h"
 
-
+#define THREAD_TEST
 
 #ifdef MEMORY_TEST
 #include <fstream>
@@ -60,7 +60,38 @@ int main()
 	return 0;
 	
 }
-#else 
+#elif defined(THREAD_TEST)
+
+#include "Core/Platform/Platform.h"
+#include "Core/Tasks/ITask.h"
+#include "Core/Tasks/TaskManager.h"
+#include "Core/Thread/ThreadPool.h"
+
+class TestTask : public Funky::Core::Task::ITask
+{
+public:
+	TestTask() : ITask(Funky::Core::Thread::Type::Any) {}
+	void Run()
+	{
+		std::cout << "Processing task" << std::endl;
+	}
+};
+
+int main()
+{
+	Funky::Core::Task::TaskManager TaskManager;
+	Funky::Core::Thread::ThreadPool ThreadPool({ {Funky::Core::Thread::Type::Worker, (u16)5u} });
+	
+	auto TT = new TestTask();
+	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
+	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
+	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
+	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
+	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
+
+	return 0;
+}
+#else
 int main()
 {
 	Funky::FunkyEngine Engine;
