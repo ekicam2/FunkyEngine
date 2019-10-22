@@ -12,6 +12,6 @@ Funky::Core::Thread::ThreadPool::ThreadPool(ThreadCreationDesc const& CreationDe
 	for (auto& Desc : CreationDesc)
 	{
 		for (u16 i = 0; i < Desc.second; ++i)
-			AllThreads.push_back(Core::Platform::CreateThread("Unnamed", Desc.first));
+			AllThreads.push_back(Funky::Core::Thread::IThread::CreateThread("Unnamed", Desc.first));
 	}
 }

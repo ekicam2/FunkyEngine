@@ -15,7 +15,7 @@ namespace Funky
 			{
 			public:
 				ITask(Thread::Type Type);
-				virtual void Run() = 0;
+				virtual void Process() = 0;
 
 				FORCEINLINE Thread::Type GetThreadToRunOn() const { return ThreadToRunOn; }
 			private:

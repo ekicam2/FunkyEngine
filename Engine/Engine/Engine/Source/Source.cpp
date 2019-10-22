@@ -71,7 +71,7 @@ class TestTask : public Funky::Core::Task::ITask
 {
 public:
 	TestTask() : ITask(Funky::Core::Thread::Type::Any) {}
-	void Run()
+	void Process()
 	{
 		std::cout << "Processing task" << std::endl;
 	}
@@ -88,6 +88,7 @@ int main()
 	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
 	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
 	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
+	delete TT;
 
 	return 0;
 }

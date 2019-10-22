@@ -15,13 +15,16 @@ namespace Funky
 			class WindowsThread : public IThread
 			{
 			public:
-				WindowsThread(HANDLE Handle, str const& Name, Thread::Type ThreadType);
+				WindowsThread(str const& Name, Thread::Type ThreadType);
 				~WindowsThread();
 
+				void SetHandle(HANDLE NewHandle);
 				FORCEINLINE HANDLE GetHandle() const { return Handle; }
 
+				virtual i32 Run() override;
+
 			private:
-				HANDLE Handle;
+				HANDLE Handle = NULL;
 			};
 
 		}

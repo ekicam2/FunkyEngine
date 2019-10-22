@@ -23,6 +23,10 @@ namespace Funky
 				IThread(str const& Name, Thread::Type ThreadType);
 				virtual ~IThread() = default;
 
+				virtual i32 Run() = 0;
+
+				static IThread* CreateThread(str const& Name, Funky::Core::Thread::Type ThreadType);
+
 			private:
 				str Name;
 				Thread::Type Type;

@@ -1,18 +1,37 @@
 #include "WindowsThread.h"
 
-DWORD WinThreadFunc([[maybe_unused]] LPVOID lpThreadParameter)
+Funky::Core::Thread::IThread* Funky::Core::Thread::IThread::CreateThread(str const& Name, Funky::Core::Thread::Type ThreadType)
 {
-	return 0;
+	WindowsThread* NewThread = new Funky::Core::Thread::WindowsThread(Name, ThreadType);
+	HANDLE Handle = ::CreateThread(NULL, 0, WinThreadFunc, NewThread, 0, NULL);
+	NewThread->SetHandle(Handle);
+	return NewThread;
 }
 
-Funky::Core::Thread::WindowsThread::WindowsThread(HANDLE _Handle, str const& Name, Thread::Type ThreadType)
+
+DWORD WinThreadFunc(LPVOID lpThreadParameter)
+{
+	return ((Funky::Core::Thread::WindowsThread*)(lpThreadParameter))->Run();
+}
+
+Funky::Core::Thread::WindowsThread::WindowsThread(str const& Name, Thread::Type ThreadType)
 	: IThread(Name, ThreadType)
 {
-	Handle = _Handle;
 }
 
 Funky::Core::Thread::WindowsThread::~WindowsThread()
 {
+	::CloseHandle(GetHandle());
+}
 
+void Funky::Core::Thread::WindowsThread::SetHandle(HANDLE NewHandle)
+{
+	if (Handle == NULL) 
+		Handle = NewHandle;
+}
+
+i32 Funky::Core::Thread::WindowsThread::Run()
+{
+	return 0;
 }
 
