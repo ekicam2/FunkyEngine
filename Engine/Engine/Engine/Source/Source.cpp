@@ -62,6 +62,9 @@ int main()
 }
 #elif defined(THREAD_TEST)
 
+#include <chrono>
+#include <thread>
+
 #include "Core/Platform/Platform.h"
 #include "Core/Tasks/ITask.h"
 #include "Core/Tasks/TaskManager.h"
@@ -73,7 +76,10 @@ public:
 	TestTask() : ITask(Funky::Core::Thread::Type::Any) {}
 	void Process()
 	{
+		using namespace std::chrono_literals;
 		std::cout << "Processing task" << std::endl;
+		std::this_thread::sleep_for(2s);
+		std::cout << "Processing task completed" << std::endl;
 	}
 };
 
@@ -87,8 +93,24 @@ int main()
 	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
 	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
 	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
 	
-	TaskManager.Tick();
+	while(TaskManager.GetTasksCount() > 0)
+		TaskManager.Tick();
 
 	puts("Press enter to stop...");
 	getchar();
