@@ -36,6 +36,7 @@ namespace Funky
 	FunkyEngine::FunkyEngine()
 		: RenderingBackend(Rendering::RenderingBackend::API::DX11)
 		, ThreadPool({ {Core::Thread::Type::Rendering, (u16)1u}, {Core::Thread::Type::Worker, (u16)5u} })
+		, TaskManager(&ThreadPool)
 	{
 		FunkyEngine::Engine = this;
 		FunkyEngine::IO = new IOSystem();

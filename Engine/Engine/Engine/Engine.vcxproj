@@ -185,8 +185,10 @@
     <ClInclude Include="Source\Core\Memory\MemoryPool.h" />
     <ClInclude Include="Source\Core\Path.h" />
     <ClInclude Include="Source\Core\Platform\Windows\FunkyWindows.h" />
+    <ClInclude Include="Source\Core\Platform\Windows\WindowsConditionVariable.h" />
     <ClInclude Include="Source\Core\Platform\Windows\WindowsMutex.h" />
     <ClInclude Include="Source\Core\Platform\Windows\WindowsThread.h" />
+    <ClInclude Include="Source\Core\Thread\IConditionVariable.h" />
     <ClInclude Include="Source\Core\Thread\IMutex.h" />
     <ClInclude Include="Source\Core\Platform\Platform.h" />
     <ClInclude Include="Source\Core\String.h" />
@@ -235,6 +237,8 @@
     <ClCompile Include="Source\Core\Assets\ITexture.cpp" />
     <ClCompile Include="Source\Core\Assets\RawMesh.cpp" />
     <ClCompile Include="Source\Core\Assets\Texture.cpp" />
+    <ClCompile Include="Source\Core\Platform\Windows\WindowsConditionVariable.cpp" />
+    <ClCompile Include="Source\Core\Platform\Windows\WindowsMutex.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsThread.cpp" />
     <ClCompile Include="Source\Core\Tasks\ITask.cpp" />
     <ClCompile Include="Source\Core\Tasks\TaskManager.cpp" />

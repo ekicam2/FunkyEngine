@@ -11,36 +11,23 @@ namespace Funky
 		{
 			class WindowsMutex final : public IMutex
 			{
+			public:
+				FORCEINLINE CRITICAL_SECTION GetHandle() const;
+
 				WindowsMutex();
 				~WindowsMutex();
+			private:
 
-				virtual bool Wait() override;
+				virtual void Wait() override;
 				virtual void Free() override;
 
-
-				LPCRITICAL_SECTION Handle;
+				CRITICAL_SECTION Handle;
 			}; 
-
-			WindowsMutex::WindowsMutex()
-			{
-				::InitializeCriticalSection(Handle);
-			}
-
-			WindowsMutex::~WindowsMutex()
-			{
-				::DeleteCriticalSection(Handle);
-			}
-
-			bool WindowsMutex::Wait()
-			{
-				::EnterCriticalSection(Handle);
-			}
-
-			void WindowsMutex::Free()
-			{
-				::LeaveCriticalSection(Handle);
-			}
-
 		}
 	}
+}
+
+FORCEINLINE CRITICAL_SECTION Funky::Core::Thread::WindowsMutex::GetHandle() const
+{
+	return Handle;
 }

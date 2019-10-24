@@ -17,6 +17,8 @@ namespace Funky
 
 				ThreadPool(ThreadCreationDesc const& CreationDesc);
 
+				IThread* GetIdleThread(Funky::Core::Thread::Type Type);
+
 			private:
 				darray<IThread*> AllThreads;
 			};

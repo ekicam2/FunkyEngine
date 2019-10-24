@@ -15,3 +15,14 @@ Funky::Core::Thread::ThreadPool::ThreadPool(ThreadCreationDesc const& CreationDe
 			AllThreads.push_back(Funky::Core::Thread::IThread::CreateThread("Unnamed", Desc.first));
 	}
 }
+
+Funky::Core::Thread::IThread* Funky::Core::Thread::ThreadPool::GetIdleThread(Funky::Core::Thread::Type Type)
+{
+	for (auto& Thread : AllThreads)
+	{
+		if ((Type == Type::Any || Thread->GetType() == Type) && Thread->IsWaitingForTask())
+			return Thread;
+	}
+
+	return nullptr;
+}

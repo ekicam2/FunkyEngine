@@ -438,7 +438,13 @@
     <ClInclude Include="Source\Core\Platform\Windows\FunkyWindows.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Core\Platform\Windows\WindowdPlatform.h">
+    <ClInclude Include="Source\Core\Platform\Windows\WindowsMutex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Thread\IConditionVariable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Platform\Windows\WindowsConditionVariable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -515,10 +521,13 @@
     <ClCompile Include="Source\Core\Platform\Windows\WindowsThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Core\Platform\Platform.cpp">
+    <ClCompile Include="Source\Core\Tasks\ITask.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Core\Tasks\ITask.cpp">
+    <ClCompile Include="Source\Core\Platform\Windows\WindowsConditionVariable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\Platform\Windows\WindowsMutex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

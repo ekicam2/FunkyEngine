@@ -1,5 +1,8 @@
 #include "WindowsThread.h"
 
+#include "Core/Tasks/ITask.h"
+#include "Core/Tasks/TaskManager.h"
+
 Funky::Core::Thread::IThread* Funky::Core::Thread::IThread::CreateThread(str const& Name, Funky::Core::Thread::Type ThreadType)
 {
 	WindowsThread* NewThread = new Funky::Core::Thread::WindowsThread(Name, ThreadType);
@@ -17,6 +20,7 @@ DWORD WinThreadFunc(LPVOID lpThreadParameter)
 Funky::Core::Thread::WindowsThread::WindowsThread(str const& Name, Thread::Type ThreadType)
 	: IThread(Name, ThreadType)
 {
+	TaskReadyToProcess = IConditionVariable::Create();
 }
 
 Funky::Core::Thread::WindowsThread::~WindowsThread()
@@ -32,6 +36,22 @@ void Funky::Core::Thread::WindowsThread::SetHandle(HANDLE NewHandle)
 
 i32 Funky::Core::Thread::WindowsThread::Run()
 {
+	while (true)
+	{
+		WaitForTask();
+
+		TaskToProcess->Process();
+
+		delete TaskToProcess;
+		TaskToProcess = nullptr;
+	}
+
 	return 0;
+}
+
+void Funky::Core::Thread::WindowsThread::WaitForTask()
+{
+	while (TaskToProcess == nullptr)
+		TaskReadyToProcess->Sleep(TaskMutex);
 }
 

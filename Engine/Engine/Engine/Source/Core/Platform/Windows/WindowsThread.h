@@ -22,6 +22,7 @@ namespace Funky
 				FORCEINLINE HANDLE GetHandle() const { return Handle; }
 
 				virtual i32 Run() override;
+				virtual void WaitForTask() override;
 
 			private:
 				HANDLE Handle = NULL;

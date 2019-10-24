@@ -9,8 +9,15 @@ namespace Funky
 			class IMutex
 			{
 				friend class MutexScopeGuard;
+			public:
+				static IMutex* Create();
+
+			protected:
+				IMutex() = default;
+				virtual ~IMutex() = default;
+
 				/* If mutex is free return true and lock mutex otherwise return false and suspend execution. */
-				virtual bool Wait() = 0;
+				virtual void Wait() = 0;
 				virtual void Free() = 0;
 			};
 

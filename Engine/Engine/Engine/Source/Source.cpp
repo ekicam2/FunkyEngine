@@ -79,20 +79,23 @@ public:
 
 int main()
 {
-	Funky::Core::Task::TaskManager TaskManager;
 	Funky::Core::Thread::ThreadPool ThreadPool({ {Funky::Core::Thread::Type::Worker, (u16)5u} });
+	Funky::Core::Task::TaskManager TaskManager(&ThreadPool);
 	
-	auto TT = new TestTask();
-	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
-	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
-	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
-	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
-	TaskManager.EnqueueTask((Funky::Core::Task::ITask*)TT);
-	delete TT;
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
+	
+	TaskManager.Tick();
+
+	puts("Press enter to stop...");
+	getchar();
 
 	return 0;
 }
-#else
+#elif defined(ENGINE)
 int main()
 {
 	Funky::FunkyEngine Engine;
