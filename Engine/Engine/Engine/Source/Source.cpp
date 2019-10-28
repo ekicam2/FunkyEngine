@@ -1,6 +1,6 @@
 #include "FunkyEngine.h"
 
-#define THREAD_TEST
+#define ENGINE
 
 #ifdef MEMORY_TEST
 #include <fstream>

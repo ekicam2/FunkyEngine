@@ -41,6 +41,7 @@ i32 Funky::Core::Thread::WindowsThread::Run()
 		WaitForTask();
 
 		TaskToProcess->Process();
+		TaskToProcess->PostProcess();
 
 		MutexScopeGuard ScopeGuard(StateMutex);
 		IsWaitingForTaskState = true;
