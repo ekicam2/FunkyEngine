@@ -9,18 +9,16 @@ namespace Funky
 {
 	class AssetManager
 	{
+	public:
 		inline static const str BaseAssetsPath = "Resource\\";
 
 		/* Basically lookup for all assets in the @BaseAssetsPath and fill @AllAssets. */
 		void ParseFileTree();
 
+		void DrawGUI();
+
 
 		map<str, Asset::IAsset*> AllAssets;
 	};
-
-	void AssetManager::ParseFileTree()
-	{
-		
-	}
 
 }

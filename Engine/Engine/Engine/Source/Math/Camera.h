@@ -10,6 +10,15 @@ namespace Funky
 		class Camera
 		{
 		public:
+			Camera()
+				: Projection(DirectX::XMMatrixIdentity())
+				, Position(0.0f, 0.0f, 0.0f)
+				, Rotation(0.0f, 0.0f, 0.0f)
+				, LookAt(0.0f, 0.0f, 100.f)
+				, Up(0.0f, 1.0f, 0.0f)
+			{
+			}
+
 			Camera(float AspectRatio, float FOV = 90.0f, float Near = 0.01f, float Far = 100.0f)
 				: Projection(DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(FOV), AspectRatio, Near, Far))
 				, Position(0.0f, 0.0f, 0.0f)

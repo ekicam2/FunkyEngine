@@ -30,26 +30,41 @@ LRESULT CALLBACK ProcessInput(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lPa
 
 namespace Funky
 {
-	FunkyEngine* FunkyEngine::Engine = nullptr;
-	IOSystem* FunkyEngine::IO = nullptr;
+	FunkyEngine* FunkyEngine::_Engine = nullptr;
+	Core::IO::IIOSystem* FunkyEngine::_IO = nullptr;
 
 	FunkyEngine::FunkyEngine()
 		: RenderingBackend(Rendering::RenderingBackend::API::DX11)
 		, ThreadPool({ {Core::Thread::Type::Rendering, (u16)1u}, {Core::Thread::Type::Worker, (u16)5u} })
 		, TaskManager(&ThreadPool)
 	{
-		FunkyEngine::Engine = this;
-		FunkyEngine::IO = new IOSystem();
+		FunkyEngine::_Engine = this;
+
+		EditorWindowManager = new Editor::WindowManager();
+		IOSystem = new Core::IO::WindowsIOSystem();
+		FunkyEngine::_IO = IOSystem;
 	}
 
-	IOSystem const & FunkyEngine::GetIO()
+	FunkyEngine::~FunkyEngine()
 	{
-		return *IO;
+		delete IOSystem;
+		delete Editor;
+		delete EditorWindowManager;
+	}
+
+	Core::IO::IIOSystem* FunkyEngine::GetIO()
+	{
+		return _IO;
 	}
 
 	FunkyEngine* FunkyEngine::GetEngine()
 	{
-		return Engine;
+		return _Engine;
+	}
+
+	Funky::Editor::WindowManager* FunkyEngine::GetEditorWindowManager()
+{
+		return FunkyEngine::GetEngine()->EditorWindowManager;
 	}
 
 	LRESULT CALLBACK FunkyEngine::ProcessInput(HWND InhWnd, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -129,15 +144,19 @@ namespace Funky
 		Renderer = new Rendering::Renderer(RenderingBackend);
 		Renderer->InitBuffers();
 
+		Editor = new Editor::EditorContext();
+
 		return true;
 	}
 
 	void FunkyEngine::Run()
 	{
-		RECT ClientArea;
-		GetClientRect(hWnd, &ClientArea);
-		f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
-		f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
+		AssetManager.ParseFileTree();
+
+		//RECT ClientArea;
+		//GetClientRect(hWnd, &ClientArea);
+		//f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
+		//f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
 
 		std::unique_ptr<Asset::RawMesh> CubeMesh = std::make_unique<Asset::RawMesh>(MeshUtils::CreateCube());
 		std::unique_ptr <Asset::RawMesh> SkySphere = std::make_unique<Asset::RawMesh>(MeshUtils::CreateSphere(2000.0f, true));
@@ -161,15 +180,11 @@ namespace Funky
 		Asset::Material LitMaterial("Sample.mat");
 
 
-		//Camera setup
-		Math::Camera SceneCamera(DeltaX / DeltaY, 90.0f, 0.01f, 3000.0f);
-		//SceneCamera.MakeOrtho((DeltaX / DeltaY) * 1.0f, 1.0f, 0.01f, 10000.0f);
+		// Math::Camera ShadowCamera(DeltaX / DeltaY, 90.0f, 1.0f, 26.5f);
+		// ShadowCamera.MakeOrtho(DeltaX / DeltaY, 1.0f, 1.0, 15.0f);
+		// ShadowCamera.Translate({ 10.0f, 0.0f, 0.0f });
+		// ShadowCamera.Rotate({ 0.0f, -90.0f, 0.0f });
 
-		Math::Camera ShadowCamera(DeltaX / DeltaY, 90.0f, 1.0f, 26.5f);
-		ShadowCamera.MakeOrtho(DeltaX / DeltaY, 1.0f, 1.0, 15.0f);
-
-		ShadowCamera.Translate({ 10.0f, 0.0f, 0.0f });
-		ShadowCamera.Rotate({ 0.0f, -90.0f, 0.0f });
 		//ShadowCB.Projection = ShadowCamera.GetProjection();
 		//ShadowCB.View = ShadowCamera.GetView();
 		//RenderingBackend.UpdateConstantBuffer(ShadowCBHandle, (Rendering::RenderingBackend::ConstantBufferData)(&ShadowCB));
@@ -193,7 +208,6 @@ namespace Funky
 
 
 		bool bGotMsg;
-		bool bPrevFrameRMB;
 
 		MSG  Msg;
 		Msg.message = WM_NULL;
@@ -206,65 +220,14 @@ namespace Funky
 				TranslateMessage(&Msg);
 				DispatchMessage(&Msg);
 
-				[=](HWND hWnd, bool& bPrevFrameRMB, Math::Camera& SceneCamera)
-				{
-					constexpr byte PressedMask = 1 << 7;
-					 
-					if (!ImGui::GetIO().WantCaptureKeyboard)
-					{
-						if (PressedMask & GetKeyState('W'))
-					 		SceneCamera.Translate(Math::Vector3f(0.0f, 0.0f, 1.f) * CameraSpeed);
-						if (PressedMask & GetKeyState('S'))
-					 		SceneCamera.Translate(Math::Vector3f(0.0f, 0.0f, -1.0f) *CameraSpeed);
-						if (PressedMask & GetKeyState('A'))
-					 		SceneCamera.Translate(Math::Vector3f(-1.0f, 0.0f, 0.0f) * CameraSpeed);
-						if (PressedMask & GetKeyState('D'))
-					 		SceneCamera.Translate(Math::Vector3f(1.0f, 0.0f, 0.0f) * CameraSpeed);
-						if (PressedMask & GetKeyState('E'))
-							SceneCamera.Translate(Math::Vector3f(0.0f, 1.0f, 0.0f) * CameraSpeed);
-						if (PressedMask & GetKeyState('Q'))
-							SceneCamera.Translate(Math::Vector3f(0.0f, -1.0f, 0.0f) * CameraSpeed);
-					}
-
-					if (!ImGui::GetIO().WantCaptureMouse && PressedMask & GetKeyState(VK_RBUTTON))
-					{
-					 	RECT WindowRect = { 0 };
-					 	GetWindowRect(hWnd, &WindowRect); //get window rect of control relative to screen
-					 	//GetClientRect(hwnd, &WindowRect);
-					 	POINT CursorPosition = { 0, 0 };
-					 	GetCursorPos(&CursorPosition);
-					 	POINT WindowCenter = {
-					 		WindowRect.left + ((WindowRect.right - WindowRect.left) / 2),
-					 		WindowRect.top + ((WindowRect.bottom - WindowRect.top) / 2)
-					 	};
-					 
-					 	POINT MouseOffset = {
-					 		CursorPosition.x - WindowCenter.x,
-					 		CursorPosition.y - WindowCenter.y
-					 	};
-					 
-					 	if (bPrevFrameRMB)
-					 	{
-					 		SceneCamera.RotateClamped(
-								Funky::Math::Vector3f(MouseOffset.y * CameraY, MouseOffset.x * CameraX, 0.0f),
-								Funky::Math::Vector3f(1.0f, 0.0f, 0.0f),
-								Funky::Math::Vector3f(89.0f, 0.0f, 0.0f)
-							);
-					 	}
-					 
-					 	SetCursorPos(WindowCenter.x, WindowCenter.y);
-
-						bPrevFrameRMB = true;
-					}
-					else
-					{
-					 	bPrevFrameRMB = false;
-					}
-				}(hWnd, bPrevFrameRMB, SceneCamera);
+				IOSystem->Update();
 			}
 			else
 			{
-				Renderer->DrawSceneFromView(&SceneCamera, &MainScene);
+
+				Editor->Update();
+
+				Renderer->DrawSceneFromView(&Editor->MainCamera, &MainScene);
 				DrawGUI();
 				RenderingBackend.Present();
 			}
@@ -297,16 +260,7 @@ namespace Funky
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		ImGuiWindowFlags WindowFlags = 0;
-		WindowFlags |= ImGuiWindowFlags_NoCollapse;
-		ImGui::Begin("Editor", NULL, WindowFlags);
-			ImGui::DragFloat("Camera speed", &CameraSpeed, 0.01f, 0.0f, 10.0f, "%.2f");
-			ImGui::DragFloat("Camera X speed", &CameraX, 0.01f, 0.0f, 10.0f, "%.2f");
-			ImGui::DragFloat("Camera Y speed", &CameraY, 0.01f, 0.0f, 10.10f, "%.2f");
-		ImGui::End();
-
-		ImGui::ShowDemoWindow();
-		MainScene.DrawGUI();
+		EditorWindowManager->DrawGUI();
 
 		ImGui::Render();
 

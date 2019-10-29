@@ -181,11 +181,13 @@
     <ClInclude Include="Source\Core\Assets\IAsset.h" />
     <ClInclude Include="Source\Core\Assets\Texture.h" />
     <ClInclude Include="Source\Core\Containers.h" />
+    <ClInclude Include="Source\Core\IIOSystem.h" />
     <ClInclude Include="Source\Core\Memory\Memory.h" />
     <ClInclude Include="Source\Core\Memory\MemoryPool.h" />
     <ClInclude Include="Source\Core\Path.h" />
     <ClInclude Include="Source\Core\Platform\Windows\FunkyWindows.h" />
     <ClInclude Include="Source\Core\Platform\Windows\WindowsConditionVariable.h" />
+    <ClInclude Include="Source\Core\Platform\Windows\WindowsIOSystem.h" />
     <ClInclude Include="Source\Core\Platform\Windows\WindowsMutex.h" />
     <ClInclude Include="Source\Core\Platform\Windows\WindowsThread.h" />
     <ClInclude Include="Source\Core\Thread\IConditionVariable.h" />
@@ -198,6 +200,8 @@
     <ClInclude Include="Source\Core\Thread\ThreadPool.h" />
     <ClInclude Include="Source\Core\Timer.h" />
     <ClInclude Include="Source\DebugMacros.h" />
+    <ClInclude Include="Source\Editor\EditorContext.h" />
+    <ClInclude Include="Source\Editor\WindowManager.h" />
     <ClInclude Include="Source\Rendering\Renderer.h" />
     <ClInclude Include="Source\Rendering\DX11\DirectUtils.h" />
     <ClInclude Include="Source\Rendering\DX11\DX11Core.h" />
@@ -233,11 +237,13 @@
     <ClCompile Include="Source\3rd\imgui\imgui_draw.cpp" />
     <ClCompile Include="Source\3rd\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Source\3rd\TinyObjectLoader.cpp" />
+    <ClCompile Include="Source\Core\Assets\AssetManager.cpp" />
     <ClCompile Include="Source\Core\Assets\Cubemap.cpp" />
     <ClCompile Include="Source\Core\Assets\ITexture.cpp" />
     <ClCompile Include="Source\Core\Assets\RawMesh.cpp" />
     <ClCompile Include="Source\Core\Assets\Texture.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsConditionVariable.cpp" />
+    <ClCompile Include="Source\Core\Platform\Windows\WindowsIOSystem.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsMutex.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsThread.cpp" />
     <ClCompile Include="Source\Core\Tasks\ITask.cpp" />
@@ -245,6 +251,8 @@
     <ClCompile Include="Source\Core\Thread\IThread.cpp" />
     <ClCompile Include="Source\Core\Thread\ThreadPool.cpp" />
     <ClCompile Include="Source\Core\Timer.cpp" />
+    <ClCompile Include="Source\Editor\EditorContext.cpp" />
+    <ClCompile Include="Source\Editor\WindowManager.cpp" />
     <ClCompile Include="Source\Rendering\DX11\DX11Core.cpp" />
     <ClCompile Include="Source\Rendering\DX11\DX11ImGUIFasade.cpp" />
     <ClCompile Include="Source\FunkyEngine.cpp" />
