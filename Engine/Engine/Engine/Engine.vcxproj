@@ -242,6 +242,7 @@
     <ClCompile Include="Source\Core\Assets\ITexture.cpp" />
     <ClCompile Include="Source\Core\Assets\RawMesh.cpp" />
     <ClCompile Include="Source\Core\Assets\Texture.cpp" />
+    <ClCompile Include="Source\Core\IIOSystem.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsConditionVariable.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsIOSystem.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsMutex.cpp" />

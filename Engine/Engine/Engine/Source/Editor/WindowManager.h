@@ -9,6 +9,7 @@ namespace Funky
 {
 	namespace Editor
 	{
+		/* At some point I will change this implementation however for now it can stay this way. */
 		class IWindow
 		{
 		public:

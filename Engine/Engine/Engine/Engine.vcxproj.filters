@@ -554,5 +554,8 @@
     <ClCompile Include="Source\Core\Platform\Windows\WindowsIOSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Core\IIOSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

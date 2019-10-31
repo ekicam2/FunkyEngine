@@ -6,7 +6,7 @@
 
 #include "3rd/imgui/imgui.h"
 
-//TODO(ekciam2): this whole file is fucking hacky to resolve that problem there should be much more layers
+//TODO(ekciam2): at the moment the only problem I can see is that direct winapi call in the Update method
 
 Funky::Editor::EditorContext::EditorContext() 
 	: IWindow("Editor")

@@ -50,12 +50,15 @@ namespace Funky
 			class IIOSystem
 			{
 			public:
+				/* Remember to always call Frame() at the beginning of overloaded Update()! */
 				virtual void Update() = 0;
 
 				FORCEINLINE bool IsKeyPressed(IO::Key Key) const { return Keys[(u32)Key].IsPressed; }
 				FORCEINLINE bool WasKeyPressed(IO::Key Key) const { return Keys[(u32)Key].WasPressedLastFrame; }
 
 			protected:
+				void Frame();
+
 				struct KeyState
 				{
 					u8 IsPressed : 1;
@@ -64,6 +67,7 @@ namespace Funky
 
 				KeyState Keys[(u32)Key::COUNT];
 			};
+
 		}
 	}
 }

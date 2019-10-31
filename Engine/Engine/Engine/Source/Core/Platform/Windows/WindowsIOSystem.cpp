@@ -4,6 +4,8 @@
 
 void Funky::Core::IO::WindowsIOSystem::Update()
 {
+	Frame();
+
 	constexpr u16 PressedMask = 1 << 15;
 
 	Keys[(u32)IO::Key::A].IsPressed = (PressedMask & GetAsyncKeyState('A')) != 0;
