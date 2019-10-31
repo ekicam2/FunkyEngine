@@ -73,8 +73,7 @@ void Funky::AssetManager::ParseAsset(str const& Path)
 		LOG(Line);
 	}
 
-	auto Temp = new Asset::IAsset(Path);
-	AllAssets[":tetet"] = Temp;
+	AllAssets[Path] = new Asset::IAsset(Path);
 
 	AssetFile.close();
 }
