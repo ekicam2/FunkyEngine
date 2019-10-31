@@ -1,3 +1,5 @@
+#ifdef FUNKY_EDITOR
+
 #include "WindowManager.h"
 
 #include "FunkyEngine.h"
@@ -74,3 +76,4 @@ void Funky::Editor::WindowManager::UnregisterWindow(IWindow* Window)
 }
 
 
+#endif // FUNKY_EDITOR

@@ -1,3 +1,5 @@
+#ifdef FUNKY_EDITOR
+
 #include "EditorContext.h"
 
 #include "FunkyEngine.h"
@@ -90,3 +92,4 @@ void Funky::Editor::EditorContext::Update()
 		bPrevFrameRMB = false;
 	}
 }
+#endif // FUNKY_EDITOR

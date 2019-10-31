@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef FUNKY_EDITOR
+
 #include "Macros.h"
 
 #include "Core/Containers.h"
@@ -60,3 +62,4 @@ namespace Funky
 
 	}
 }
+#endif // FUNKY_EDITOR

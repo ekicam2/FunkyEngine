@@ -33,7 +33,10 @@ namespace Funky
 		~FunkyEngine();
 		static Core::IO::IIOSystem* GetIO();
 		static FunkyEngine* GetEngine();
-		static Editor::WindowManager* GetEditorWindowManager();
+		
+		#ifdef FUNKY_EDITOR
+			static Editor::WindowManager* GetEditorWindowManager();
+		#endif // FUNKY_EDITOR
 
 		LRESULT __stdcall ProcessInput(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -59,15 +62,17 @@ namespace Funky
 		Core::Task::TaskManager TaskManager;
 		Core::Thread::ThreadPool ThreadPool;
 
-		AssetManager AssetManager;
+		AssetManager* AssetManager;
 
 		HWND hWnd;
 		HINSTANCE hInstance = GetModuleHandle(NULL);
 
 		//editor
+#ifdef FUNKY_EDITOR
 		Editor::WindowManager* EditorWindowManager;
 		Editor::EditorContext* Editor;
 
 		friend class Funky::Editor::EditorContext;
+#endif // FUNKY_EDITOR
 	};
 }

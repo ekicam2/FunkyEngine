@@ -5,18 +5,29 @@
 
 #include "Core/Assets/IAsset.h"
 
+#include "Editor/WindowManager.h"
+
 namespace Funky
 {
 	class AssetManager
+#if FUNKY_EDITOR
+		: public Editor::IWindow
+#endif
 	{
 	public:
 		inline static const str BaseAssetsPath = "Resource\\";
 
-		/* Basically lookup for all assets in the @BaseAssetsPath and fill @AllAssets. */
-		void ParseFileTree();
+		AssetManager();
+		~AssetManager();
 
 		void DrawGUI();
 
+	private:
+		/* Lookup for all assets in the @BaseAssetsPath and fill @AllAssets. */
+		void ParseFileTree();
+
+		void ParseRecursive(str const& Path);
+		void ParseAsset(str const& Path);
 
 		map<str, Asset::IAsset*> AllAssets;
 	};

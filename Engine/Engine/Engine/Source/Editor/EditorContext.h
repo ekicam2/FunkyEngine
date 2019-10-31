@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef FUNKY_EDITOR
+
 #include "Editor/WindowManager.h"
 
 #include "Math/Camera.h"
@@ -27,3 +29,4 @@ namespace Funky
 		};
 	}
 }
+#endif // FUNKY_EDITOR

@@ -9,6 +9,7 @@ namespace Funky
 	{
 		enum class Type
 		{
+			Unknown,
 			Texture,
 			Mesh,
 			Material
@@ -18,7 +19,7 @@ namespace Funky
 		{
 		public:
 			IAsset() = delete;
-			IAsset(str const& Path, Asset::Type Type) : Path(Path), Type(Type), Loaded(false) {}
+			IAsset(str const& Path, Asset::Type Type = Type::Unknown) : Path(Path), Type(Type), Loaded(false) {}
 
 			FORCEINLINE str GetPath() const;
 			FORCEINLINE Asset::Type GetType() const;

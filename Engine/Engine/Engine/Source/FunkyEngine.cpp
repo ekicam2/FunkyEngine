@@ -40,7 +40,11 @@ namespace Funky
 	{
 		FunkyEngine::_Engine = this;
 
-		EditorWindowManager = new Editor::WindowManager();
+		#ifdef FUNKY_EDITOR
+			EditorWindowManager = new Editor::WindowManager();
+		#endif // FUNKY_EDITOR
+			AssetManager = new Funky::AssetManager();
+
 		IOSystem = new Core::IO::WindowsIOSystem();
 		FunkyEngine::_IO = IOSystem;
 	}
@@ -48,8 +52,10 @@ namespace Funky
 	FunkyEngine::~FunkyEngine()
 	{
 		delete IOSystem;
-		delete Editor;
-		delete EditorWindowManager;
+		#ifdef FUNKY_EDITOR
+			delete Editor;
+			delete EditorWindowManager;
+		#endif // FUNKY_EDITOR
 	}
 
 	Core::IO::IIOSystem* FunkyEngine::GetIO()
@@ -62,10 +68,12 @@ namespace Funky
 		return _Engine;
 	}
 
+#ifdef FUNKY_EDITOR
 	Funky::Editor::WindowManager* FunkyEngine::GetEditorWindowManager()
-{
+	{
 		return FunkyEngine::GetEngine()->EditorWindowManager;
 	}
+#endif // FUNKY_EDITOR
 
 	LRESULT CALLBACK FunkyEngine::ProcessInput(HWND InhWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
@@ -144,15 +152,15 @@ namespace Funky
 		Renderer = new Rendering::Renderer(RenderingBackend);
 		Renderer->InitBuffers();
 
-		Editor = new Editor::EditorContext();
+		#ifdef FUNKY_EDITOR
+			Editor = new Editor::EditorContext();
+		#endif // FUNKY_EDITOR
 
 		return true;
 	}
 
 	void FunkyEngine::Run()
 	{
-		AssetManager.ParseFileTree();
-
 		//RECT ClientArea;
 		//GetClientRect(hWnd, &ClientArea);
 		//f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
@@ -224,10 +232,11 @@ namespace Funky
 			}
 			else
 			{
+				#ifdef FUNKY_EDITOR
+					Editor->Update();
+					Renderer->DrawSceneFromView(&Editor->MainCamera, &MainScene);
+				#endif // FUNKY_EDITOR
 
-				Editor->Update();
-
-				Renderer->DrawSceneFromView(&Editor->MainCamera, &MainScene);
 				DrawGUI();
 				RenderingBackend.Present();
 			}
@@ -260,7 +269,11 @@ namespace Funky
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		EditorWindowManager->DrawGUI();
+		ImGui::ShowDemoWindow();
+
+		#ifdef FUNKY_EDITOR
+			EditorWindowManager->DrawGUI();
+		#endif // FUNKY_EDITOR
 
 		ImGui::Render();
 
