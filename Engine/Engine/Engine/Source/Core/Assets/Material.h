@@ -23,10 +23,7 @@ namespace Funky
 				Internal_Depth
 			};
 
-			inline static const str MaterialsPath = "Resource\\Materials\\";
-
-
-			explicit Material(str const & Name);
+			explicit Material(str const & Path);
 			FORCEINLINE bool IsValid();
 			static std::optional<std::pair<str, str>> ParseMaterial(str const& Path);
 

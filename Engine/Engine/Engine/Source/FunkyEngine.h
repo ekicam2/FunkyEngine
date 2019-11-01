@@ -16,7 +16,7 @@
 #include "Core/Tasks/TaskManager.h"
 #include "Core/Thread/ThreadPool.h"
 
-#include "Core/Assets/AssetManager.h"
+#include "Core/Assets/AssetRegistry.h"
 
 #include "Core/IIOSystem.h"
 
@@ -62,7 +62,7 @@ namespace Funky
 		Core::Task::TaskManager TaskManager;
 		Core::Thread::ThreadPool ThreadPool;
 
-		AssetManager* AssetManager;
+		AssetRegistry* AssetManager;
 
 		HWND hWnd;
 		HINSTANCE hInstance = GetModuleHandle(NULL);

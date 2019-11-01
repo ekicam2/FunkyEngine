@@ -43,7 +43,7 @@ namespace Funky
 		#ifdef FUNKY_EDITOR
 			EditorWindowManager = new Editor::WindowManager();
 		#endif // FUNKY_EDITOR
-			AssetManager = new Funky::AssetManager();
+			AssetManager = new Funky::AssetRegistry();
 
 		IOSystem = new Core::IO::WindowsIOSystem();
 		FunkyEngine::_IO = IOSystem;
@@ -170,12 +170,12 @@ namespace Funky
 		std::unique_ptr <Asset::RawMesh> SkySphere = std::make_unique<Asset::RawMesh>(MeshUtils::CreateSphere(2000.0f, true));
 
 		str Textures[6] = {
- 			"Resource/Textures/mp_troubled/troubled-waters_ft.tga",
-			"Resource/Textures/mp_troubled/troubled-waters_bk.tga",
- 			"Resource/Textures/mp_troubled/troubled-waters_up.tga",
- 			"Resource/Textures/mp_troubled/troubled-waters_dn.tga",
- 			"Resource/Textures/mp_troubled/troubled-waters_rt.tga",
- 			"Resource/Textures/mp_troubled/troubled-waters_lf.tga"
+ 			"RealData/Textures/mp_troubled/troubled-waters_ft.tga",
+			"RealData/Textures/mp_troubled/troubled-waters_bk.tga",
+ 			"RealData/Textures/mp_troubled/troubled-waters_up.tga",
+ 			"RealData/Textures/mp_troubled/troubled-waters_dn.tga",
+ 			"RealData/Textures/mp_troubled/troubled-waters_rt.tga",
+ 			"RealData/Textures/mp_troubled/troubled-waters_lf.tga"
  		};
 		Asset::CubemapTexture* SkyTexture = Asset::CubemapTexture::CreateFromFile(Textures);
 		CHECK(SkyTexture != nullptr);
@@ -183,9 +183,9 @@ namespace Funky
 		CHECK(SkyTexture != nullptr);
 
 		
-		Asset::Material SkyMaterial("Sky.mat");
-		Asset::Material DepthMaterial("Depth.mat");
-		Asset::Material LitMaterial("Sample.mat");
+		Asset::Material SkyMaterial("RealData/Shaders/Sky.fkmat");
+		Asset::Material DepthMaterial("RealData/Shaders/Depth.fkmat");
+		Asset::Material LitMaterial("RealData/Shaders/Sample.fkmat");
 
 
 		// Math::Camera ShadowCamera(DeltaX / DeltaY, 90.0f, 1.0f, 26.5f);

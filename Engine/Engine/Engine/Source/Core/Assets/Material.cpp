@@ -1,14 +1,12 @@
 #include "Material.h"
 #include "FunkyEngine.h"
 
-Funky::Asset::Material::Material(str const& Name)
-	: IAsset(MaterialsPath, Asset::Type::Material)
+Funky::Asset::Material::Material(str const& Path)
+	: IAsset(Path, Asset::Type::Material)
 {
-
-	const str MaterialFullPath = MaterialsPath + Name;
-	auto Shaders = Material::ParseMaterial(MaterialFullPath);
+	auto Shaders = Material::ParseMaterial(Path);
 	if (!Shaders)
-		LOG_ERROR_FUNKY("couldn't read material ", MaterialFullPath.c_str());
+		LOG_ERROR_FUNKY("couldn't read material ", Path.c_str());
 
 	VS = [&]() {
 		std::ifstream Input(Shaders->first, std::ios::binary);

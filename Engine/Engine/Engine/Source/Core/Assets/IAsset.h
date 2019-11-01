@@ -1,5 +1,7 @@
 #pragma once
 
+#include "BasicTypes.h"
+
 #include "Core/String.h"
 #include "Macros.h"
 
@@ -7,13 +9,16 @@ namespace Funky
 {
 	namespace Asset
 	{
-		enum class Type
+		enum class Type : u8
 		{
 			Unknown,
 			Texture,
 			Mesh,
 			Material
 		};
+
+		str const TypeToString(Asset::Type EnumType);
+		Asset::Type const StringToType(str const & StrType);
 
 		class IAsset
 		{
@@ -31,7 +36,7 @@ namespace Funky
 
 		private:
 			bool Loaded;
-			friend class AssetManager;
+			friend class AssetRegistry;
 		};
 
 	}
