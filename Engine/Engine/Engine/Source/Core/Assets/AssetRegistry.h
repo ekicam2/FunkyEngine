@@ -7,8 +7,6 @@
 
 #include "Editor/WindowManager.h"
 
-#include "Core/Assets/AssetTemplates.h"
-
 namespace Funky
 {
 	class AssetRegistry
