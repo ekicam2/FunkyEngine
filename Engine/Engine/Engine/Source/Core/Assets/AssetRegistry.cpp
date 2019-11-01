@@ -12,6 +12,16 @@
 
 #include "Templates.h"
 
+void Funky::AssetRegistry::AssetDesc::Load()
+{
+	switch (Type)
+	{
+	case Funky::Asset::Type::Material:
+		AssetPtr = new Asset::Material(Path);
+		break;
+	}
+}
+
 Funky::AssetRegistry::AssetRegistry()
 #ifdef FUNKY_EDITOR
 	: IWindow("Asset Registry")
@@ -119,6 +129,22 @@ Funky::AssetRegistry::AssetDesc Funky::AssetRegistry::ParseFile(str const& Path)
 	return Desc;
 }
 
+Funky::Asset::IAsset* Funky::AssetRegistry::GetByName(str const& Name, Asset::Type Type)
+{
+	for (auto& Asset : AllAssets)
+	{
+		if (Asset.Name == Name && Asset.Type == Type)
+		{
+			if (!Asset.IsLoaded())
+				Asset.Load();
+
+			return Asset.AssetPtr;
+		}
+	}
+
+	return nullptr;
+}
+
 #ifdef FUNKY_EDITOR
 void Funky::AssetRegistry::FileBrowser::ResetIfNeeded(str const& NewPath)
 {
@@ -197,8 +223,3 @@ void Funky::AssetRegistry::FileBrowser::DrawGUI()
 	ImGui::End();
 }
 #endif // FUNKY_EDITOR
-
-void Funky::AssetRegistry::AssetDesc::Load()
-{
-
-}

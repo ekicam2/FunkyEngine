@@ -183,9 +183,13 @@ namespace Funky
 		CHECK(SkyTexture != nullptr);
 
 		
-		Asset::Material SkyMaterial("RealData/Shaders/Sky.fkmat");
+		/*Asset::Material SkyMaterial("RealData/Shaders/Sky.fkmat");
 		Asset::Material DepthMaterial("RealData/Shaders/Depth.fkmat");
-		Asset::Material LitMaterial("RealData/Shaders/Sample.fkmat");
+		Asset::Material LitMaterial("RealData/Shaders/Sample.fkmat");*/
+
+		Asset::Material* SkyMaterial	= AssetManager->GetByName<Asset::Material>("Sky");
+		[[maybe_unused]] Asset::Material* DepthMaterial	= AssetManager->GetByName<Asset::Material>("Depth");
+		Asset::Material* LitMaterial	= AssetManager->GetByName<Asset::Material>("Sample");
 
 
 		// Math::Camera ShadowCamera(DeltaX / DeltaY, 90.0f, 1.0f, 26.5f);
@@ -201,7 +205,7 @@ namespace Funky
 		for (u8 i = 0; i < 4; ++i)
 		{
 			auto NewDrawable = new Scene::Drawable();
-			NewDrawable->Mesh.Mat = &LitMaterial;
+			NewDrawable->Mesh.Mat = LitMaterial;
 			//NewDrawable->Mesh.Targets.push_back(ShadowsRT);
 			NewDrawable->Mesh.Data = CubeMesh.get();
 			NewDrawable->Name = str("drawableObj_").append(std::to_string(i));
@@ -211,7 +215,7 @@ namespace Funky
 
 		MainScene.SkySphere = new Scene::MeshComponent();
 		MainScene.SkySphere->Data = SkySphere.get();
-		MainScene.SkySphere->Mat = &SkyMaterial;
+		MainScene.SkySphere->Mat = SkyMaterial;
 		MainScene.SkySphere->Textures.push_back((ITexture*)SkyTexture);
 
 

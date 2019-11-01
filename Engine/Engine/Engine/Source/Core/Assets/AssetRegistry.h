@@ -7,6 +7,8 @@
 
 #include "Editor/WindowManager.h"
 
+#include "Core/Assets/AssetTemplates.h"
+
 namespace Funky
 {
 	class AssetRegistry
@@ -30,6 +32,11 @@ namespace Funky
 		};
 
 		AssetRegistry();
+
+		Asset::IAsset* GetByName(str const& Name, Asset::Type Type);
+
+		template <typename T>
+		T* GetByName(str const& Name);
 
 	#ifdef FUNKY_EDITOR
 		void DrawGUI();
@@ -60,5 +67,11 @@ namespace Funky
 		static AssetDesc ParseFile(str const& Path);
 		darray<AssetDesc> AllAssets;
 	};
+
+	template <typename T>
+	T* Funky::AssetRegistry::GetByName(str const& Name)
+	{
+		return static_cast<T*>(GetByName(Name, Asset::CTypeToType<T>()));
+	}
 
 }
