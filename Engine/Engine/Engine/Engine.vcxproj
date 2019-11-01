@@ -210,7 +210,6 @@
     <ClInclude Include="Source\3rd\TinyObjectLoader.h" />
     <ClInclude Include="Source\BasicTypes.h" />
     <ClInclude Include="Source\Core\Assets\AssetRegistry.h" />
-    <ClInclude Include="Source\Core\Assets\AssetTemplates.h" />
     <ClInclude Include="Source\Core\Assets\Cubemap.h" />
     <ClInclude Include="Source\Core\Assets\IAsset.h" />
     <ClInclude Include="Source\Core\Assets\Texture.h" />
