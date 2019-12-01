@@ -6,6 +6,8 @@
 
 #include "Core/Platform/Platform.h"
 
+#include "Utils/MeshUtils.h"
+
 #include "3rd/imgui/imgui.h"
 
 //TODO(ekciam2): at the moment the only problem I can see is that direct winapi call in the Update method
@@ -22,6 +24,60 @@ Funky::Editor::EditorContext::EditorContext()
 	f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
 
 	MainCamera.MakePerepective(DeltaX / DeltaY, 90.0f, 0.01f, 3000.0f);
+}
+
+bool Funky::Editor::EditorContext::Init()
+{
+		//RECT ClientArea;
+		//GetClientRect(hWnd, &ClientArea);
+		//f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
+		//f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
+
+		EditorCube = std::make_unique<Asset::RawMesh>(MeshUtils::CreateCube());
+		EditorSphere = std::make_unique<Asset::RawMesh>(MeshUtils::CreateSphere(2000.0f, true));
+
+		str Textures[6] = {
+ 			"RealData/Textures/mp_troubled/troubled-waters_ft.tga",
+			"RealData/Textures/mp_troubled/troubled-waters_bk.tga",
+ 			"RealData/Textures/mp_troubled/troubled-waters_up.tga",
+ 			"RealData/Textures/mp_troubled/troubled-waters_dn.tga",
+ 			"RealData/Textures/mp_troubled/troubled-waters_rt.tga",
+ 			"RealData/Textures/mp_troubled/troubled-waters_lf.tga"
+ 		};
+		Asset::CubemapTexture* SkyTexture = Asset::CubemapTexture::CreateFromFile(Textures);
+		SkyTexture->Proxy = FunkyEngine::GetEngine()->GetRenderingBackend()->CreateCubemap(SkyTexture->GetData(), SkyTexture->Size);
+
+		
+		Asset::Material* SkyMaterial	= FunkyEngine::GetEngine()->GetAssetRegistry()->GetByName<Asset::Material>("Sky");
+		Asset::Material* LitMaterial	= FunkyEngine::GetEngine()->GetAssetRegistry()->GetByName<Asset::Material>("Sample");
+
+
+		// Math::Camera ShadowCamera(DeltaX / DeltaY, 90.0f, 1.0f, 26.5f);
+		// ShadowCamera.MakeOrtho(DeltaX / DeltaY, 1.0f, 1.0, 15.0f);
+		// ShadowCamera.Translate({ 10.0f, 0.0f, 0.0f });
+		// ShadowCamera.Rotate({ 0.0f, -90.0f, 0.0f });
+
+		//ShadowCB.Projection = ShadowCamera.GetProjection();
+		//ShadowCB.View = ShadowCamera.GetView();
+		//RenderingBackend.UpdateConstantBuffer(ShadowCBHandle, (Rendering::RenderingBackend::ConstantBufferData)(&ShadowCB));
+
+		for (u8 i = 0; i < 4; ++i)
+		{
+			auto NewDrawable = new Scene::Drawable();
+			NewDrawable->Mesh.Mat = LitMaterial;
+			//NewDrawable->Mesh.Targets.push_back(ShadowsRT);
+			NewDrawable->Mesh.Data = EditorCube.get();
+			NewDrawable->Name = str("drawableObj_").append(std::to_string(i));
+			NewDrawable->Position = Math::Vector3f(0.0f, 0.0f, 1.0f) * i;
+			FunkyEngine::GetEngine()->GetCurrentScene()->SceneNodes.push_back(NewDrawable);
+		}
+		
+		FunkyEngine::GetEngine()->GetCurrentScene()->SkySphere = new Scene::MeshComponent();
+		FunkyEngine::GetEngine()->GetCurrentScene()->SkySphere->Data = EditorSphere.get();
+		FunkyEngine::GetEngine()->GetCurrentScene()->SkySphere->Mat = SkyMaterial;
+		FunkyEngine::GetEngine()->GetCurrentScene()->SkySphere->Textures.push_back((ITexture*)SkyTexture);
+
+		return true;
 }
 
 void Funky::Editor::EditorContext::DrawGUI()

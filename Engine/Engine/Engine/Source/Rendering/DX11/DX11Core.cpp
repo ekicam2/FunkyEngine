@@ -10,6 +10,9 @@
 //TODO(ekicam2): there should not be any assets over here
 #include "Core/Assets/RawMesh.h"
 
+#define FUNKY_SAFE_RELEASE(x) if(x) x->Release();
+
+
 namespace Funky
 {
 	namespace Rendering
@@ -35,14 +38,16 @@ namespace Funky
 		{
 			pDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 			
-			pRenderTarget->Release();
-			pDepthStencilView->Release();
+			FUNKY_SAFE_RELEASE(pBackBufferView);
+			FUNKY_SAFE_RELEASE(pDepthStencilView);
+
+			//FUNKY_SAFE_RELEASE(pBackBuffer);
+			FUNKY_SAFE_RELEASE(pDepthStencilBuffer);
 
 			pSwapChain->ResizeBuffers(0, 0, 0,DXGI_FORMAT::DXGI_FORMAT_UNKNOWN, 0);
 			
-			// init  
 			InitSwapchain();
-			
+
 			ImGui_ImplDX11_Shutdown();
 			ImGui_ImplDX11_Init(pDevice.Get(), pDeviceContext.Get());
 		}
@@ -315,7 +320,7 @@ namespace Funky
 			// if (SUCCEEDED(hr))
 			// 	pPerf->EndEvent();
 
-			ID3D11RenderTargetView* rt[] = { pRenderTarget.Get() };
+			ID3D11RenderTargetView* rt[] = { pBackBufferView.Get() };
 			pDeviceContext->OMSetRenderTargets(1, rt, pDepthStencilView.Get());
 		}
 
@@ -324,7 +329,7 @@ namespace Funky
 			float color[4] = { Color.X, Color.Y, Color.Z, 1.0f };
 
 
-			ID3D11RenderTargetView* FinalTarget = RenderTargetToClear == RenderingBackend::INVALID_INDEX ? pRenderTarget.Get() : RenderTargets[RenderTargetToClear].pRenderTargetView.Get();
+			ID3D11RenderTargetView* FinalTarget = RenderTargetToClear == RenderingBackend::INVALID_INDEX ? pBackBufferView.Get() : RenderTargets[RenderTargetToClear].pRenderTargetView.Get();
 			pDeviceContext->ClearRenderTargetView(FinalTarget, color);
 		}
 
@@ -520,7 +525,7 @@ namespace Funky
 
 			pDeviceContext->RSSetViewports(1, &Viewport);
 
-			hr = pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, pRenderTarget.GetAddressOf());
+			hr = pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, pBackBufferView.GetAddressOf());
 			if (!SUCCEEDED(hr))
 			{
 				LOG_ERROR(TEXT("couldn't create render target"));
@@ -532,10 +537,12 @@ namespace Funky
 
 		void DX11::FreeSwapchain()
 		{
-#define FK_COM_SAFERELEASE(x) if(x) x->Release();
+			FUNKY_SAFE_RELEASE(pBackBufferView);
+			FUNKY_SAFE_RELEASE(pDepthStencilView);
 
-			FK_COM_SAFERELEASE(pRenderTarget);
-			FK_COM_SAFERELEASE(pDepthStencilView);
+			FUNKY_SAFE_RELEASE(pBackBuffer);
+			FUNKY_SAFE_RELEASE(pDepthStencilBuffer);
+
 		}
 
 		void DX11::BindTexture(RenderingBackend::ShaderResourceStage Stage, RenderingBackend::Texture const & Texture, u32 StartIndex /*= 0u*/)

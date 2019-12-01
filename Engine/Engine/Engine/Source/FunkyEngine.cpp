@@ -17,7 +17,6 @@
 #include "Core/Containers.h"
 #include "Core/String.h"
 
-#include "Utils/MeshUtils.h"
 
 #include "SDL.h"
 
@@ -37,16 +36,16 @@ namespace Funky
 		: RenderingBackend(Rendering::RenderingBackend::API::DX11)
 		, ThreadPool({ {Core::Thread::Type::Rendering, (u16)1u}, {Core::Thread::Type::Worker, (u16)5u} })
 		, TaskManager(&ThreadPool)
+		, IOSystem(new Core::IO::WindowsIOSystem())
 	{
 		FunkyEngine::_Engine = this;
+		FunkyEngine::_IO = IOSystem;
 
 		#ifdef FUNKY_EDITOR
 			EditorWindowManager = new Editor::WindowManager();
 		#endif // FUNKY_EDITOR
-			AssetManager = new Funky::AssetRegistry();
-
-		IOSystem = new Core::IO::WindowsIOSystem();
-		FunkyEngine::_IO = IOSystem;
+		
+		AssetManager = new Funky::AssetRegistry();
 	}
 
 	FunkyEngine::~FunkyEngine()
@@ -60,11 +59,13 @@ namespace Funky
 
 	Core::IO::IIOSystem* FunkyEngine::GetIO()
 	{
+		CHECK(_IO);
 		return _IO;
 	}
 
 	FunkyEngine* FunkyEngine::GetEngine()
 	{
+		CHECK(_Engine);
 		return _Engine;
 	}
 
@@ -84,15 +85,20 @@ namespace Funky
 		// sort through and find what code to run for the message given
 		switch (Message)
 		{
-		case WM_SIZE:
+		case WM_EXITSIZEMOVE:
 			{
-				static i32 counter = 0;
-				if (counter > 0)
-				{
-					const Math::Vector2u NewSize{ LOWORD(lParam), HIWORD(lParam) };
-					RenderingBackend.OnViewportResized(NewSize);
-				}
-				++counter;
+				RenderingBackend.OnViewportResized(Math::Vector2u(0u, 0u));
+				
+#ifdef FUNKY_EDITOR
+				RECT ClientArea;
+				GetClientRect(FunkyEngine::GetEngine()->hWnd, &ClientArea);
+				f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
+				f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
+				
+				Editor->MainCamera.MakePerepective(DeltaX / DeltaY, 90.0f, 0.01f, 3000.0f);
+#endif
+
+				return 0;
 			}
 			break;
 			// this message is read when the window is closed
@@ -112,6 +118,8 @@ namespace Funky
 	{
 		constexpr unsigned uWindowWidth = 2048u;
 		constexpr unsigned uWindowHeight = 1024u;
+
+		Funky::Log<ELogType::Info>("Creating widnow with size: ", uWindowWidth, " ", uWindowHeight);
 
 		if (!CreateAndShowWindow({ uWindowWidth, uWindowHeight }))
 			return false;
@@ -154,71 +162,17 @@ namespace Funky
 
 		#ifdef FUNKY_EDITOR
 			Editor = new Editor::EditorContext();
+
+			if (!Editor->Init())
+				return false;
 		#endif // FUNKY_EDITOR
+
 
 		return true;
 	}
 
 	void FunkyEngine::Run()
 	{
-		//RECT ClientArea;
-		//GetClientRect(hWnd, &ClientArea);
-		//f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
-		//f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
-
-		std::unique_ptr<Asset::RawMesh> CubeMesh = std::make_unique<Asset::RawMesh>(MeshUtils::CreateCube());
-		std::unique_ptr <Asset::RawMesh> SkySphere = std::make_unique<Asset::RawMesh>(MeshUtils::CreateSphere(2000.0f, true));
-
-		str Textures[6] = {
- 			"RealData/Textures/mp_troubled/troubled-waters_ft.tga",
-			"RealData/Textures/mp_troubled/troubled-waters_bk.tga",
- 			"RealData/Textures/mp_troubled/troubled-waters_up.tga",
- 			"RealData/Textures/mp_troubled/troubled-waters_dn.tga",
- 			"RealData/Textures/mp_troubled/troubled-waters_rt.tga",
- 			"RealData/Textures/mp_troubled/troubled-waters_lf.tga"
- 		};
-		Asset::CubemapTexture* SkyTexture = Asset::CubemapTexture::CreateFromFile(Textures);
-		CHECK(SkyTexture != nullptr);
-		SkyTexture->Proxy = RenderingBackend.CreateCubemap(SkyTexture->GetData(), SkyTexture->Size);
-		CHECK(SkyTexture != nullptr);
-
-		
-		/*Asset::Material SkyMaterial("RealData/Shaders/Sky.fkmat");
-		Asset::Material DepthMaterial("RealData/Shaders/Depth.fkmat");
-		Asset::Material LitMaterial("RealData/Shaders/Sample.fkmat");*/
-
-		Asset::Material* SkyMaterial	= AssetManager->GetByName<Asset::Material>("Sky");
-		[[maybe_unused]] Asset::Material* DepthMaterial	= AssetManager->GetByName<Asset::Material>("Depth");
-		Asset::Material* LitMaterial	= AssetManager->GetByName<Asset::Material>("Sample");
-
-
-		// Math::Camera ShadowCamera(DeltaX / DeltaY, 90.0f, 1.0f, 26.5f);
-		// ShadowCamera.MakeOrtho(DeltaX / DeltaY, 1.0f, 1.0, 15.0f);
-		// ShadowCamera.Translate({ 10.0f, 0.0f, 0.0f });
-		// ShadowCamera.Rotate({ 0.0f, -90.0f, 0.0f });
-
-		//ShadowCB.Projection = ShadowCamera.GetProjection();
-		//ShadowCB.View = ShadowCamera.GetView();
-		//RenderingBackend.UpdateConstantBuffer(ShadowCBHandle, (Rendering::RenderingBackend::ConstantBufferData)(&ShadowCB));
-
-
-		for (u8 i = 0; i < 4; ++i)
-		{
-			auto NewDrawable = new Scene::Drawable();
-			NewDrawable->Mesh.Mat = LitMaterial;
-			//NewDrawable->Mesh.Targets.push_back(ShadowsRT);
-			NewDrawable->Mesh.Data = CubeMesh.get();
-			NewDrawable->Name = str("drawableObj_").append(std::to_string(i));
-			NewDrawable->Position = Math::Vector3f(0.0f, 0.0f, 1.0f) * i;
-			MainScene.SceneNodes.push_back(NewDrawable);
-		}
-
-		MainScene.SkySphere = new Scene::MeshComponent();
-		MainScene.SkySphere->Data = SkySphere.get();
-		MainScene.SkySphere->Mat = SkyMaterial;
-		MainScene.SkySphere->Textures.push_back((ITexture*)SkyTexture);
-
-
 		bool bGotMsg;
 
 		MSG  Msg;
@@ -236,12 +190,26 @@ namespace Funky
 			}
 			else
 			{
+				struct 
+				{
+					Math::Camera* Camera = nullptr;
+					Scene* RelevantScene = nullptr;
+
+					bool IsValid() const { return Camera != nullptr && RelevantScene != nullptr; }
+				} View;
+
 				#ifdef FUNKY_EDITOR
 					Editor->Update();
-					Renderer->DrawSceneFromView(&Editor->MainCamera, &MainScene);
+				
+					View.Camera = &Editor->MainCamera;
+					View.RelevantScene = &MainScene;
 				#endif // FUNKY_EDITOR
 
+
+				if(View.IsValid())
+					Renderer->DrawSceneFromView(View.Camera, View.RelevantScene);
 				DrawGUI();
+					
 				RenderingBackend.Present();
 			}
 		}

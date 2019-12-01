@@ -2,7 +2,7 @@
 #include "FunkyEngine.h"
 
 Funky::Asset::Material::Material(str const& Path)
-	: IAsset(Path, Asset::Type::Material)
+	: IAsset(Path, Asset::EType::Material)
 {
 	auto Shaders = Material::ParseMaterial(Path);
 	if (!Shaders)

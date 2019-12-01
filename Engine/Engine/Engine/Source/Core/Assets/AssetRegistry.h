@@ -7,6 +7,7 @@
 
 #include "Editor/WindowManager.h"
 
+
 namespace Funky
 {
 	class AssetRegistry
@@ -15,6 +16,8 @@ namespace Funky
 #endif
 	{
 	public:
+		using AssetID = str;
+
 		inline static const str BaseAssetsPath = "AssetsRegistry\\";
 		inline static const str AssetExtension = ".fkasset";
 
@@ -22,28 +25,37 @@ namespace Funky
 		{
 			str Name;
 			str Path;
-			Asset::Type Type = Asset::Type::Unknown;
+			Asset::EType Type = Asset::EType::Unknown;
 			class Asset::IAsset* AssetPtr = nullptr;
 
 			void Load();
+			void Free();
 			FORCEINLINE bool IsLoaded() const { return AssetPtr != nullptr; }
 		};
 
 		AssetRegistry();
 
-		Asset::IAsset* GetByName(str const& Name, Asset::Type Type);
+		Asset::IAsset* GetByName(AssetID const& Name, Asset::EType Type);
 
 		template <typename T>
-		T* GetByName(str const& Name);
+		T* GetByName(AssetID const& Name);
 
 	#ifdef FUNKY_EDITOR
 		void DrawGUI();
 	#endif // FUNKY_EDITOR
 
+
+
+
+
 	private:
 		/* Lookup for all assets in the @BaseAssetsPath and fill @AllAssets. */
 		void ParseFileTree();
 		void ParseRecursive(str const& Path);
+
+		static AssetDesc ParseFile(str const& Path);
+		darray<AssetDesc> AllAssets;
+
 
 #ifdef FUNKY_EDITOR
 		struct FileBrowser
@@ -62,12 +74,10 @@ namespace Funky
 		} Browser;
 #endif // FUNKY_EDITOR
 
-		static AssetDesc ParseFile(str const& Path);
-		darray<AssetDesc> AllAssets;
 	};
 
 	template <typename T>
-	T* Funky::AssetRegistry::GetByName(str const& Name)
+	T* Funky::AssetRegistry::GetByName(AssetID const& Name)
 	{
 		return static_cast<T*>(GetByName(Name, Asset::CTypeToType<T>()));
 	}

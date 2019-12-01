@@ -112,7 +112,7 @@ namespace Funky
 			Microsoft::WRL::ComPtr<ID3D11Texture2D> pDepthStencilBuffer = nullptr;
 
 			// Resource Views
-			Microsoft::WRL::ComPtr<ID3D11RenderTargetView>  pRenderTarget = nullptr;
+			Microsoft::WRL::ComPtr<ID3D11RenderTargetView>  pBackBufferView = nullptr;
 			Microsoft::WRL::ComPtr<ID3D11DepthStencilView>  pDepthStencilView = nullptr;
 
 			darray<DX11GPUConstantBuffer>	ConstantBuffers;

@@ -45,6 +45,9 @@ namespace Funky
 		bool Shutdown();
 		void DrawGUI();
 
+		Scene* GetCurrentScene() { return &MainScene; }
+
+		AssetRegistry* GetAssetRegistry() { return AssetManager; }
 		Rendering::RenderingBackend* GetRenderingBackend() { return &RenderingBackend; }
 
 	private:

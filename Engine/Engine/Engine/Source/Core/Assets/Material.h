@@ -33,6 +33,6 @@ namespace Funky
 		};
 
 		template <>
-		inline Asset::Type CTypeToType<Asset::Material>() { return Asset::Type::Material; }
+		inline Asset::EType CTypeToType<Asset::Material>() { return Asset::EType::Material; }
 	}
 }

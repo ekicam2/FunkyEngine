@@ -9,7 +9,10 @@ namespace Funky
 {
 	namespace Asset
 	{
-		enum class Type : u8
+		using AssetID = str;
+		using AssetPath = str;
+
+		enum class EType : u8
 		{
 			Unknown,
 			Texture,
@@ -17,25 +20,25 @@ namespace Funky
 			Material
 		};
 
-		str const TypeToString(Asset::Type EnumType);
-		Asset::Type const StringToType(str const & StrType);
+		str const TypeToString(Asset::EType EnumType);
+		Asset::EType const StringToType(str const & StrType);
 
 		template <typename T>
-		inline Asset::Type CTypeToType() { return Asset::Type::Unknown; }
+		inline Asset::EType CTypeToType() { return Asset::EType::Unknown; }
 
 		class IAsset
 		{
 		public:
 			IAsset() = delete;
-			IAsset(str const& Path, Asset::Type Type = Type::Unknown) : Path(Path), Type(Type), Loaded(false) {}
+			IAsset(AssetPath const& Path, Asset::EType Type = EType::Unknown) : Path(Path), Type(Type), Loaded(false) {}
 
-			FORCEINLINE str GetPath() const;
-			FORCEINLINE Asset::Type GetType() const;
+			FORCEINLINE AssetPath GetPath() const;
+			FORCEINLINE Asset::EType GetType() const;
 			FORCEINLINE bool IsLoaded() const;
 
 		protected:
-			str Path;
-			Asset::Type Type;
+			AssetPath Path;
+			Asset::EType Type;
 
 		private:
 			bool Loaded;
@@ -44,12 +47,12 @@ namespace Funky
 
 	}
 
-	FORCEINLINE str Asset::IAsset::GetPath() const
+	FORCEINLINE Asset::AssetPath Asset::IAsset::GetPath() const
 	{
 		return Path;
 	}
 
-	FORCEINLINE Asset::Type Asset::IAsset::GetType() const
+	FORCEINLINE Asset::EType Asset::IAsset::GetType() const
 	{
 		return Type;
 	}

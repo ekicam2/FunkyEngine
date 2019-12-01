@@ -3,7 +3,7 @@
 #include "Templates.h"
 
 Funky::Asset::RawMesh::RawMesh(str const& Path)
-	: IAsset(Path, Asset::Type::Mesh)
+	: IAsset(Path, Asset::EType::Mesh)
 {
 	if (!Path.ends_with(".obj"))
 	{
@@ -19,7 +19,7 @@ Funky::Asset::RawMesh::RawMesh(str const& Path)
 }
 
 Funky::Asset::RawMesh::RawMesh(std::pair<darray<Vertex>, darray<u16>>&& Load)
-	: IAsset(str("CustomMesh").append(std::to_string(RawMesh::TagCounter)), Asset::Type::Mesh)
+	: IAsset(str("CustomMesh").append(std::to_string(RawMesh::TagCounter)), Asset::EType::Mesh)
 {
 	TagCounter++;
 
