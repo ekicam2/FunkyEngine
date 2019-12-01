@@ -450,7 +450,7 @@ namespace Funky
 				return false;
 			}
 
-			LOG_FUNKY(TEXT("actually supported level is: "), DirectUtils::FeatureNameToString(ActuallySupportedLevel));
+			Funky::Log<ELogType::Info>(TEXT("actually supported level is: "), DirectUtils::FeatureNameToString(ActuallySupportedLevel));
 
 
 			Microsoft::WRL::ComPtr<IDXGIDevice> Device;

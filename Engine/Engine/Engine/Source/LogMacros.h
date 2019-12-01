@@ -1,5 +1,8 @@
 #pragma once
 
+#define ENDABLE_LOG
+#define LOG_EVERYWHERE
+
 #include <iostream>
 #include <sstream>
 #ifndef WINDOWS_LEAN_AND_MEAN
@@ -21,16 +24,33 @@
 #error "PREF_IDE_LOG and PREF_CONSOLE_LOG should not be defined simultaneously"
 #endif
 
+enum class ELogType
+{
+	Info,
+	Warning,
+	Error
+};
+
 namespace
 {
 	template<typename T>
-	void IDELOG(T msg)
+	void IDELOG([[maybe_unused]]T msg)
 	{
-#if UNICODE
-		OutputDebugString(std::to_wstring(msg).c_str());
-#else 
-		OutputDebugString(std::to_string(msg).c_str());
-#endif
+		// TODO(ekicam2): implement IDE with ints
+		// LPCSTR lifetime = std::to_string(msg).c_str();
+		// OutputDebugStringA(lifetime);
+	}
+
+	template<>
+	void IDELOG<std::string const&>(std::string const& msg)
+	{
+		OutputDebugStringA(msg.c_str());
+	}
+
+	template<>
+	void IDELOG<std::wstring const&>(std::wstring const& msg)
+	{
+		OutputDebugStringW(msg.c_str());
 	}
 
 	template<>
@@ -46,15 +66,71 @@ namespace
 	}
 }
 
-#if UNICODE
-#define STDLOG std::wclog
-#define STDERR std::wcerr
+namespace
+{
+	template<typename T>
+	void CONSOLELOG(T msg)
+	{
+		std::clog << msg;
+	}
 
-#else
-#define STDLOG std::clog
-#define STDERR std::cerr
-#endif
+	template<>
+	void CONSOLELOG<std::string const&>(std::string const& msg)
+	{
+		std::clog << msg.c_str();
+	}
 
+	template<>
+	void CONSOLELOG<std::wstring const&>(std::wstring const& msg)
+	{
+		std::wclog << msg;
+	}
+
+	template<>
+	void CONSOLELOG<char const*>(char const* msg)
+	{
+		std::clog << msg;
+	}
+
+	template<>
+	void CONSOLELOG<wchar_t const*>(wchar_t const* msg)
+	{
+		std::wclog << msg;
+	}
+}
+
+namespace
+{
+	template<typename T>
+	void CONSOLEERROR(T msg)
+	{
+		std::cerr << msg;
+	}
+
+	template<>
+	void CONSOLEERROR<std::string const&>(std::string const& msg)
+	{
+		std::cerr << msg.c_str();
+	}
+
+	template<>
+	void CONSOLEERROR<std::wstring const&>(std::wstring const& msg)
+	{
+		std::wcerr << msg;
+	}
+
+	template<>
+	void CONSOLEERROR<char const*>(char const* msg)
+	{
+		std::cerr << msg;
+	}
+
+	template<>
+	void CONSOLEERROR<wchar_t const*>(wchar_t const* msg)
+	{
+		std::wcerr << msg;
+	}
+}
 
 #ifdef PREF_IDE_LOG
 
@@ -63,13 +139,13 @@ namespace
 
 #elif defined(PREF_CONSOLE_LOG)
 
-#define __INTERNAL_LOG(debug_msg) STDLOG << debug_msg;	
-#define __INTERNAL_ERR(debug_msg) STDERR << debug_msg;	
+#define __INTERNAL_LOG(debug_msg) CONSOLELOG(debug_msg);	
+#define __INTERNAL_ERR(debug_msg) CONSOLEERROR(debug_msg);	
 
 #elif defined(LOG_EVERYWHERE)
 
-#define __INTERNAL_LOG(debug_msg) STDLOG << debug_msg; IDELOG(debug_msg);
-#define __INTERNAL_ERR(debug_msg) STDERR << debug_msg; IDELOG(debug_msg);
+#define __INTERNAL_LOG(debug_msg) CONSOLELOG(debug_msg); IDELOG(debug_msg);
+#define __INTERNAL_ERR(debug_msg) CONSOLEERROR(debug_msg); IDELOG(debug_msg);
 
 #endif
 
@@ -135,19 +211,13 @@ __forceinline void ErrF(Ts... Params)
 }
 
 #define LOG_FUNKY(...)	LogF(__VA_ARGS__)
+#define LOG_ERROR(msg)  ErrF(__FILE__, TEXT(":"), __LINE__, TEXT("\t"), msg)
 #define LOG_ERROR_FUNKY(...)	ErrF(__FILE__, TEXT(":"), __LINE__, TEXT("\t"), __VA_ARGS__)
 
 
 
 namespace Funky
 {
-	enum class ELogType
-	{
-		Info,
-		Warning,
-		Error
-	};
-
 	__forceinline auto LogTime()
 	{
 		SYSTEMTIME Time;
@@ -178,31 +248,31 @@ namespace Funky
 	{
 		switch (LogType)
 		{
-			case ELogType::Info:	return "[INFO]		| ";
-			case ELogType::Warning: return "[WARNING]	| ";
-			case ELogType::Error:	return "Error		| ";
-			default: return "";
+		case ELogType::Info:	return "[INFO] | ";
+		case ELogType::Warning: return "[WARNING] | ";
+		case ELogType::Error:	return "[Error] | ";
+		default: return "";
 		}
 	};
 
 	template <ELogType LogType, typename... Ts>
-	__forceinline void Log(Ts... Params) 
-	{ 
+	__forceinline void Log(Ts... Params)
+	{
 		std::stringstream ss;
 		ss << LogTime()
 			<< " "
 			<< LogTypeToHeader(LogType);
-		
-		_LogF<char const*, Ts...>::log(ss.str().c_str(), Params...); 
-	}
-}
 
+		_LogF<char const*, Ts...>::log(ss.str().c_str(), Params...);
+	}
 
 #else
 
-#define LOG_FUNKY(...)	
+template <ELogType LogType, typename... Ts>
+__forceinline void Log([[maybe_unused]] Ts... Params)
+{
 
-#define LOG_ERROR(msg) 
-#define LOG_ERROR_FUNKY(...) 
-
+}
 #endif
+
+}

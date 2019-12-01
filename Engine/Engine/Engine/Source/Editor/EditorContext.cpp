@@ -33,6 +33,7 @@ bool Funky::Editor::EditorContext::Init()
 		//f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
 		//f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
 
+
 		EditorCube = std::make_unique<Asset::RawMesh>(MeshUtils::CreateCube());
 		EditorSphere = std::make_unique<Asset::RawMesh>(MeshUtils::CreateSphere(2000.0f, true));
 

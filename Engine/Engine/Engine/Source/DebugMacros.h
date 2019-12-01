@@ -65,9 +65,6 @@ namespace
 #define CHECK_ONCE(condition) if(!(condition) && OnceOnly([]{})) { if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) BREAK(); }
 #define CHECK(condition) if(!(condition)) { if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) BREAK(); }
 
-#define ALERT(msg) { if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) BREAK(); }
-#define ALERT_ONCE(msg) if(OnceOnly([]{})){ if(ShowAssertionBox(TEXTIFY(condition), TEXTIFY(__FILE__), __LINE__)) BREAK(); }
-
 #define DEATH_PATH(...) ASSERT(false, TEXT("death path reached"))
 
 #define DEF_DEBUG_SCOPE_TIMER(TimerName) ScopeTimer<Timer::EResolution::Mills> CONCAT(ScopeTimer, __LINE__)(TimerName)

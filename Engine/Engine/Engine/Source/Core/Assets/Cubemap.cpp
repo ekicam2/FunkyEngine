@@ -17,7 +17,7 @@ Funky::Asset::CubemapTexture* Funky::Asset::CubemapTexture::CreateFromFile(str (
 			return nullptr;
 		}
 
-		LOG_FUNKY(TEXT("Texture successful read: ["), i + 1, TEXT("/6]"), pFilePath[i], TEXT(" width: "), image[i]->w, TEXT(" height: "), image[i]->h);
+		Funky::Log<ELogType::Info>(TEXT("Texture successful read: ["), i + 1, TEXT("/6]"), pFilePath[i], TEXT(" width: "), image[i]->w, TEXT(" height: "), image[i]->h);
 	}
 
 	CubemapTexture* cubemap = new CubemapTexture(str(), ITexture::TextureType::Tex_6D);

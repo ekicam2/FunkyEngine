@@ -2,10 +2,6 @@
 
 #include "Core/Platform/Platform.h"
 
-#define ENDABLE_LOG
-#define LOG_EVERYWHERE
-#include "LogMacros.h"
-
 #include "Math/Vector2.h"
 
 #include "Rendering/RenderingBackend.h"

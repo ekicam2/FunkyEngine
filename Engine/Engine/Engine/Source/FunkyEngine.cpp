@@ -119,11 +119,12 @@ namespace Funky
 		constexpr unsigned uWindowWidth = 2048u;
 		constexpr unsigned uWindowHeight = 1024u;
 
-		Funky::Log<ELogType::Info>("Creating widnow with size: ", uWindowWidth, " ", uWindowHeight);
+		Funky::Log<ELogType::Info>("Creating widnow with size: ", uWindowWidth, "x", uWindowHeight);
 
 		if (!CreateAndShowWindow({ uWindowWidth, uWindowHeight }))
 			return false;
 
+		Funky::Log<ELogType::Info>("Init SDL 2.0");
 		if (SDL_Init(SDL_INIT_AUDIO) != 0)
 		{
 			LOG_ERROR_FUNKY(TEXT("SDL_Init: Failed to init SDL!\n"));
@@ -131,6 +132,7 @@ namespace Funky
 		}
 		atexit(SDL_Quit);
 
+		Funky::Log<ELogType::Info>("Init SDL IMAGE");
 		int flags = IMG_INIT_JPG | IMG_INIT_PNG;
 		int initted = IMG_Init(flags);
 		if ((initted&flags) != flags)
@@ -145,6 +147,7 @@ namespace Funky
 		//LOG_FUNKY(fk::getExecPath());
 
 		// IMGUI
+		Funky::Log<ELogType::Info>("Init ImGUI");
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -154,15 +157,20 @@ namespace Funky
 		ImGui_ImplWin32_Init(hWnd);
 		// IMGUI END
 
+		Funky::Log<ELogType::Info>("Init Rendering");
 		if (!RenderingBackend.Init(hWnd))
 			return false;
 
+		Funky::Log<ELogType::Info>("Create Renderer");
 		Renderer = new Rendering::Renderer(RenderingBackend);
+		Funky::Log<ELogType::Info>("Init Renderer");
 		Renderer->InitBuffers();
 
 		#ifdef FUNKY_EDITOR
+			Funky::Log<ELogType::Info>("Create Editor Context");
 			Editor = new Editor::EditorContext();
 
+			Funky::Log<ELogType::Info>("Init Editor Context");
 			if (!Editor->Init())
 				return false;
 		#endif // FUNKY_EDITOR
