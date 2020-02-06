@@ -11,7 +11,7 @@ struct Light
 
 	}
 
-	Light(Funky::Math::Vector3f vPosition, Funky::Math::LinearColor LightColor)
+	Light(Funky::Math::Vec3f vPosition, Funky::Math::LinearColor LightColor)
 		: Position(vPosition)
 		, Color(LightColor)
 	{
@@ -19,7 +19,7 @@ struct Light
 	}
 
 	Funky::Math::LinearColor Color;
-	Funky::Math::Vector3f Position;
+	Funky::Math::Vec3f Position;
 
 private:
 	float padding = 0.0987654f;

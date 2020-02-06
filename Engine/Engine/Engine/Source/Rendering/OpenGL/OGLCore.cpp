@@ -48,7 +48,7 @@ namespace Funky
 			return RenderingBackend::API::OGL;
 		}
 
-		void OGL::OnViewportResized([[maybe_unused]]Math::Vector2u const & NewSize)
+		void OGL::OnViewportResized([[maybe_unused]]Math::Vec2u const & NewSize)
 		{
 			ASSERT(false, TEXT("Not supported at the moment."));
 
@@ -58,7 +58,7 @@ namespace Funky
 			//ImGui_ImplOpenGL3_Init(FUNKY_GLSL_MIN_VERSION);
 		}
 
-		RenderingBackend::RenderTarget OGL::CreateRenderTarget([[maybe_unused]] Math::Vector2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
+		RenderingBackend::RenderTarget OGL::CreateRenderTarget([[maybe_unused]] Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
 		{
 			//TODO(ekicam2): implement
 			return RenderingBackend::INVALID_INDEX;
@@ -82,7 +82,7 @@ namespace Funky
 			return RenderingBackend::INVALID_INDEX;
 		}
 
-		RenderingBackend::Texture OGL::CreateTexture2D(byte const * const Data, Math::Vector2u const & Size)
+		RenderingBackend::Texture OGL::CreateTexture2D(byte const * const Data, Math::Vec2u const & Size)
 		{
 			Textures.push_back(Move(OGLGPUTexture()));
 
@@ -95,7 +95,7 @@ namespace Funky
 			return Index;
 		}
 
-		RenderingBackend::Texture OGL::CreateCubemap(byte const * const Data, Math::Vector2u const & Size)
+		RenderingBackend::Texture OGL::CreateCubemap(byte const * const Data, Math::Vec2u const & Size)
 		{
 			Textures.push_back(Move(OGLGPUTexture()));
 
@@ -129,7 +129,7 @@ namespace Funky
 			
 		}
 
-		void OGL::ClearRenderTargetWithColor(Math::Vector3f const & Color, RenderingBackend::RenderTarget RenderTargetToClear)
+		void OGL::ClearRenderTargetWithColor(Math::Vec3f const & Color, RenderingBackend::RenderTarget RenderTargetToClear)
 		{
 			//ID3D11RenderTargetView* FinalTarget =  ? pRenderTarget.Get() : RenderTargets[RenderTargetToClear].pRenderTargetView.Get();
 

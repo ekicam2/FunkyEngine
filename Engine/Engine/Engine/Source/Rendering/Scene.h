@@ -111,9 +111,9 @@ namespace Funky
 
 			bool bVisible;
 
-			Math::Vector3f Position;
-			Math::Vector3f Rotation;
-			Math::Vector3f Scale;
+			Math::Vec3f Position;
+			Math::Vec3f Rotation;
+			Math::Vec3f Scale;
 
 			f32 PositionInput = 100.0f;
 			f32 RotationInput = 180.0f;

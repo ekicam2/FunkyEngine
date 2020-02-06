@@ -166,11 +166,11 @@ namespace Funky
 			const bool bSuccess = tinyobj::LoadObj(&Attribs, &Shapes, &Materials, &Warnings, &Error, pFilePath, NULL, true, false);
 			ParseTimer.End();
 
-			LOG_FUNKY(TEXT("Parsing mesh: "), pFilePath, TEXT(". Took: "), ParseTimer.GetInMills(), TEXT(" ms."));
+			LOG(TEXT("Parsing mesh: "), pFilePath, TEXT(". Took: "), ParseTimer.GetInMills(), TEXT(" ms."));
 
 			if (!bSuccess)
 			{
-				LOG_ERROR_FUNKY(TEXT("Error was: "), Error.c_str());
+				LOG_ERROR(TEXT("Error was: "), Error.c_str());
 				BREAK();
 				return {};
 			}
@@ -226,9 +226,9 @@ namespace Funky
 				{
 					f32 xSegment = (f32)x / (f32)X_SEGMENTS;
 					f32 ySegment = (f32)y / (f32)Y_SEGMENTS;
-					f32 xPos = Math::Cos(xSegment * 2.0f * Math::PI<f32>) * Math::Sin(ySegment * Funky::Math::PI<f32>) * Radius;
+					f32 xPos = Math::Cos(xSegment * 2.0f * Math::PI<f32>) * Math::Sin(ySegment * Math::PI<f32>) * Radius;
 					f32 yPos = Math::Cos(ySegment * Math::PI<f32>) * Radius;
-					f32 zPos = Math::Sin(xSegment * 2.0f * Math::PI<f32>) * Math::Sin(ySegment * Funky::Math::PI<f32>) * Radius;
+					f32 zPos = Math::Sin(xSegment * 2.0f * Math::PI<f32>) * Math::Sin(ySegment * Math::PI<f32>) * Radius;
 
 					Vertices.push_back(
 						{ DirectX::XMFLOAT3(xPos, yPos, zPos), DirectX::XMFLOAT3(xPos / Radius, yPos / Radius, zPos / Radius), DirectX::XMFLOAT2(xSegment, ySegment) }

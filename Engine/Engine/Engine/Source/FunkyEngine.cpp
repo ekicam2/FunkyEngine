@@ -7,6 +7,7 @@
 
 #include "BasicTypes.h"
 
+#include "Math/Vector2.h"
 #include "Math/Camera.h"
 #include "Rendering/ParticleSystem.h"
 
@@ -87,7 +88,7 @@ namespace Funky
 		{
 		case WM_EXITSIZEMOVE:
 			{
-				RenderingBackend.OnViewportResized(Math::Vector2u(0u, 0u));
+				RenderingBackend.OnViewportResized(Math::Vec2u(0u, 0u));
 				
 #ifdef FUNKY_EDITOR
 				RECT ClientArea;
@@ -97,8 +98,6 @@ namespace Funky
 				
 				Editor->MainCamera.MakePerepective(DeltaX / DeltaY, 90.0f, 0.01f, 3000.0f);
 #endif
-
-				return 0;
 			}
 			break;
 			// this message is read when the window is closed
@@ -119,26 +118,26 @@ namespace Funky
 		constexpr unsigned uWindowWidth = 2048u;
 		constexpr unsigned uWindowHeight = 1024u;
 
-		Funky::Log<ELogType::Info>("Creating widnow with size: ", uWindowWidth, "x", uWindowHeight);
+		LOG("Creating widnow with size: ", uWindowWidth, "x", uWindowHeight);
 
 		if (!CreateAndShowWindow({ uWindowWidth, uWindowHeight }))
 			return false;
 
-		Funky::Log<ELogType::Info>("Init SDL 2.0");
+		LOG("Init SDL 2.0");
 		if (SDL_Init(SDL_INIT_AUDIO) != 0)
 		{
-			LOG_ERROR_FUNKY(TEXT("SDL_Init: Failed to init SDL!\n"));
+			LOG_ERROR(TEXT("SDL_Init: Failed to init SDL!\n"));
 			return false;
 		}
 		atexit(SDL_Quit);
 
-		Funky::Log<ELogType::Info>("Init SDL IMAGE");
+		LOG("Init SDL IMAGE");
 		int flags = IMG_INIT_JPG | IMG_INIT_PNG;
 		int initted = IMG_Init(flags);
 		if ((initted&flags) != flags)
 		{
-			LOG_ERROR_FUNKY(TEXT("IMG_Init: Failed to init required jpg and png support!\n"));
-			LOG_ERROR_FUNKY(TEXT("IMG_Init: "), IMG_GetError());
+			LOG_ERROR(TEXT("IMG_Init: Failed to init required jpg and png support!\n"));
+			LOG_ERROR(TEXT("IMG_Init: "), IMG_GetError());
 			return false;
 		}
 		atexit(IMG_Quit);
@@ -147,7 +146,7 @@ namespace Funky
 		//LOG_FUNKY(fk::getExecPath());
 
 		// IMGUI
-		Funky::Log<ELogType::Info>("Init ImGUI");
+		LOG("Init ImGUI");
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -157,20 +156,20 @@ namespace Funky
 		ImGui_ImplWin32_Init(hWnd);
 		// IMGUI END
 
-		Funky::Log<ELogType::Info>("Init Rendering");
+		LOG("Init Rendering");
 		if (!RenderingBackend.Init(hWnd))
 			return false;
 
-		Funky::Log<ELogType::Info>("Create Renderer");
+		LOG("Create Renderer");
 		Renderer = new Rendering::Renderer(RenderingBackend);
-		Funky::Log<ELogType::Info>("Init Renderer");
+		LOG("Init Renderer");
 		Renderer->InitBuffers();
 
 		#ifdef FUNKY_EDITOR
-			Funky::Log<ELogType::Info>("Create Editor Context");
+			LOG("Create Editor Context");
 			Editor = new Editor::EditorContext();
 
-			Funky::Log<ELogType::Info>("Init Editor Context");
+			LOG("Init Editor Context");
 			if (!Editor->Init())
 				return false;
 		#endif // FUNKY_EDITOR
@@ -213,9 +212,13 @@ namespace Funky
 					View.RelevantScene = &MainScene;
 				#endif // FUNKY_EDITOR
 
+				RenderingBackend.BindDefaultRenderTarget();
+				RenderingBackend.ClearRenderTargetWithColor({ 0.392156899f, 0.584313750f, 0.929411829f });
+				RenderingBackend.ClearDepthStencil(1.0f, 0u);
+				RenderingBackend.SetPrimitiveTopology(Rendering::RenderingBackend::PrimitiveTopology::Trianglelist);
 
 				if(View.IsValid())
-					Renderer->DrawSceneFromView(View.Camera, View.RelevantScene);
+					//Renderer->DrawSceneFromView(View.Camera, View.RelevantScene);
 				DrawGUI();
 					
 				RenderingBackend.Present();
@@ -268,7 +271,7 @@ namespace Funky
 		}
 	}
 
-	bool FunkyEngine::CreateAndShowWindow(Math::Vector2u const & windowSize)
+	bool FunkyEngine::CreateAndShowWindow(Math::Vec2u const & windowSize)
 	{
 		constexpr charx const * const WND_CLASS_NAME = TEXT("MainWindowClass");
 
@@ -286,7 +289,7 @@ namespace Funky
 		if (!RegisterClass(&Wcx))
 		{
 			BREAK();
-			LOG_ERROR_FUNKY(TEXT("couldn't register a class with name "), WND_CLASS_NAME);
+			LOG_ERROR(TEXT("couldn't register a class with name "), WND_CLASS_NAME);
 			return false;
 		}
 
@@ -294,7 +297,7 @@ namespace Funky
 		if (!hWnd)
 		{
 			BREAK();
-			LOG_ERROR_FUNKY(TEXT("couldn't create the window with class: "), WND_CLASS_NAME);
+			LOG_ERROR(TEXT("couldn't create the window with class: "), WND_CLASS_NAME);
 			UnregisterClass(WND_CLASS_NAME, hInstance);
 			return false;
 		}

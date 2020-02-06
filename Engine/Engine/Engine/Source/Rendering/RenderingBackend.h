@@ -20,7 +20,7 @@
  * BaseConstantBuffer() : LookAt(0.0f, 0.0f, 0.0f) {}
  * DirectX::XMMATRIX MVP;
  * DirectX::XMMATRIX Model;
- * Funky::Math::Vector3f LookAt;
+ * Funky::Math::Vec3f LookAt;
  * DEFINE_CONSTANT_BUFFER_END(BaseConstantBuffer)
  *
  */
@@ -86,25 +86,25 @@ namespace Funky
 
 			RenderingBackend(API Api);
 			bool Init(HWND hwnd);
-			void OnViewportResized(Math::Vector2u const & NewSize);
+			void OnViewportResized(Math::Vec2u const & NewSize);
 
 			RenderingBackend::API GetBackendAPI() const;
 
-			RenderTarget CreateRenderTarget(Math::Vector2u const & Size /* TODO(ekicam2): I woild like to specify format*/);
+			RenderTarget CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/);
 
 			VertexShader CreateVertexShader(byte* VertexShaderData, u64 DataSize);
 			PixelShader CreatePixelShader(byte* PixelShaderData, u64 DataSize);
 			ConstantBuffer CreateConstantBuffer(size SizeOfConstantBuffer, ConstantBufferData InitData = nullptr);
 
-			Texture CreateTexture2D(byte const * const Data, Math::Vector2u const & Size);
-			Texture CreateCubemap(byte const * const Data, Math::Vector2u const & Size);
+			Texture CreateTexture2D(byte const * const Data, Math::Vec2u const & Size);
+			Texture CreateCubemap(byte const * const Data, Math::Vec2u const & Size);
 
 			MeshProxy CreateMeshProxy(Asset::RawMesh const * Mesh);
 
 			void BindRenderTarget(RenderTarget RenderTargetToBind);
 
 			void BindDefaultRenderTarget();
-			void ClearRenderTargetWithColor(Math::Vector3f const & Color, RenderingBackend::RenderTarget const & RenderTargetToClear = RenderingBackend::INVALID_INDEX);
+			void ClearRenderTargetWithColor(Math::Vec3f const & Color, RenderingBackend::RenderTarget const & RenderTargetToClear = RenderingBackend::INVALID_INDEX);
 			void ClearDepthStencil(float Depth, float Stencil);
 			void SetPrimitiveTopology(PrimitiveTopology NewTopology);
 

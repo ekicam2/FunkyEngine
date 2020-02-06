@@ -75,7 +75,7 @@ Funky::AssetRegistry::AssetDesc Funky::AssetRegistry::ParseFile(str const& Path)
 	std::ifstream AssetFile(Path, std::ios::binary);
 	if (!AssetFile.is_open())
 	{
-		LOG_ERROR_FUNKY(TEXT("Couldn't open asset file: "), Path);
+		LOG_ERROR(TEXT("Couldn't open asset file: "), Path);
 		BREAK();
 		return { "", "", Asset::EType::Unknown };
 	}

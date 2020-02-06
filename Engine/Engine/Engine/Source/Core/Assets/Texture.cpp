@@ -5,10 +5,10 @@ Funky::Asset::Texture* Funky::Asset::Texture::CreateFromFile(str const & pFilePa
 	SDL_Surface* image = IMG_Load(pFilePath.c_str());
 	if (!image)
 	{
-		LOG_ERROR_FUNKY(TEXT("Couldn't load image file: "), IMG_GetError());
+		LOG_ERROR(TEXT("Couldn't load image file: "), IMG_GetError());
 		return nullptr;
 	}
-	LOG_FUNKY(TEXT("Texture successful read: "), pFilePath, TEXT(" width: "), image->w, TEXT(" height: "), image->h);
+	LOG(TEXT("Texture successful read: "), pFilePath, TEXT(" width: "), image->w, TEXT(" height: "), image->h);
 
 	Texture* NewCreatedTexture = new Texture(pFilePath, ITexture::TextureType::Tex_1D);
 	NewCreatedTexture->Image = image;
@@ -16,7 +16,7 @@ Funky::Asset::Texture* Funky::Asset::Texture::CreateFromFile(str const & pFilePa
 
 	NewCreatedTexture->Data.reserve(image->w * image->h);
 
-	NewCreatedTexture->Size = Math::Vector2u(image->w, image->h);
+	NewCreatedTexture->Size = Math::Vec2u(image->w, image->h);
 
 	for (u64 pixIndex = 0; pixIndex < (image->w * image->h * 3); pixIndex += 3)
 	{

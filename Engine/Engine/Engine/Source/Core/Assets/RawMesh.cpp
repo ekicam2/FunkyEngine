@@ -7,7 +7,7 @@ Funky::Asset::RawMesh::RawMesh(str const& Path)
 {
 	if (!Path.ends_with(".obj"))
 	{
-		LOG_ERROR_FUNKY("Unsupported mesh file format: ", Path);
+		LOG_ERROR("Unsupported mesh file format: ", Path);
 		LOG_ERROR("Currently only .obj format is supported.");
 		return;
 	}

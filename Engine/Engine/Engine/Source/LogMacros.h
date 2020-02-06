@@ -1,7 +1,9 @@
 #pragma once
 
 #define ENDABLE_LOG
-#define LOG_EVERYWHERE
+#define PREF_CONSOLE_LOG
+
+#include "BasicTypes.h"
 
 #include <iostream>
 #include <sstream>
@@ -24,6 +26,14 @@
 #error "PREF_IDE_LOG and PREF_CONSOLE_LOG should not be defined simultaneously"
 #endif
 
+#define INIT_LOG(...) 								\
+HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);	\
+DWORD consoleMode;									\
+GetConsoleMode(console, &consoleMode);				\
+consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;	\
+SetConsoleMode(console, consoleMode);					
+
+
 enum class ELogType
 {
 	Info,
@@ -31,26 +41,58 @@ enum class ELogType
 	Error
 };
 
+namespace std
+{
+	using str = std::basic_string<charx, std::char_traits<charx>, std::allocator<charx>>;
+}
+
+#if _UNICODE
+	#define sprintf_s swprintf_s
+#else
+	#define sprintf_s sprintf_s
+#endif
+
 namespace
 {
 	template<typename T>
-	void IDELOG([[maybe_unused]]T msg)
+	void IDELOG(T msg)
 	{
-		// TODO(ekicam2): implement IDE with ints
-		// LPCSTR lifetime = std::to_string(msg).c_str();
-		// OutputDebugStringA(lifetime);
+		//auto m2 = std::to_string(2).c_str();
+
+		charx m[1024];
+		sprintf_s(m, TEXT("%s"), msg);
+		OutputDebugString(m);
 	}
 
 	template<>
-	void IDELOG<std::string const&>(std::string const& msg)
+	void IDELOG<float>(float msg)
 	{
-		OutputDebugStringA(msg.c_str());
+		charx m[1024];
+		sprintf_s(m, TEXT("%f"), msg);
+		OutputDebugString(m);
 	}
 
 	template<>
-	void IDELOG<std::wstring const&>(std::wstring const& msg)
+	void IDELOG<long>(long msg)
 	{
-		OutputDebugStringW(msg.c_str());
+		charx m[1024];
+		sprintf_s(m, TEXT("%ld"), msg);
+		OutputDebugString(m);
+	}
+
+	template<>
+	void IDELOG<int>(int msg)
+	{
+		charx m[1024];
+		sprintf_s(m, TEXT("%d"), msg);
+		OutputDebugString(m);
+	}
+
+
+	template<>
+	void IDELOG<std::str>(std::str msg)
+	{
+		OutputDebugString(msg.c_str());
 	}
 
 	template<>
@@ -210,13 +252,7 @@ __forceinline void ErrF(Ts... Params)
 	_ErrF<Ts...>::log(Params...);
 }
 
-#define LOG_FUNKY(...)	LogF(__VA_ARGS__)
-#define LOG_ERROR(msg)  ErrF(__FILE__, TEXT(":"), __LINE__, TEXT("\t"), msg)
-#define LOG_ERROR_FUNKY(...)	ErrF(__FILE__, TEXT(":"), __LINE__, TEXT("\t"), __VA_ARGS__)
-
-
-
-namespace Funky
+namespace
 {
 	__forceinline auto LogTime()
 	{
@@ -248,9 +284,15 @@ namespace Funky
 	{
 		switch (LogType)
 		{
+#ifdef PREF_CONSOLE_LOG
+		case ELogType::Info:	return "[\x1B[32mINFO\033[0m] | ";
+		case ELogType::Warning: return "[\x1B[34mWARNING\033[0m] | ";
+		case ELogType::Error:	return "[\x1b[1;31mError\033[0m] | ";
+#else
 		case ELogType::Info:	return "[INFO] | ";
 		case ELogType::Warning: return "[WARNING] | ";
 		case ELogType::Error:	return "[Error] | ";
+#endif
 		default: return "";
 		}
 	};
@@ -265,14 +307,19 @@ namespace Funky
 
 		_LogF<char const*, Ts...>::log(ss.str().c_str(), Params...);
 	}
+}
+
+#define LOG(...)	Log<ELogType::Info>(__VA_ARGS__)
+//#define LOG_ERROR(msg)  ErrF(__FILE__, TEXT(":"), __LINE__, TEXT("\t"), msg)
+#define LOG_WARNING(...)	Log<ELogType::Warning>(__VA_ARGS__)
+#define LOG_ERROR(...)	Log<ELogType::Error>(__FILE__, TEXT(":"), __LINE__, TEXT("\t"), __VA_ARGS__)
+
+#undef sprintf_s
 
 #else
 
-template <ELogType LogType, typename... Ts>
-__forceinline void Log([[maybe_unused]] Ts... Params)
-{
-
+#define LOG(...)	
+#define LOG_ERROR(msg) 
+#define ERROR(...)
 }
 #endif
-
-}

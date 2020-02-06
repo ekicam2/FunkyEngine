@@ -47,7 +47,7 @@ namespace Funky
 		Rendering::RenderingBackend* GetRenderingBackend() { return &RenderingBackend; }
 
 	private:
-		bool CreateAndShowWindow(Math::Vector2u const & windowSize);
+		bool CreateAndShowWindow(Math::Vec2u const & windowSize);
 
 		static FunkyEngine* _Engine;
 		static Core::IO::IIOSystem* _IO;

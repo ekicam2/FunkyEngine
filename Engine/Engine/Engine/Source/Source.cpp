@@ -121,6 +121,7 @@ int main()
 #elif defined(ENGINE)
 int main()
 {
+	INIT_LOG();
 	Funky::FunkyEngine Engine;
 	if (Engine.Init())
 		Engine.Run();

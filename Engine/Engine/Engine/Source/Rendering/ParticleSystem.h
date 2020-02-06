@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Math/LinearColor.h"
-#include "Math/Vector3.h"
-#include "Math/Vector2.h"
+#include "Math/Math.h"
 
 #include "Core/Containers.h"
 
@@ -17,9 +16,9 @@ namespace Funky
 			struct Particle
 			{
 				float Lifetime;
-				Math::Vector2f Size = Math::Vector2f(1.0f, 1.0f);
-				Math::Vector3f Position = Math::Vector3f(0.0f, 0.0f, 0.0f);
-				Math::Vector3f Velocity = Math::Vector3f(0.0f, 1.0f, 0.0f);
+				Math::Vec2f Size = Math::Vec2f(1.0f, 1.0f);
+				Math::Vec3f Position = Math::Vec3f(0.0f, 0.0f, 0.0f);
+				Math::Vec3f Velocity = Math::Vec3f(0.0f, 1.0f, 0.0f);
 				Math::LinearColor Color;
 
 				bool bAlive = true;
@@ -77,7 +76,7 @@ namespace Funky
 
 					for (auto& Particle : Particles)
 					{
-						Particle.Position = Math::Vector3f(0.0f, 0.0f, 0.0f);
+						Particle.Position = Math::Vec3f(0.0f, 0.0f, 0.0f);
 						Particle.Reset();
 					}
 				}

@@ -26,22 +26,22 @@ namespace Funky
 		{
 			virtual bool Init(HWND hwnd) override;
 			virtual RenderingBackend::API GetBackendAPI() const override;
-			virtual void OnViewportResized(Math::Vector2u const & NewSize) override;
+			virtual void OnViewportResized(Math::Vec2u const & NewSize) override;
 
-			virtual RenderingBackend::RenderTarget CreateRenderTarget(Math::Vector2u const & Size /* TODO(ekicam2): I woild like to specify format*/) override;
+			virtual RenderingBackend::RenderTarget CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/) override;
 
 			virtual RenderingBackend::VertexShader CreateVertexShader(byte* VertexShaderData, u64 DataSize) override;
 			virtual RenderingBackend::PixelShader CreatePixelShader(byte* PixelShaderData, u64 DataSize) override;
 			virtual RenderingBackend::ConstantBuffer CreateConstantBuffer(size SizeOfConstantBuffer) override;
 
-			virtual RenderingBackend::Texture CreateTexture2D(byte const * const Data, Math::Vector2u const & Size) override;
-			virtual RenderingBackend::Texture CreateCubemap(byte const * const Data, Math::Vector2u const & Size) override;
+			virtual RenderingBackend::Texture CreateTexture2D(byte const * const Data, Math::Vec2u const & Size) override;
+			virtual RenderingBackend::Texture CreateCubemap(byte const * const Data, Math::Vec2u const & Size) override;
 
 			virtual RenderingBackend::MeshProxy CreateMeshProxy(Asset::RawMesh const * Mesh) override;
 
 			virtual void BindRenderTarget(RenderingBackend::RenderTarget RenderTargetToBind) override;
 			virtual void BindDefaultRenderTarget() override;
-			virtual void ClearRenderTargetWithColor(Math::Vector3f const & Color, RenderingBackend::RenderTarget RenderTargetToClear) override;
+			virtual void ClearRenderTargetWithColor(Math::Vec3f const & Color, RenderingBackend::RenderTarget RenderTargetToClear) override;
 			virtual void ClearDepthStencil(float Depth, float Stencil) override;
 			virtual void SetPrimitiveTopology(RenderingBackend::PrimitiveTopology NewTopology) override;
 

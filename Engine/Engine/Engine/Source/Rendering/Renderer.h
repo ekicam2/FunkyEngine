@@ -12,7 +12,7 @@ DEFINE_CONSTANT_BUFFER_BEGIN(BaseConstantBuffer)
 BaseConstantBuffer() : LookAt(0.0f, 0.0f, 0.0f) {}
 DirectX::XMMATRIX MVP;
 DirectX::XMMATRIX Model;
-Funky::Math::Vector3f LookAt;
+Math::Vec3f LookAt;
 DEFINE_CONSTANT_BUFFER_END(BaseConstantBuffer)
 
 DEFINE_CONSTANT_BUFFER_BEGIN(ShadowConstantBuffer)
@@ -41,13 +41,13 @@ namespace Funky
 			void DrawSceneFromView(Math::Camera const * ViewCamera, Scene const * RenderScene)
 			{
 				//			PREPARE FRAME
-				RenderingBackend.BindDefaultRenderTarget();
-				RenderingBackend.ClearRenderTargetWithColor({ 0.392156899f, 0.584313750f, 0.929411829f });
-				RenderingBackend.ClearDepthStencil(1.0f, 0u);
-				RenderingBackend.SetPrimitiveTopology(Rendering::RenderingBackend::PrimitiveTopology::Trianglelist);
-				//			PREPARE FRAME END 
+//				RenderingBackend.BindDefaultRenderTarget();
+//				RenderingBackend.ClearRenderTargetWithColor({ 0.392156899f, 0.584313750f, 0.929411829f });
+//				RenderingBackend.ClearDepthStencil(1.0f, 0u);
+//				RenderingBackend.SetPrimitiveTopology(Rendering::RenderingBackend::PrimitiveTopology::Trianglelist);
+//				//			PREPARE FRAME END 
 
-				MVPBuffer.LookAt = ViewCamera->GetLookat().Normalize();
+				MVPBuffer.LookAt = ViewCamera->GetLookat().Normalized();
 
 				for (u64 i = 0; i < RenderScene->SceneNodes.size(); ++i)
 				{

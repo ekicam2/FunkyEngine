@@ -27,7 +27,7 @@ namespace Funky
 			ITexture(str const& Path, TextureType Type);
 
 
-			Math::Vector2u Size = Math::Vector2u(0u, 0u);
+			Math::Vec2u Size = Math::Vec2u(0u, 0u);
 			Rendering::RenderingBackend::Texture Proxy = Rendering::RenderingBackend::INVALID_INDEX;
 		
 			virtual byte* GetData() const = 0;

@@ -3,132 +3,130 @@
 #include "Math/Vector3.h"
 #include "Math/Math.h"
 
-namespace Funky
+#define FORCEINLINE __forceinline
+
+namespace Math
 {
-	namespace Math
+	class Camera
 	{
-		class Camera
+	public:
+		Camera()
+			: Projection(DirectX::XMMatrixIdentity())
+			, Position(0.0f, 0.0f, 0.0f)
+			, Rotation(0.0f, 0.0f, 0.0f)
+			, LookAt(0.0f, 0.0f, 100.f)
+			, Up(0.0f, 1.0f, 0.0f)
 		{
-		public:
-			Camera()
-				: Projection(DirectX::XMMatrixIdentity())
-				, Position(0.0f, 0.0f, 0.0f)
-				, Rotation(0.0f, 0.0f, 0.0f)
-				, LookAt(0.0f, 0.0f, 100.f)
-				, Up(0.0f, 1.0f, 0.0f)
-			{
-			}
+		}
 
-			Camera(float AspectRatio, float FOV = 90.0f, float Near = 0.01f, float Far = 100.0f)
-				: Projection(DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(FOV), AspectRatio, Near, Far))
-				, Position(0.0f, 0.0f, 0.0f)
-				, Rotation(0.0f, 0.0f, 0.0f)
-				, LookAt(0.0f, 0.0f, 100.f)
-				, Up(0.0f, 1.0f, 0.0f)
-			{
+		Camera(float AspectRatio, float FOV = 90.0f, float Near = 0.01f, float Far = 100.0f)
+			: Projection(DirectX::XMMatrixPerspectiveFovLH(Math::ToRad(FOV), AspectRatio, Near, Far))
+			, Position(0.0f, 0.0f, 0.0f)
+			, Rotation(0.0f, 0.0f, 0.0f)
+			, LookAt(0.0f, 0.0f, 100.f)
+			, Up(0.0f, 1.0f, 0.0f)
+		{
+			RecalculateView();
+		}
+
+		void MakePerepective(float AspectRatio, float FOV = 90.0f, float Near = 0.01f, float Far = 100.0f)
+		{
+			Projection = DirectX::XMMatrixPerspectiveFovLH(Math::ToRad(FOV), AspectRatio, Near, Far);
+			RecalculateView();
+		}
+
+		void MakeOrtho(float Width, float Height, float Near = 0.01f, float Far = 100.0f)
+		{
+			Projection = DirectX::XMMatrixOrthographicLH(Width, Height, Near, Far);
+			RecalculateView();
+		}
+
+		FORCEINLINE DirectX::XMMATRIX const & GetProjection() const { return Projection; }
+
+		FORCEINLINE DirectX::XMMATRIX const & GetView() const
+		{
+			if (bViewDirty)
 				RecalculateView();
-			}
+			return View;
+		}
 
-			void MakePerepective(float AspectRatio, float FOV = 90.0f, float Near = 0.01f, float Far = 100.0f)
-			{
-				Projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(FOV), AspectRatio, Near, Far);
-				RecalculateView();
-			}
+		FORCEINLINE Math::Vec3f const & GetLookat() const { return LookAt; }
 
-			void MakeOrtho(float Width, float Height, float Near = 0.01f, float Far = 100.0f)
-			{
-				Projection = DirectX::XMMatrixOrthographicLH(Width, Height, Near, Far);
-				RecalculateView();
-			}
+		FORCEINLINE Math::Vec3f const & GetPosition() const { return Position; }
 
-			FORCEINLINE DirectX::XMMATRIX const & GetProjection() const { return Projection; }
+		void Translate(Math::Vec3f const & vTranslation)
+		{
+			Math::Vec3f Temp = vTranslation;
 
-			FORCEINLINE DirectX::XMMATRIX const & GetView() const
-			{
-				if (bViewDirty)
-					RecalculateView();
-				return View;
-			}
+			Temp = Temp.RotateX(Rotation.X);
+			Temp = Temp.RotateY(Rotation.Y);
+			Temp = Temp.RotateZ(Rotation.Z);
 
-			FORCEINLINE Funky::Math::Vector3f const & GetLookat() const { return LookAt; }
+			Position += Temp;
+			bViewDirty = true;
+		}
 
-			FORCEINLINE Funky::Math::Vector3f const & GetPosition() const { return Position; }
+		/**
+		* Rotates camera and clamp final rotation.
+		* @param vRotation an Euler rotation vector
+		*/
+		void Rotate(Math::Vec3f const & vRotation) { Rotation += vRotation; bViewDirty = true; }
 
-			void Translate(Funky::Math::Vector3f const & vTranslation)
-			{
-				Funky::Math::Vector3f Temp = vTranslation;
+		/**
+		* Rotates camera and clamp final rotation.
+		* @param vRotation an Euler rotation vector
+		* @param vAxisToClamp describes which axis should be clampped, simply just pass 1.0f on selected axis eg. {0.0f, 1.0f, 0.0f} or {0.0f, 1.0f, 1.0f}
+		* @param vAxisMax describes maximum value for axis
+		*/
+		void RotateClamped(Math::Vec3f const & vRotation, Math::Vec3f const & vAxisToClamp, Math::Vec3f const & vAxisMax)
+		{
+			Rotation += vRotation;
 
-				Temp = Temp.RotateX(Rotation.X);
-				Temp = Temp.RotateY(Rotation.Y);
-				Temp = Temp.RotateZ(Rotation.Z);
+			if (1.0f == vAxisToClamp.X && Math::Abs(Rotation.X) > vAxisMax.X)
+				Rotation.X = vAxisMax.X * (Rotation.X / Math::Abs(Rotation.X));
 
-				Position += Temp;
-				bViewDirty = true;
-			}
+			if (1.0f == vAxisToClamp.Y && Math::Abs(Rotation.Y) > vAxisMax.Y)
+				Rotation.Y = vAxisMax.Y * (Rotation.Y / Math::Abs(Rotation.Y));
 
-			/**
-			* Rotates camera and clamp final rotation.
-			* @param vRotation an Euler rotation vector
-			*/
-			void Rotate(Funky::Math::Vector3f const & vRotation) { Rotation += vRotation; bViewDirty = true; }
+			if (1.0f == vAxisToClamp.Z && Math::Abs(Rotation.Z) > vAxisMax.Z)
+				Rotation.Z = vAxisMax.Z * (Rotation.Z / Math::Abs(Rotation.Z));
 
-			/**
-			* Rotates camera and clamp final rotation.
-			* @param vRotation an Euler rotation vector
-			* @param vAxisToClamp describes which axis should be clampped, simply just pass 1.0f on selected axis eg. {0.0f, 1.0f, 0.0f} or {0.0f, 1.0f, 1.0f}
-			* @param vAxisMax describes maximum value for axis
-			*/
-			void RotateClamped(Funky::Math::Vector3f const & vRotation, Funky::Math::Vector3f const & vAxisToClamp, Funky::Math::Vector3f const & vAxisMax)
-			{
-				Rotation += vRotation;
+			bViewDirty = true;
+		}
 
-				if (1.0f == vAxisToClamp.X && Funky::Math::Abs(Rotation.X) > vAxisMax.X)
-					Rotation.X = vAxisMax.X * (Rotation.X / Funky::Math::Abs(Rotation.X));
+	private:
+		void RecalculateView() const
+		{
+			Math::Vec3f Forward(0.0f, 0.0f, 100.f);
 
-				if (1.0f == vAxisToClamp.Y && Funky::Math::Abs(Rotation.Y) > vAxisMax.Y)
-					Rotation.Y = vAxisMax.Y * (Rotation.Y / Funky::Math::Abs(Rotation.Y));
+			Forward = Forward.RotateX(Rotation.X);
+			Forward = Forward.RotateY(Rotation.Y);
+			Forward = Forward.RotateZ(Rotation.Z);
 
-				if (1.0f == vAxisToClamp.Z && Funky::Math::Abs(Rotation.Z) > vAxisMax.Z)
-					Rotation.Z = vAxisMax.Z * (Rotation.Z / Funky::Math::Abs(Rotation.Z));
+			LookAt = Position + Forward;
 
-				bViewDirty = true;
-			}
-
-		private:
-			void RecalculateView() const
-			{
-				Funky::Math::Vector3f Forward(0.0f, 0.0f, 100.f);
-
-				Forward = Forward.RotateX(Rotation.X);
-				Forward = Forward.RotateY(Rotation.Y);
-				Forward = Forward.RotateZ(Rotation.Z);
-
-				LookAt = Position + Forward;
-
-				View = DirectX::XMMatrixLookAtLH(
-					DirectX::XMVectorSet(Position.X, Position.Y, Position.Z, 0.0f),
-					DirectX::XMVectorSet(LookAt.X, LookAt.Y, LookAt.Z, 0.0f),
-					DirectX::XMVectorSet(Up.X, Up.Y, Up.Z, 0.0f)
-				);
-
-				bViewDirty = false;
-			}
-
-			mutable bool bViewDirty = false;
-
-			Funky::Math::Vector3f Position;
-			Funky::Math::Vector3f Rotation;
-			mutable Funky::Math::Vector3f LookAt;
-			const Funky::Math::Vector3f Up;
-
-			DirectX::XMMATRIX Projection;
-
-			mutable DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(
+			View = DirectX::XMMatrixLookAtLH(
 				DirectX::XMVectorSet(Position.X, Position.Y, Position.Z, 0.0f),
 				DirectX::XMVectorSet(LookAt.X, LookAt.Y, LookAt.Z, 0.0f),
 				DirectX::XMVectorSet(Up.X, Up.Y, Up.Z, 0.0f)
 			);
-		};
-	}
-}
 
+			bViewDirty = false;
+		}
+
+		mutable bool bViewDirty = false;
+
+		Math::Vec3f Position;
+		Math::Vec3f Rotation;
+		mutable Math::Vec3f LookAt;
+		const Math::Vec3f Up;
+
+		DirectX::XMMATRIX Projection;
+
+		mutable DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(
+			DirectX::XMVectorSet(Position.X, Position.Y, Position.Z, 0.0f),
+			DirectX::XMVectorSet(LookAt.X, LookAt.Y, LookAt.Z, 0.0f),
+			DirectX::XMVectorSet(Up.X, Up.Y, Up.Z, 0.0f)
+		);
+	};
+}

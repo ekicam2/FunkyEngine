@@ -17,7 +17,7 @@ namespace Funky
 
 		RenderingBackend::API RenderingBackend::GetBackendAPI() const { return Impl->GetBackendAPI(); }
 
-		RenderingBackend::RenderTarget RenderingBackend::CreateRenderTarget(Math::Vector2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
+		RenderingBackend::RenderTarget RenderingBackend::CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
 		{
 			return Impl->CreateRenderTarget(Size);
 		}
@@ -34,7 +34,7 @@ namespace Funky
 
 		bool RenderingBackend::Init(HWND hwnd) { return Impl->Init(hwnd); }
 
-		void RenderingBackend::OnViewportResized(Math::Vector2u const & NewSize)
+		void RenderingBackend::OnViewportResized(Math::Vec2u const & NewSize)
 		{
 			Impl->OnViewportResized(NewSize);
 		}
@@ -49,12 +49,12 @@ namespace Funky
 			return Impl->CreateConstantBuffer(SizeOfConstantBuffer);
 		}
 
-		RenderingBackend::Texture RenderingBackend::CreateTexture2D(byte const * const Data, Math::Vector2u const & Size)
+		RenderingBackend::Texture RenderingBackend::CreateTexture2D(byte const * const Data, Math::Vec2u const & Size)
 		{
 			return Impl->CreateTexture2D(Data, Size);
 		}
 
-		RenderingBackend::Texture RenderingBackend::CreateCubemap(byte const * const Data, Math::Vector2u const & Size)
+		RenderingBackend::Texture RenderingBackend::CreateCubemap(byte const * const Data, Math::Vec2u const & Size)
 		{
 			return Impl->CreateCubemap(Data, Size);
 		}
@@ -69,7 +69,7 @@ namespace Funky
 			Impl->BindRenderTarget(RenderTargetToBind);
 		}
 
-		void RenderingBackend::ClearRenderTargetWithColor(Math::Vector3f const & Color, RenderingBackend::RenderTarget const & RenderTargetToClear /*= RenderingBackend::INVALID_INDEX*/)
+		void RenderingBackend::ClearRenderTargetWithColor(Math::Vec3f const & Color, RenderingBackend::RenderTarget const & RenderTargetToClear /*= RenderingBackend::INVALID_INDEX*/)
 		{
 			Impl->ClearRenderTargetWithColor(Color, RenderTargetToClear);
 		}

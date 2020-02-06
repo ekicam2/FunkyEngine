@@ -34,7 +34,7 @@ namespace Funky
 			return RenderingBackend::API::DX11;
 		}
 
-		void DX11::OnViewportResized([[maybe_unused]]Math::Vector2u const & NewSize)
+		void DX11::OnViewportResized([[maybe_unused]]Math::Vec2u const & NewSize)
 		{
 			pDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 			
@@ -52,7 +52,7 @@ namespace Funky
 			ImGui_ImplDX11_Init(pDevice.Get(), pDeviceContext.Get());
 		}
 
-		RenderingBackend::RenderTarget DX11::CreateRenderTarget(Math::Vector2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
+		RenderingBackend::RenderTarget DX11::CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
 		{
 			Microsoft::WRL::ComPtr<ID3D11Texture2D>			 pTexture = nullptr;
 			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView = nullptr;
@@ -164,7 +164,7 @@ namespace Funky
 			return Index;
 		}
 
-		RenderingBackend::Texture DX11::CreateTexture2D(byte const * const Data, Math::Vector2u const & Size)
+		RenderingBackend::Texture DX11::CreateTexture2D(byte const * const Data, Math::Vec2u const & Size)
 		{
 			Textures.push_back(Move(
 				[Size]()
@@ -204,7 +204,7 @@ namespace Funky
 			return Index;
 		}
 
-		RenderingBackend::Texture DX11::CreateCubemap(byte const * const Data, Math::Vector2u const & Size)
+		RenderingBackend::Texture DX11::CreateCubemap(byte const * const Data, Math::Vec2u const & Size)
 		{
 			constexpr unsigned TexCount = 6u;
 
@@ -324,7 +324,7 @@ namespace Funky
 			pDeviceContext->OMSetRenderTargets(1, rt, pDepthStencilView.Get());
 		}
 
-		void DX11::ClearRenderTargetWithColor(Math::Vector3f const & Color, RenderingBackend::RenderTarget RenderTargetToClear)
+		void DX11::ClearRenderTargetWithColor(Math::Vec3f const & Color, RenderingBackend::RenderTarget RenderTargetToClear)
 		{
 			float color[4] = { Color.X, Color.Y, Color.Z, 1.0f };
 
@@ -450,7 +450,7 @@ namespace Funky
 				return false;
 			}
 
-			Funky::Log<ELogType::Info>(TEXT("actually supported level is: "), DirectUtils::FeatureNameToString(ActuallySupportedLevel));
+			LOG(TEXT("actually supported level is: "), DirectUtils::FeatureNameToString(ActuallySupportedLevel));
 
 
 			Microsoft::WRL::ComPtr<IDXGIDevice> Device;

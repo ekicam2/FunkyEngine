@@ -8,7 +8,7 @@ Funky::Asset::CubemapTexture* Funky::Asset::CubemapTexture::CreateFromFile(str (
 		image[i] = IMG_Load(pFilePath[i].c_str());
 		if (!image[i])
 		{
-			LOG_ERROR_FUNKY(IMG_GetError());
+			LOG_ERROR(IMG_GetError());
 
 			for (int j = 0; j < i; ++j)
 			{
@@ -17,7 +17,7 @@ Funky::Asset::CubemapTexture* Funky::Asset::CubemapTexture::CreateFromFile(str (
 			return nullptr;
 		}
 
-		Funky::Log<ELogType::Info>(TEXT("Texture successful read: ["), i + 1, TEXT("/6]"), pFilePath[i], TEXT(" width: "), image[i]->w, TEXT(" height: "), image[i]->h);
+		LOG(TEXT("Texture successful read: ["), i + 1, TEXT("/6]"), pFilePath[i], TEXT(" width: "), image[i]->w, TEXT(" height: "), image[i]->h);
 	}
 
 	CubemapTexture* cubemap = new CubemapTexture(str(), ITexture::TextureType::Tex_6D);
@@ -29,7 +29,7 @@ Funky::Asset::CubemapTexture* Funky::Asset::CubemapTexture::CreateFromFile(str (
 		cubemap->m_pImage[i] = image[i];
 	}
 
-	cubemap->Size = Math::Vector2u(image[0]->w, image[0]->h);
+	cubemap->Size = Math::Vec2u(image[0]->w, image[0]->h);
 	cubemap->Data.reserve(6 * image[0]->w * image[0]->h);
 
 	for (int i = 0; i < 6; ++i)

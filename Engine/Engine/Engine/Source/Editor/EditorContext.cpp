@@ -69,7 +69,7 @@ bool Funky::Editor::EditorContext::Init()
 			//NewDrawable->Mesh.Targets.push_back(ShadowsRT);
 			NewDrawable->Mesh.Data = EditorCube.get();
 			NewDrawable->Name = str("drawableObj_").append(std::to_string(i));
-			NewDrawable->Position = Math::Vector3f(0.0f, 0.0f, 1.0f) * i;
+			NewDrawable->Position = Math::Vec3f(0.0f, 0.0f, 1.0f) * i;
 			FunkyEngine::GetEngine()->GetCurrentScene()->SceneNodes.push_back(NewDrawable);
 		}
 		
@@ -101,17 +101,17 @@ void Funky::Editor::EditorContext::Update()
 		auto& IO = *FunkyEngine::GetIO(); 
 
 		if (IO.IsKeyPressed(Core::IO::Key::W))
-			MainCamera.Translate(Math::Vector3f(0.0f, 0.0f, 1.f) * CameraSpeed);
+			MainCamera.Translate(Math::Vec3f(0.0f, 0.0f, 1.f) * CameraSpeed);
 		if (IO.IsKeyPressed(Core::IO::Key::S))
-			MainCamera.Translate(Math::Vector3f(0.0f, 0.0f, -1.0f) *CameraSpeed);
+			MainCamera.Translate(Math::Vec3f(0.0f, 0.0f, -1.0f) *CameraSpeed);
 		if (IO.IsKeyPressed(Core::IO::Key::A))
-			MainCamera.Translate(Math::Vector3f(-1.0f, 0.0f, 0.0f) * CameraSpeed);
+			MainCamera.Translate(Math::Vec3f(-1.0f, 0.0f, 0.0f) * CameraSpeed);
 		if (IO.IsKeyPressed(Core::IO::Key::D))
-			MainCamera.Translate(Math::Vector3f(1.0f, 0.0f, 0.0f) * CameraSpeed);
+			MainCamera.Translate(Math::Vec3f(1.0f, 0.0f, 0.0f) * CameraSpeed);
 		if (IO.IsKeyPressed(Core::IO::Key::E))
-			MainCamera.Translate(Math::Vector3f(0.0f, 1.0f, 0.0f) * CameraSpeed);
+			MainCamera.Translate(Math::Vec3f(0.0f, 1.0f, 0.0f) * CameraSpeed);
 		if (IO.IsKeyPressed(Core::IO::Key::Q))
-			MainCamera.Translate(Math::Vector3f(0.0f, -1.0f, 0.0f) * CameraSpeed);
+			MainCamera.Translate(Math::Vec3f(0.0f, -1.0f, 0.0f) * CameraSpeed);
 	}
 
 	if (!ImGui::GetIO().WantCaptureMouse && PressedMask & GetKeyState(VK_RBUTTON))
@@ -133,10 +133,10 @@ void Funky::Editor::EditorContext::Update()
 		if (bPrevFrameRMB)
 		{
 			MainCamera.RotateClamped(
-				//Funky::Math::Vector3f(MouseOffset.y * CameraY, MouseOffset.x * CameraX, 0.0f),
-				Funky::Math::Vector3f((float)MouseOffset.y, (float)MouseOffset.x, 0.0f),
-				Funky::Math::Vector3f(1.0f, 0.0f, 0.0f),
-				Funky::Math::Vector3f(89.0f, 0.0f, 0.0f)
+				//Funky::Math::Vec3f(MouseOffset.y * CameraY, MouseOffset.x * CameraX, 0.0f),
+				Math::Vec3f((float)MouseOffset.y, (float)MouseOffset.x, 0.0f),
+				Math::Vec3f(1.0f, 0.0f, 0.0f),
+				Math::Vec3f(89.0f, 0.0f, 0.0f)
 			);
 		}
 

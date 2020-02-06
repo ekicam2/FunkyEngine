@@ -23,22 +23,22 @@ namespace Funky
 
 			virtual RenderingBackend::API GetBackendAPI() const = 0;
 			virtual bool Init(HWND hwnd) = 0;
-			virtual void OnViewportResized(Math::Vector2u const & NewSize) = 0;
+			virtual void OnViewportResized(Math::Vec2u const & NewSize) = 0;
 
-			virtual RenderingBackend::RenderTarget CreateRenderTarget(Math::Vector2u const & Size /* TODO(ekicam2): I woild like to specify format*/) = 0;
+			virtual RenderingBackend::RenderTarget CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/) = 0;
 
 			virtual RenderingBackend::VertexShader CreateVertexShader(byte* VertexShaderData, u64 DataSize) = 0;
 			virtual RenderingBackend::PixelShader CreatePixelShader(byte* PixelShaderData, u64 DataSize) = 0;
 			virtual RenderingBackend::ConstantBuffer CreateConstantBuffer(size SizeOfConstantBuffer) = 0;
 
-			virtual RenderingBackend::Texture CreateTexture2D(byte const * const Data, Math::Vector2u const & Size) = 0;
-			virtual RenderingBackend::Texture CreateCubemap(byte const * const Data, Math::Vector2u const & Size) = 0;
+			virtual RenderingBackend::Texture CreateTexture2D(byte const * const Data, Math::Vec2u const & Size) = 0;
+			virtual RenderingBackend::Texture CreateCubemap(byte const * const Data, Math::Vec2u const & Size) = 0;
 
 			virtual RenderingBackend::MeshProxy CreateMeshProxy(Asset::RawMesh const * Mesh) = 0;
 
 			virtual void BindRenderTarget(RenderingBackend::RenderTarget RenderTargetToBind) = 0;
 			virtual void BindDefaultRenderTarget() = 0;
-			virtual void ClearRenderTargetWithColor(Math::Vector3f const & Color, RenderingBackend::RenderTarget RenderTargetToClear) = 0;
+			virtual void ClearRenderTargetWithColor(Math::Vec3f const & Color, RenderingBackend::RenderTarget RenderTargetToClear) = 0;
 			virtual void ClearDepthStencil(float Depth, float Stencil) = 0;
 			virtual void SetPrimitiveTopology(RenderingBackend::PrimitiveTopology NewTopology) = 0;
 
