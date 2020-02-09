@@ -6,7 +6,7 @@ Funky::Asset::Material::Material(str const& Path)
 {
 	auto Shaders = Material::ParseMaterial(Path);
 	if (!Shaders)
-		LOG_ERROR_FUNKY("couldn't read material ", Path.c_str());
+		LOG_ERROR("couldn't read material ", Path.c_str());
 
 	VS = [&]() {
 		std::ifstream Input(Shaders->first, std::ios::binary);

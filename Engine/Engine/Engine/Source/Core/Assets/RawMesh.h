@@ -68,6 +68,8 @@ namespace std {
 	};
 }
 
+typedef std::pair<darray<Funky::Vertex>, darray<u16>> MeshLoad;
+
 namespace Funky
 {
 	namespace Rendering
@@ -81,8 +83,9 @@ namespace Funky
 		class RawMesh : public IAsset
 		{
 		public:
+
 			RawMesh(str const& Path);
-			RawMesh(std::pair<darray<Vertex>, darray<u16>>&& Load);
+			RawMesh(MeshLoad&& Load);
 			virtual ~RawMesh() = default;
 
 			FORCEINLINE size_t GetIndicesCount() const

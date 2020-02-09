@@ -250,6 +250,7 @@
     <ClInclude Include="Source\Math\Camera.h" />
     <ClInclude Include="Source\Rendering\Light.h" />
     <ClInclude Include="Source\Core\Assets\Material.h" />
+    <ClInclude Include="Source\Utils\Internal\MeshUtils.cpp" />
     <ClInclude Include="Source\Utils\MeshUtils.h" />
     <ClInclude Include="Source\Rendering\OpenGL\OGLCore.h" />
     <ClInclude Include="Source\Rendering\OpenGL\OGLUtils.h" />

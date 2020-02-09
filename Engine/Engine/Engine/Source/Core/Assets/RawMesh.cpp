@@ -18,7 +18,7 @@ Funky::Asset::RawMesh::RawMesh(str const& Path)
 	Indices = Funky::Move(VertsAndInds.second);
 }
 
-Funky::Asset::RawMesh::RawMesh(std::pair<darray<Vertex>, darray<u16>>&& Load)
+Funky::Asset::RawMesh::RawMesh(MeshLoad&& Load)
 	: IAsset(str("CustomMesh").append(std::to_string(RawMesh::TagCounter)), Asset::EType::Mesh)
 {
 	TagCounter++;
