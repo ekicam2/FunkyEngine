@@ -1,0 +1,26 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build-windows:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: msvc 2019 Debug x64
+      run: |
+       cd “C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\”
+       .\MSBuild.exe $Env:GITHUB_WORKSPACE\Engine\Engine\Engine\Engine.vcxproj /property:Configuration=Debug /property:Platform=x64
+    - name: msvc 2019 Debug Editor x64
+      run: |
+       cd “C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\”
+       .\MSBuild.exe $Env:GITHUB_WORKSPACE\Engine\Engine\Engine\Engine.vcxproj /property:Configuration="Debug Editor" /property:Platform=x64
+    - name: msvc 2019 Release x64
+      run: |
+       cd “C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\”
+       .\MSBuild.exe $Env:GITHUB_WORKSPACE\Engine\Engine\Engine\Engine.vcxproj /property:Configuration=Release /property:Platform=x64
