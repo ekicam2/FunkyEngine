@@ -9,19 +9,15 @@
 
 #include "Math/Vector2.h"
 #include "Math/Camera.h"
-#include "Rendering/ParticleSystem.h"
 
-#include "Rendering/DX11/DX11ImGUIFasade.h" 
-#include "Rendering/OpenGL/OGL_ImGUIFasade.h"
-#include "Rendering/Renderer.h"
+#include "RenderingFrontend/Renderer.h"
 
 #include "Core/Containers.h"
 #include "Core/String.h"
 
+#include "Utils/MeshUtils.h"
 
 #include "SDL.h"
-
-extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 LRESULT CALLBACK ProcessInput(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -42,20 +38,12 @@ namespace Funky
 		FunkyEngine::_Engine = this;
 		FunkyEngine::_IO = IOSystem;
 
-		#ifdef FUNKY_EDITOR
-			EditorWindowManager = new Editor::WindowManager();
-		#endif // FUNKY_EDITOR
-		
 		AssetManager = new Funky::AssetRegistry();
 	}
 
 	FunkyEngine::~FunkyEngine()
 	{
 		delete IOSystem;
-		#ifdef FUNKY_EDITOR
-			delete Editor;
-			delete EditorWindowManager;
-		#endif // FUNKY_EDITOR
 	}
 
 	Core::IO::IIOSystem* FunkyEngine::GetIO()
@@ -70,18 +58,8 @@ namespace Funky
 		return _Engine;
 	}
 
-#ifdef FUNKY_EDITOR
-	Funky::Editor::WindowManager* FunkyEngine::GetEditorWindowManager()
-	{
-		return FunkyEngine::GetEngine()->EditorWindowManager;
-	}
-#endif // FUNKY_EDITOR
-
 	LRESULT CALLBACK FunkyEngine::ProcessInput(HWND InhWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
-		if (ImGui_ImplWin32_WndProcHandler(InhWnd, Message, wParam, lParam))
-			return true;
-		// else fill IO struct
 			
 		// sort through and find what code to run for the message given
 		switch (Message)
@@ -93,10 +71,9 @@ namespace Funky
 #ifdef FUNKY_EDITOR
 				RECT ClientArea;
 				GetClientRect(FunkyEngine::GetEngine()->hWnd, &ClientArea);
-				f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
-				f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
+				[[maybe_unused]] f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
+				[[maybe_unused]] f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
 				
-				Editor->MainCamera.MakePerepective(DeltaX / DeltaY, 90.0f, 0.01f, 3000.0f);
 #endif
 			}
 			break;
@@ -145,17 +122,6 @@ namespace Funky
 		
 		//LOG_FUNKY(fk::getExecPath());
 
-		// IMGUI
-		LOG("Init ImGUI");
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-		ImGui::StyleColorsDark();
-
-		ImGui_ImplWin32_Init(hWnd);
-		// IMGUI END
-
 		LOG("Init Rendering");
 		if (!RenderingBackend.Init(hWnd))
 			return false;
@@ -165,15 +131,8 @@ namespace Funky
 		LOG("Init Renderer");
 		Renderer->InitBuffers();
 
-		#ifdef FUNKY_EDITOR
-			LOG("Create Editor Context");
-			Editor = new Editor::EditorContext();
-
-			LOG("Init Editor Context");
-			if (!Editor->Init())
-				return false;
-		#endif // FUNKY_EDITOR
-
+		auto sd = Funky::MeshUtils::CreateTerrainPlane(23, 32);
+		sd.Indices;
 
 		return true;
 	}
@@ -199,18 +158,11 @@ namespace Funky
 			{
 				struct 
 				{
-					Math::Camera* Camera = nullptr;
-					Scene* RelevantScene = nullptr;
+					Math::Camera Camera;
 
-					bool IsValid() const { return Camera != nullptr && RelevantScene != nullptr; }
+					bool IsValid() const { return true; }
 				} View;
 
-				#ifdef FUNKY_EDITOR
-					Editor->Update();
-				
-					View.Camera = &Editor->MainCamera;
-					View.RelevantScene = &MainScene;
-				#endif // FUNKY_EDITOR
 
 				RenderingBackend.BindDefaultRenderTarget();
 				RenderingBackend.ClearRenderTargetWithColor({ 0.392156899f, 0.584313750f, 0.929411829f });
@@ -224,16 +176,10 @@ namespace Funky
 				RenderingBackend.Present();
 			}
 		}
-
-		delete MainScene.SkySphere;
 	}
 
 	bool FunkyEngine::Shutdown()
 	{
-		ImGui_ImplDX11_Shutdown();
-		ImGui_ImplWin32_Shutdown();
-		ImGui::DestroyContext();
-
 		return true;
 	}
 
@@ -242,31 +188,17 @@ namespace Funky
 		switch (RenderingBackend.GetBackendAPI())
 		{
 		case Rendering::RenderingBackend::API::DX11:
-			ImGui_ImplDX11_NewFrame();
 			break;
 		case Rendering::RenderingBackend::API::OGL:
-			ImGui_ImplOpenGL3_NewFrame();
 			break;
 		}
 
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();
-
-		ImGui::ShowDemoWindow();
-
-		#ifdef FUNKY_EDITOR
-			EditorWindowManager->DrawGUI();
-		#endif // FUNKY_EDITOR
-
-		ImGui::Render();
 
 		switch (RenderingBackend.GetBackendAPI())
 		{
 		case Rendering::RenderingBackend::API::DX11:
-			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 			break;
 		case Rendering::RenderingBackend::API::OGL:
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 			break;
 		}
 	}

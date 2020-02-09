@@ -2,8 +2,7 @@
 
 #include "Math/Camera.h"
 
-#include "Rendering/Scene.h"
-#include "Rendering/RenderingBackend.h"
+#include "RenderingBackend/RenderingBackend.h"
 
 #include "Core/Assets/ITexture.h"
 #include "Core/Assets/Cubemap.h"
@@ -38,8 +37,13 @@ namespace Funky
 				ShadowsRT = RenderingBackend.CreateRenderTarget({ (u32)2048u, (u32)1024u });
 			}
 
-			void DrawSceneFromView(Math::Camera const * ViewCamera, Scene const * RenderScene)
+			// for now its ok but soon it will get complicated
+			void DrawSceneFromView([[maybe_unused]]Math::Camera const* ViewCamera)
 			{
+
+			}
+
+/*			{
 				//			PREPARE FRAME
 //				RenderingBackend.BindDefaultRenderTarget();
 //				RenderingBackend.ClearRenderTargetWithColor({ 0.392156899f, 0.584313750f, 0.929411829f });
@@ -163,6 +167,7 @@ namespace Funky
 			//			// DRAW SCENE END
 			//		}
 			//}
+			*/
 private:
 			Rendering::RenderingBackend& RenderingBackend;
 

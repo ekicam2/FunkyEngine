@@ -1,5 +1,6 @@
 #include "Macros.h"
 #include "FunkyEngine.h"
+#include "LogMacros.h"
 
 #define ENGINE
 

@@ -53,6 +53,11 @@ namespace Math
 			return *this;
 		}
 
+		bool operator==(Vector3D const & Other) const
+		{
+			return X == Other.X && Y == Other.Y && Z == Other.Z;
+		}
+
 		Vector3D RotateX(T Theta) const
 		{
 			const float CosTheta = Cos(ToRad(Theta));

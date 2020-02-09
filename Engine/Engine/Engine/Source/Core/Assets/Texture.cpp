@@ -1,4 +1,5 @@
 #include "Texture.h"
+#include "LogMacros.h"
 
 Funky::Asset::Texture* Funky::Asset::Texture::CreateFromFile(str const & pFilePath)
 {

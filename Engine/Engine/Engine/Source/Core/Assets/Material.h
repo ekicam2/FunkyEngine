@@ -9,7 +9,6 @@
 #include <fstream>
 
 #include "Macros.h"
-#include "Rendering/RenderingBackend.h"
 
 namespace Funky
 {
@@ -27,8 +26,8 @@ namespace Funky
 			FORCEINLINE bool IsValid();
 			static std::optional<std::pair<str, str>> ParseMaterial(str const& Path);
 
-			Rendering::RenderingBackend::VertexShader VS = Rendering::RenderingBackend::INVALID_INDEX;
-			Rendering::RenderingBackend::PixelShader PS = Rendering::RenderingBackend::INVALID_INDEX;
+			//Rendering::RenderingBackend::VertexShader VS = Rendering::RenderingBackend::INVALID_INDEX;
+			//Rendering::RenderingBackend::PixelShader PS = Rendering::RenderingBackend::INVALID_INDEX;
 			RenderingTechnique Technique = RenderingTechnique::DefaultLit;
 		};
 

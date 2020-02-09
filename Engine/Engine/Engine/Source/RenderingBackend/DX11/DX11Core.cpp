@@ -1,8 +1,7 @@
-#include "Rendering/DX11/DX11Core.h"
+#include "RenderingBackend/DX11/DX11Core.h"
 
 #include "LogMacros.h"
 
-#include "Rendering/DX11/DX11ImGUIFasade.h"
 #include <d3d11_1.h>
 #include "atlbase.h"
 #include "Templates.h"
@@ -21,7 +20,6 @@ namespace Funky
 		{
 			if (CreateDeviceAndSwapchain(hwnd))
 			{
-				ImGui_ImplDX11_Init(pDevice.Get(), pDeviceContext.Get());
 
 				return InitSwapchain();
 			}
@@ -47,9 +45,6 @@ namespace Funky
 			pSwapChain->ResizeBuffers(0, 0, 0,DXGI_FORMAT::DXGI_FORMAT_UNKNOWN, 0);
 			
 			InitSwapchain();
-
-			ImGui_ImplDX11_Shutdown();
-			ImGui_ImplDX11_Init(pDevice.Get(), pDeviceContext.Get());
 		}
 
 		RenderingBackend::RenderTarget DX11::CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)

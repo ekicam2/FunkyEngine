@@ -1,9 +1,7 @@
-#include "Rendering/OpenGL/OGLCore.h"
+#include "RenderingBackend/OpenGL/OGLCore.h"
 
 #include "LogMacros.h"
 #include "DebugMacros.h"
-
-#include "OGL_ImGUIFasade.h"
 
 #include "Templates.h"
 
@@ -35,8 +33,6 @@ namespace Funky
 
 			if (CreateDeviceAndSwapchain(hwnd))
 			{
-				ImGui_ImplOpenGL3_Init(FUNKY_GLSL_MIN_VERSION);
-
 				return InitSwapchain();
 			}
 

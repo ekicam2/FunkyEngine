@@ -5,15 +5,10 @@
 
 #include "Core/Assets/IAsset.h"
 
-#include "Editor/WindowManager.h"
-
 
 namespace Funky
 {
 	class AssetRegistry
-#if FUNKY_EDITOR
-		: public Editor::IWindow
-#endif
 	{
 	public:
 		using AssetID = str;
@@ -40,13 +35,6 @@ namespace Funky
 		template <typename T>
 		T* GetByName(AssetID const& Name);
 
-	#ifdef FUNKY_EDITOR
-		void DrawGUI();
-	#endif // FUNKY_EDITOR
-
-
-
-
 
 	private:
 		/* Lookup for all assets in the @BaseAssetsPath and fill @AllAssets. */
@@ -55,25 +43,6 @@ namespace Funky
 
 		static AssetDesc ParseFile(str const& Path);
 		darray<AssetDesc> AllAssets;
-
-
-#ifdef FUNKY_EDITOR
-		struct FileBrowser
-		{
-			str CurrentPath;
-			bool IsOpen = false;
-			bool ResetNeeded = true;
-
-			darray<bool> SelectedFiles;
-
-			void ResetIfNeeded(str const& NewPath);
-
-			void UpdatePath(str const& NewPath);
-
-			void DrawGUI();
-		} Browser;
-#endif // FUNKY_EDITOR
-
 	};
 
 	template <typename T>

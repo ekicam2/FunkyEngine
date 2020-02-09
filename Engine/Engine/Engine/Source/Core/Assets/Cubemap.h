@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Core/Assets/ITexture.h"
+#include "Core/Containers.h"
+
+#define SDL_MAIN_HANDLED
+#include "3rd/SDL_image.h"
 
 namespace Funky::Asset 
 {

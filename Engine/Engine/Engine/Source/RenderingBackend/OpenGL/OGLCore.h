@@ -1,16 +1,20 @@
 #pragma once
-#include "Rendering/RenderingBackend.h"
-#include "Rendering/RenderingBackendImpl.h"
+#include "RenderingBackend/RenderingBackend.h"
+#include "RenderingBackend/RenderingBackendImpl.h"
 
-#include <d3dcommon.h>
-#include <d3d11.h>
-// comptr
-#include <wrl/client.h>
-
+#include "3rd/gl3w/include/GL/gl3w.h"
 #include "Core/Containers.h"
 
+#include "Templates.h"
+
 #include "Math/Vector2.h"
-#include "DirectUtils.h"
+
+
+/*
+ *		It's not fully implemented
+ *		And it may crash, actually it will crash for sure.
+ *		If you can read this, that means you have to use DX11 implementation :C
+ */
 
 namespace Funky
 {
@@ -18,7 +22,7 @@ namespace Funky
 	{
 		class RawMesh;
 
-		struct DX11 final : public RenderingBackendImpl
+		struct OGL final : public RenderingBackendImpl
 		{
 			virtual bool Init(HWND hwnd) override;
 			virtual RenderingBackend::API GetBackendAPI() const override;
@@ -62,69 +66,83 @@ namespace Funky
 
 			friend class DX11Renderer;
 
-			struct DX11GPUMesh : GPUMesh
+			struct OGLGPUMesh : GPUMesh
 			{
-				Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer = nullptr;
-				Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer = nullptr;
+				GLuint VAO;
+				GLuint VBOs[4];
 
 				u64 IndicesCount = 0;
+
+				operator GLuint() const
+				{
+					return VAO;
+				}
 			};
 
-			struct DX11GPUTexture : GPUTexture
+			struct OGLGPUTexture : GPUTexture
 			{
-				D3D11_TEXTURE2D_DESC TextureDesc;
+				GLuint Texture;
 
-				Microsoft::WRL::ComPtr<ID3D11Texture2D>	pTexture = nullptr;
-				Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView = nullptr;
+				operator GLuint() const
+				{
+					return Texture;
+				}
 			};
 
-			struct DX11GPUVertexShader : GPUVertexShader
+			struct OGLGPUVertexShader : GPUVertexShader
 			{
-				Microsoft::WRL::ComPtr<ID3D11InputLayout>  pInputLayout = nullptr;
-				Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader = nullptr;;
+				GLuint Program;
 
-				DirectUtils::InputLayout InputLayoutDesc;
+				operator GLuint() const
+				{
+					return Program;
+				}
+
 			};
 
-			struct DX11GPUPixelShader : GPUPixelShader
+			struct OGLGPUPixelShader : GPUPixelShader
 			{
-				Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader = nullptr;
+				GLuint Shader;
+
+				operator GLuint() const
+				{
+					return Shader;
+				}
 			};
 
-			struct DX11GPUConstantBuffer : GPUConstantBuffer
+			struct OGLGPUConstantBuffer : GPUConstantBuffer
 			{
-				Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer = nullptr;
+				GLuint Shader;
+
+				operator GLuint() const
+				{
+					return Shader;
+				}
 			};
 
-			struct DX11GPURenderTarget : GPURenderTarget
+			struct OGLGPURenderTarget : GPURenderTarget
 			{
-				Microsoft::WRL::ComPtr<ID3D11Texture2D>			 pTexture = nullptr;
-				Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView = nullptr;
-				Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   pRenderTargetView = nullptr;
+				GLuint Texture;
+
+				operator GLuint() const
+				{
+					return Texture;
+				}
 			};
 
-			Microsoft::WRL::ComPtr<ID3D11Device>		pDevice = nullptr;
-			Microsoft::WRL::ComPtr<ID3D11DeviceContext> pDeviceContext = nullptr;
-			Microsoft::WRL::ComPtr<IDXGISwapChain>		pSwapChain = nullptr;
+			// pBackBuffer = nullptr;
+			// pDepthStencilBuffer = nullptr;
 
-			// Resources data
-			Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer = nullptr;
-			Microsoft::WRL::ComPtr<ID3D11Texture2D> pDepthStencilBuffer = nullptr;
+			OGLGPURenderTarget pRenderTarget;
+			OGLGPURenderTarget pDepthStencilView;
 
-			// Resource Views
-			Microsoft::WRL::ComPtr<ID3D11RenderTargetView>  pBackBufferView = nullptr;
-			Microsoft::WRL::ComPtr<ID3D11DepthStencilView>  pDepthStencilView = nullptr;
+			darray<OGLGPUConstantBuffer>	ConstantBuffers;
+			darray<OGLGPUVertexShader>		VertexShaders;
+			darray<OGLGPUPixelShader>		PixelShaders;
 
-			darray<DX11GPUConstantBuffer>	ConstantBuffers;
-			darray<DX11GPUVertexShader>	VertexShaders;
-			darray<DX11GPUPixelShader>		PixelShaders;
-
-			darray<DX11GPUTexture> Textures;
-
-			darray<DX11GPUMesh> Meshes;
-
-			darray<DX11GPURenderTarget> RenderTargets;
-
+			darray<OGLGPUTexture> Textures;
+			darray<OGLGPUMesh> Meshes;
+			darray<OGLGPURenderTarget> RenderTargets;
 		};
 	}
 }

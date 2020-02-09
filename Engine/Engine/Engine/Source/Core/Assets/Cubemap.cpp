@@ -1,4 +1,5 @@
 #include "Cubemap.h"
+#include "LogMacros.h"
 
 Funky::Asset::CubemapTexture* Funky::Asset::CubemapTexture::CreateFromFile(str (&pFilePath)[6])
 {

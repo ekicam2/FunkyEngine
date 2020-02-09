@@ -1,28 +1,49 @@
 #include "RawMesh.h"
-#include "Utils/MeshUtils.h"
 #include "Templates.h"
+#include "Utils/MeshUtils.h"
+
+Funky::Asset::RawMesh* Funky::Asset::RawMesh::CreateMeshFromRawData(darray<Vertex> const& InVertices)
+{
+	auto Ret = new RawMesh();
+	Ret->Vertices = InVertices;
+	return Ret;
+}
+
+Funky::Asset::RawMesh* Funky::Asset::RawMesh::CreateMeshFromRawData(darray<Vertex> const& InVertices, darray<u16> const& InIndices)
+{
+	auto Ret = new RawMesh();
+	Ret->Vertices = InVertices;
+	Ret->Indices = InIndices;
+
+	return Ret;
+}
 
 Funky::Asset::RawMesh::RawMesh(str const& Path)
 	: IAsset(Path, Asset::EType::Mesh)
 {
-	if (!Path.ends_with(".obj"))
+	/*if (!Path.ends_with(".obj"))
 	{
-		LOG_ERROR("Unsupported mesh file format: ", Path);
-		LOG_ERROR("Currently only .obj format is supported.");
+		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadOBJFromFile(Path.c_str());
+		Vertices = Funky::Move(VI.Vertices);
+		Indices = Funky::Move(VI.Indices);
+		
 		return;
 	}
+	else if (!Path.ends_with(".gltf"))
+	{
+		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadGLTFFromFile(Path.c_str());
+		Vertices = Funky::Move(VI.Vertices);
+		Indices = Funky::Move(VI.Indices);
 
-	auto VertsAndInds = Funky::MeshUtils::LoadOBJFromFile(Path.c_str());
+		return;
+	}*/
 
-	Vertices = Funky::Move(VertsAndInds.first);
-	Indices = Funky::Move(VertsAndInds.second);
+	LOG_ERROR("Unsupported mesh file format: ", Path);
+	LOG_ERROR("Currently only .obj and .gltf formats are supported.");
 }
 
-Funky::Asset::RawMesh::RawMesh(MeshLoad&& Load)
-	: IAsset(str("CustomMesh").append(std::to_string(RawMesh::TagCounter)), Asset::EType::Mesh)
+Funky::Asset::RawMesh::RawMesh()
+	: IAsset("dynamic asset", Asset::EType::Mesh)
 {
-	TagCounter++;
 
-	Vertices = Funky::Move(Load.first);
-	Indices = Funky::Move(Load.second);
 }
