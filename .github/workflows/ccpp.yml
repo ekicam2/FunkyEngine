@@ -13,4 +13,4 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Test Label
-      run: echo Hello world!
+      run: echo $Env:GITHUB_WORKSPACE
