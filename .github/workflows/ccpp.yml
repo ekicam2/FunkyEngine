@@ -15,12 +15,12 @@ jobs:
     - name: msvc 2019 Debug x64
       run: |
        cd “C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\”
-       .\MSBuild.exe $Env:GITHUB_WORKSPACE\Engine\Engine\Engine\Engine.vcxproj /property:Configuration=Debug /property:Platform=x64
+       .\MSBuild.exe $Env:GITHUB_WORKSPACE\Engine\Engine\Engine\Engine.vcxproj /property:Configuration=Debug /property:Platform=x64 /JMC /permissive- /GS /W4 /Zc:wchar_t /I"Source\FunkyMath" /I"Source\3rd\sdl" /I"Source\" /I"Source\3rd" /ZI /Gm- /Od /sdl /Fd"Intermediate\x64\Debug\vc142.pdb" /Zc:inline /fp:precise /D "_UNICODE" /D "UNICODE" /errorReport:prompt /WX /Zc:forScope /RTC1 /Gd /MDd /std:c++latest /FC /Fa"Intermediate\x64\Debug\" /EHsc /nologo /Fo"Intermediate\x64\Debug\" /Fp"Intermediate\x64\Debug\Engine.pch" /diagnostics:column 
     - name: msvc 2019 Debug Editor x64
       run: |
        cd “C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\”
-       .\MSBuild.exe $Env:GITHUB_WORKSPACE\Engine\Engine\Engine\Engine.vcxproj /property:Configuration="Debug Editor" /property:Platform=x64
+       .\MSBuild.exe $Env:GITHUB_WORKSPACE\Engine\Engine\Engine\Engine.vcxproj /property:Configuration="Debug Editor" /property:Platform=x64 /JMC /permissive- /GS /W4 /Zc:wchar_t /I"Source\FunkyMath" /I"Source\3rd\sdl" /I"Source\" /I"Source\3rd" /ZI /Gm- /Od /sdl /Fd"Intermediate\x64\Debug Editor\vc142.pdb" /Zc:inline /fp:precise /D "FUNKY_EDITOR" /D "_UNICODE" /D "UNICODE" /errorReport:prompt /WX /Zc:forScope /RTC1 /Gd /MDd /std:c++latest /FC /Fa"Intermediate\x64\Debug Editor\" /EHsc /nologo /Fo"Intermediate\x64\Debug Editor\" /Fp"Intermediate\x64\Debug Editor\Engine.pch" /diagnostics:column 
     - name: msvc 2019 Release x64
       run: |
        cd “C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\”
-       .\MSBuild.exe $Env:GITHUB_WORKSPACE\Engine\Engine\Engine\Engine.vcxproj /property:Configuration=Release /property:Platform=x64
+       .\MSBuild.exe $Env:GITHUB_WORKSPACE\Engine\Engine\Engine\Engine.vcxproj /property:Configuration=Release /property:Platform=x64 /permissive- /GS /GL /W3 /Gy /Zc:wchar_t /Zi /Gm- /O2 /sdl /Fd"Intermediate\x64\Release\vc142.pdb" /Zc:inline /fp:precise /D "_UNICODE" /D "UNICODE" /errorReport:prompt /WX- /Zc:forScope /Gd /Oi /MD /FC /Fa"Intermediate\x64\Release\" /EHsc /nologo /Fo"Intermediate\x64\Release\" /Fp"Intermediate\x64\Release\Engine.pch" /diagnostics:column 
