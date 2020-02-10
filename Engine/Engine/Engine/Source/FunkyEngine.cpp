@@ -129,10 +129,11 @@ namespace Funky
 		LOG("Create Renderer");
 		Renderer = new Rendering::Renderer(RenderingBackend);
 		LOG("Init Renderer");
-		Renderer->InitBuffers();
-
-		auto sd = Funky::MeshUtils::CreateTerrainPlane(23, 32);
-		sd.Indices;
+		if (!Renderer->Init())
+		{
+			LOG_ERROR("Couldn't initialize renderer!");
+			return false;
+		}
 
 		return true;
 	}
@@ -156,24 +157,7 @@ namespace Funky
 			}
 			else
 			{
-				struct 
-				{
-					Math::Camera Camera;
-
-					bool IsValid() const { return true; }
-				} View;
-
-
-				RenderingBackend.BindDefaultRenderTarget();
-				RenderingBackend.ClearRenderTargetWithColor({ 0.392156899f, 0.584313750f, 0.929411829f });
-				RenderingBackend.ClearDepthStencil(1.0f, 0u);
-				RenderingBackend.SetPrimitiveTopology(Rendering::RenderingBackend::PrimitiveTopology::Trianglelist);
-
-				if(View.IsValid())
-					//Renderer->DrawSceneFromView(View.Camera, View.RelevantScene);
-				DrawGUI();
-					
-				RenderingBackend.Present();
+				RenderScene();
 			}
 		}
 	}
@@ -183,24 +167,9 @@ namespace Funky
 		return true;
 	}
 
-	void FunkyEngine::DrawGUI()
+	void FunkyEngine::RenderScene()
 	{
-		switch (RenderingBackend.GetBackendAPI())
-		{
-		case Rendering::RenderingBackend::API::DX11:
-			break;
-		case Rendering::RenderingBackend::API::OGL:
-			break;
-		}
-
-
-		switch (RenderingBackend.GetBackendAPI())
-		{
-		case Rendering::RenderingBackend::API::DX11:
-			break;
-		case Rendering::RenderingBackend::API::OGL:
-			break;
-		}
+		Renderer->DrawScene(nullptr);
 	}
 
 	bool FunkyEngine::CreateAndShowWindow(Math::Vec2u const & windowSize)

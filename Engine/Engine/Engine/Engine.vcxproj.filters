@@ -432,6 +432,12 @@
     <ClInclude Include="Source\RenderingBackend\Internal\RenderingBackendUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\RenderingFrontend\IRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingFrontend\RenderScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Source.cpp">
@@ -510,6 +516,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\RenderingBackend\Internal\RenderingBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingFrontend\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

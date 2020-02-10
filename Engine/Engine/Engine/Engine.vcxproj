@@ -229,6 +229,7 @@
     <ClInclude Include="Source\Core\Timer.h" />
     <ClInclude Include="Source\DebugMacros.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\RenderingBackendUtils.h" />
+    <ClInclude Include="Source\RenderingFrontend\IRenderer.h" />
     <ClInclude Include="Source\RenderingFrontend\Renderer.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\DX11\DirectUtils.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\DX11\DX11Core.h" />
@@ -243,6 +244,7 @@
     <ClInclude Include="Source\Math\Camera.h" />
     <ClInclude Include="Source\RenderingFrontend\Light.h" />
     <ClInclude Include="Source\Core\Assets\Material.h" />
+    <ClInclude Include="Source\RenderingFrontend\RenderScene.h" />
     <ClInclude Include="Source\RenderingFrontend\VertexDefinition.h" />
     <ClInclude Include="Source\Utils\MeshUtils.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\OpenGL\OGLCore.h" />
@@ -279,6 +281,7 @@
     <ClCompile Include="Source\Core\Assets\Material.cpp" />
     <ClCompile Include="Source\RenderingBackend\Internal\OpenGL\OGLCore.cpp" />
     <ClCompile Include="Source\RenderingBackend\Internal\RenderingBackend.cpp" />
+    <ClCompile Include="Source\RenderingFrontend\Renderer.cpp" />
     <ClCompile Include="Source\Source.cpp" />
     <ClCompile Include="Source\Utils\Internal\MeshUtils.cpp" />
     <ClCompile Include="Source\Utils\NoiseGenerator.cpp" />

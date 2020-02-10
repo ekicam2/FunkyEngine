@@ -1,47 +1,20 @@
 #pragma once
 
-#include "Math/Camera.h"
-
-#include "RenderingBackend/RenderingBackend.h"
-
-#include "Core/Assets/ITexture.h"
-#include "Core/Assets/Cubemap.h"
-
-DEFINE_CONSTANT_BUFFER_BEGIN(BaseConstantBuffer)
-BaseConstantBuffer() : LookAt(0.0f, 0.0f, 0.0f) {}
-DirectX::XMMATRIX MVP;
-DirectX::XMMATRIX Model;
-Math::Vec3f LookAt;
-DEFINE_CONSTANT_BUFFER_END(BaseConstantBuffer)
-
-DEFINE_CONSTANT_BUFFER_BEGIN(ShadowConstantBuffer)
-ShadowConstantBuffer() {}
-DirectX::XMMATRIX View;
-DirectX::XMMATRIX Projection;
-DEFINE_CONSTANT_BUFFER_END(ShadowConstantBuffer)
+#include "RenderingFrontend/IRenderer.h"
 
 namespace Funky
 {
 	namespace Rendering
 	{
-		class Renderer
+		class Renderer : public IRenderer
 		{
 		public:
-			Renderer(Rendering::RenderingBackend& RenderingBackend) : RenderingBackend(RenderingBackend) {}
-			~Renderer() = default;
+			FUNKY_DECLARE_RENDERER_CONSTRUCTOR(Renderer)
 
-			void InitBuffers()
-			{
-				MVPBufferHandle = RenderingBackend.CreateConstantBuffer(sizeof(BaseConstantBuffer));
-				ShadowCBHandle = RenderingBackend.CreateConstantBuffer(sizeof(ShadowConstantBuffer));
-				ShadowsRT = RenderingBackend.CreateRenderTarget({ (u32)2048u, (u32)1024u });
-			}
+			virtual bool Init() override;
+			virtual void Shutdown() override;
 
-			// for now its ok but soon it will get complicated
-			void DrawSceneFromView([[maybe_unused]]Math::Camera const* ViewCamera)
-			{
-
-			}
+			virtual void DrawScene(class RenderScene* SceneToRender) override;
 
 /*			{
 				//			PREPARE FRAME
@@ -169,7 +142,24 @@ namespace Funky
 			//}
 			*/
 private:
-			Rendering::RenderingBackend& RenderingBackend;
+		};
+	}
+}
+
+
+/*
+			DEFINE_CONSTANT_BUFFER_BEGIN(BaseConstantBuffer)
+				BaseConstantBuffer() : LookAt(0.0f, 0.0f, 0.0f) {}
+			DirectX::XMMATRIX MVP;
+			DirectX::XMMATRIX Model;
+			Math::Vec3f LookAt;
+			DEFINE_CONSTANT_BUFFER_END(BaseConstantBuffer)
+
+				DEFINE_CONSTANT_BUFFER_BEGIN(ShadowConstantBuffer)
+				ShadowConstantBuffer() {}
+			DirectX::XMMATRIX View;
+			DirectX::XMMATRIX Projection;
+			DEFINE_CONSTANT_BUFFER_END(ShadowConstantBuffer)
 
 			BaseConstantBuffer MVPBuffer;
 			Rendering::RenderingBackend::ConstantBuffer MVPBufferHandle = RenderingBackend::INVALID_INDEX;
@@ -178,6 +168,7 @@ private:
 			Rendering::RenderingBackend::ConstantBuffer ShadowCBHandle = RenderingBackend::INVALID_INDEX;
 
 			Rendering::RenderingBackend::RenderTarget ShadowsRT = RenderingBackend::INVALID_INDEX;
-		};
-	}
-}
+
+
+
+*/

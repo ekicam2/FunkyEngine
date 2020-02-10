@@ -5,7 +5,7 @@
 #include "Math/Vector2.h"
 
 #include "RenderingBackend/RenderingBackend.h"
-#include "RenderingFrontend/Renderer.h"
+#include "RenderingFrontend/IRenderer.h"
 
 #include "Core/Tasks/TaskManager.h"
 #include "Core/Thread/ThreadPool.h"
@@ -29,7 +29,8 @@ namespace Funky
 		bool Init();
 		void Run();
 		bool Shutdown();
-		void DrawGUI();
+
+		void RenderScene();
 
 		AssetRegistry* GetAssetRegistry() { return AssetManager; }
 		Rendering::RenderingBackend* GetRenderingBackend() { return &RenderingBackend; }
@@ -41,7 +42,7 @@ namespace Funky
 		static Core::IO::IIOSystem* _IO;
 
 		Rendering::RenderingBackend RenderingBackend;
-		Rendering::Renderer* Renderer;
+		Rendering::IRenderer* Renderer;
 
 		Core::IO::IIOSystem* IOSystem;
 
