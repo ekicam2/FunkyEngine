@@ -5,6 +5,8 @@
 
 #include "BasicTypes.h"
 
+#include "Internal/RenderingBackendUtils.h"
+
 #ifndef WINDOWS_LEAN_AND_MEAN
 #define WINDOWS_LEAN_AND_MEAN
 #endif
@@ -25,21 +27,8 @@
  *
  */
 
-#define FK_DEFINE_RENDERINGBACKEND_TYPE(__name__, __handle__) \
-struct __name__ { 											  \
-	__name__(__handle__ NewHandle) : Handle(NewHandle) {} 	  \
-	operator __handle__() const { return Handle; }			  \
-private:													  \
-	__handle__ Handle;										  \
-};
-
 namespace Funky
 {
-	namespace Asset
-	{
-		class RawMesh; //TODO(ekicam2): we should not operate on rawmesh directly, instead use GPUMesh
-	}
-
 	namespace Rendering
 	{
 		class RenderingBackend
@@ -72,8 +61,6 @@ namespace Funky
 				TrianglestripAdj = 13
 			};
 
-			FK_DEFINE_RENDERINGBACKEND_TYPE(Mesh, u64);
-			
 			static constexpr u64 INVALID_INDEX = (u64)-1;
 			
 			FK_DEFINE_RENDERINGBACKEND_TYPE(RenderTarget, u64);
@@ -82,7 +69,7 @@ namespace Funky
 			FK_DEFINE_RENDERINGBACKEND_TYPE(ConstantBuffer, u64);
 			using ConstantBufferData = void*;
 			FK_DEFINE_RENDERINGBACKEND_TYPE(Texture, u64);
-			FK_DEFINE_RENDERINGBACKEND_TYPE(MeshProxy, u64);
+			FK_DEFINE_RENDERINGBACKEND_TYPE(Mesh, u64);
 
 			RenderingBackend(API Api);
 			bool Init(HWND hwnd);
@@ -99,8 +86,6 @@ namespace Funky
 			Texture CreateTexture2D(byte const * const Data, Math::Vec2u const & Size);
 			Texture CreateCubemap(byte const * const Data, Math::Vec2u const & Size);
 
-			MeshProxy CreateMeshProxy(Asset::RawMesh const * Mesh);
-
 			void BindRenderTarget(RenderTarget RenderTargetToBind);
 
 			void BindDefaultRenderTarget();
@@ -115,7 +100,6 @@ namespace Funky
 			void BindPixelShader(PixelShader PixelShaderToBind);
 			void BindTexture(ShaderResourceStage Stage, Texture const & Texture, u32 StartIndex = 0u);
 			void BindTexture(ShaderResourceStage Stage, RenderTarget const & Texture, u32 StartIndex = 0u);
-			void DrawMesh(MeshProxy Mesh);
 
 			void Present();
 

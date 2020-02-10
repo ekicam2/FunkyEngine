@@ -32,10 +32,6 @@ namespace Funky
 
 		Asset::IAsset* GetByName(AssetID const& Name, Asset::EType Type);
 
-		template <typename T>
-		T* GetByName(AssetID const& Name);
-
-
 	private:
 		/* Lookup for all assets in the @BaseAssetsPath and fill @AllAssets. */
 		void ParseFileTree();
@@ -44,11 +40,5 @@ namespace Funky
 		static AssetDesc ParseFile(str const& Path);
 		darray<AssetDesc> AllAssets;
 	};
-
-	template <typename T>
-	T* Funky::AssetRegistry::GetByName(AssetID const& Name)
-	{
-		return static_cast<T*>(GetByName(Name, Asset::CTypeToType<T>()));
-	}
 
 }

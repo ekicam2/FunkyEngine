@@ -23,9 +23,6 @@ namespace Funky
 		str const TypeToString(Asset::EType EnumType);
 		Asset::EType const StringToType(str const & StrType);
 
-		template <typename T>
-		inline Asset::EType CTypeToType() { return Asset::EType::Unknown; }
-
 		class IAsset
 		{
 		public:

@@ -30,8 +30,5 @@ namespace Funky
 			//Rendering::RenderingBackend::PixelShader PS = Rendering::RenderingBackend::INVALID_INDEX;
 			RenderingTechnique Technique = RenderingTechnique::DefaultLit;
 		};
-
-		template <>
-		inline Asset::EType CTypeToType<Asset::Material>() { return Asset::EType::Material; }
 	}
 }

@@ -6,8 +6,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "3rd/imgui/imgui.h"
-
 #include "Core/Assets/Material.h"
 
 #include "Templates.h"
