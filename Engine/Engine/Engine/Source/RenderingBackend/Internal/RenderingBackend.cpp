@@ -10,9 +10,15 @@ namespace Funky
 			switch (Api)
 			{
 			case API::DX11:
+				delete Impl;
 				Impl = new Funky::Rendering::DX11();
 				break;
 			}
+		}
+
+		RenderingBackend::~RenderingBackend()
+		{
+			delete Impl;
 		}
 
 		RenderingBackend::API RenderingBackend::GetBackendAPI() const { return Impl->GetBackendAPI(); }

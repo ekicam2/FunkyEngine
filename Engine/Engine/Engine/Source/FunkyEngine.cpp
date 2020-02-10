@@ -17,6 +17,8 @@
 
 #include "Utils/MeshUtils.h"
 
+#include "Core/Tasks/ITask.h"
+
 #include "SDL.h"
 
 LRESULT CALLBACK ProcessInput(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -31,19 +33,15 @@ namespace Funky
 
 	FunkyEngine::FunkyEngine()
 		: RenderingBackend(Rendering::RenderingBackend::API::DX11)
-		, ThreadPool({ {Core::Thread::Type::Rendering, (u16)1u}, {Core::Thread::Type::Worker, (u16)5u} })
-		, TaskManager(&ThreadPool)
 		, IOSystem(new Core::IO::WindowsIOSystem())
 	{
 		FunkyEngine::_Engine = this;
 		FunkyEngine::_IO = IOSystem;
 
-		AssetManager = new Funky::AssetRegistry();
 	}
 
 	FunkyEngine::~FunkyEngine()
 	{
-		delete IOSystem;
 	}
 
 	Core::IO::IIOSystem* FunkyEngine::GetIO()
@@ -92,6 +90,11 @@ namespace Funky
 
 	bool FunkyEngine::Init()
 	{
+		ThreadPool.Reset(new Core::Thread::ThreadPool({ {Core::Thread::Type::Rendering, (u16)1u}, {Core::Thread::Type::Worker, (u16)5u} }));
+		TaskManager.Reset(new Core::Task::TaskManager(ThreadPool));
+
+		AssetManager.Reset(new Funky::AssetRegistry());
+
 		constexpr unsigned uWindowWidth = 2048u;
 		constexpr unsigned uWindowHeight = 1024u;
 
@@ -127,7 +130,7 @@ namespace Funky
 			return false;
 
 		LOG("Create Renderer");
-		Renderer = new Rendering::Renderer(RenderingBackend);
+		Renderer.Reset(new Rendering::Renderer(RenderingBackend));
 		LOG("Init Renderer");
 		if (!Renderer->Init())
 		{
@@ -146,6 +149,8 @@ namespace Funky
 		Msg.message = WM_NULL;
 		while (WM_QUIT != Msg.message)
 		{
+			TaskManager->Tick();
+
 			bGotMsg = (PeekMessage(&Msg, NULL, 0U, 0U, PM_REMOVE) != 0);
 			if (bGotMsg)
 			{
@@ -169,7 +174,20 @@ namespace Funky
 
 	void FunkyEngine::RenderScene()
 	{
-		Renderer->DrawScene(nullptr);
+		class RenderTask : public Core::Task::ITask
+		{
+		public:
+			RenderTask(Rendering::IRenderer* InRenderer) : Core::Task::ITask(Core::Thread::Type::Rendering) { Renderer = InRenderer; }
+			virtual void Process() override { 
+				Renderer->DrawScene(nullptr); 
+			}
+
+			Rendering::IRenderer* Renderer;
+		};
+
+		TaskManager->EnqueueTask(new RenderTask(Renderer));
+
+		//Renderer->DrawScene(nullptr /* CurrentScene->CreateDrawScene()*/);
 	}
 
 	bool FunkyEngine::CreateAndShowWindow(Math::Vec2u const & windowSize)

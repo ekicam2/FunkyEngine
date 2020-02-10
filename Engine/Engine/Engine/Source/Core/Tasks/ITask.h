@@ -19,6 +19,7 @@ namespace Funky
 				virtual void PostProcess() {}
 
 				FORCEINLINE Thread::Type GetThreadToRunOn() const;
+				 bool CanRunOnThread(Thread::Type InThreadType) const;
 			private:
 				Thread::Type ThreadToRunOn;
 			};

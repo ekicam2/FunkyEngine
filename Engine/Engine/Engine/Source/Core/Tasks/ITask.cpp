@@ -10,3 +10,13 @@ FORCEINLINE Funky::Core::Thread::Type  Funky::Core::Task::ITask::GetThreadToRunO
 {
 	return ThreadToRunOn;
 }
+
+bool Funky::Core::Task::ITask::CanRunOnThread(Thread::Type InThreadType) const
+{
+	if (ThreadToRunOn == Thread::Type::Any) 
+		return true;
+	else if (ThreadToRunOn == InThreadType) 
+		return true;
+
+	return false;
+}

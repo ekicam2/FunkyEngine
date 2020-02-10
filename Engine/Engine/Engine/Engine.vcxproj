@@ -212,6 +212,7 @@
     <ClInclude Include="Source\Core\IIOSystem.h" />
     <ClInclude Include="Source\Core\Memory\Memory.h" />
     <ClInclude Include="Source\Core\Memory\MemoryPool.h" />
+    <ClInclude Include="Source\Core\Memory\UniquePtr.h" />
     <ClInclude Include="Source\Core\Path.h" />
     <ClInclude Include="Source\Core\Platform\Windows\FunkyWindows.h" />
     <ClInclude Include="Source\Core\Platform\Windows\WindowsConditionVariable.h" />

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BasicTypes.h"
 #include "RenderingBackend/RenderingBackend.h"
 
 #ifndef WINDOWS_LEAN_AND_MEAN

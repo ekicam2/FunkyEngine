@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Platform/Platform.h"
+#include "Core/Memory/UniquePtr.h"
 
 #include "Math/Vector2.h"
 
@@ -42,14 +43,14 @@ namespace Funky
 		static Core::IO::IIOSystem* _IO;
 
 		Rendering::RenderingBackend RenderingBackend;
-		Rendering::IRenderer* Renderer;
+		Core::Memory::UniquePtr<Rendering::IRenderer> Renderer;
 
-		Core::IO::IIOSystem* IOSystem;
+		Core::Memory::UniquePtr<Core::IO::IIOSystem> IOSystem;
 
-		Core::Task::TaskManager TaskManager;
-		Core::Thread::ThreadPool ThreadPool;
+		Core::Memory::UniquePtr<Core::Task::TaskManager> TaskManager;
+		Core::Memory::UniquePtr<Core::Thread::ThreadPool> ThreadPool;
 
-		AssetRegistry* AssetManager;
+		Core::Memory::UniquePtr<AssetRegistry> AssetManager;
 
 		HWND hWnd;
 		HINSTANCE hInstance = GetModuleHandle(NULL);

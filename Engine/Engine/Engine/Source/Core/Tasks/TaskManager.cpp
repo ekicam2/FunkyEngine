@@ -22,12 +22,21 @@ void Funky::Core::Task::TaskManager::EnqueueTask(ITask* NewTask)
 	TaskQueue.push_back(NewTask);
 }
 
-Funky::Core::Task::ITask* Funky::Core::Task::TaskManager::DequeueTask()
+Funky::Core::Task::ITask* Funky::Core::Task::TaskManager::DequeueTask(Thread::Type RequiredThreadToRunOn)
 {
 	if (TaskQueue.size() == 0u) return nullptr;
 
-	ITask* Ret = TaskQueue[0];
-	TaskQueue.erase(TaskQueue.begin());
+	ITask* Ret = nullptr;
+
+	for (u64 i = 0u; i < TaskQueue.size(); ++i)
+	{
+		if (TaskQueue[i]->CanRunOnThread(RequiredThreadToRunOn))
+		{
+			Ret = TaskQueue[i];
+			TaskQueue.erase(TaskQueue.begin() + i);
+		}
+	}
+
 	return Ret;
 }
 
@@ -51,9 +60,25 @@ Funky::Core::Task::ITask* Funky::Core::Task::TaskManager::DequeueTaskSafe()
 void Funky::Core::Task::TaskManager::Tick()
 {
 	Thread::MutexScopeGuard ScopeGuard(QueueMutex);
-	Funky::Core::Thread::IThread* Thread = ThreadPool->GetIdleThread(Funky::Core::Thread::Type::Any);
+	
+	//always try to dispatch worker job first	
+	Funky::Core::Thread::IThread* Thread = ThreadPool->GetIdleThread(Funky::Core::Thread::Type::Worker);
 	if (Thread != nullptr)
 	{
-		Thread->AssignTask(DequeueTask());
+		ITask* Task = DequeueTask(Thread->GetType());
+		if (Task != nullptr)
+		{
+			Thread->AssignTask(Task);
+		}
+	}
+
+	Thread = ThreadPool->GetIdleThread(Funky::Core::Thread::Type::Rendering);
+	if (Thread != nullptr)
+	{
+		ITask* Task = DequeueTask(Thread->GetType());
+		if (Task != nullptr)
+		{
+			Thread->AssignTask(Task);
+		}
 	}
 }

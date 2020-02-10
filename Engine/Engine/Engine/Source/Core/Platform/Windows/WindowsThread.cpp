@@ -8,6 +8,15 @@ Funky::Core::Thread::IThread* Funky::Core::Thread::IThread::CreateThread(str con
 	WindowsThread* NewThread = new Funky::Core::Thread::WindowsThread(Name, ThreadType);
 	HANDLE Handle = ::CreateThread(NULL, 0, WinThreadFunc, NewThread, 0, NULL);
 	NewThread->SetHandle(Handle);
+	switch (ThreadType)
+	{
+	case Type::Worker:
+		SetThreadDescription(NewThread->GetHandle(), L"WorkerThread");
+		break;
+	case Type::Rendering:
+		SetThreadDescription(NewThread->GetHandle(), L"RenderingThread");
+		break;
+	}
 	return NewThread;
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Memory/UniquePtr.h"
+
 #include "Math/Vector3.h"
 #include "Math/Vector2.h"
 
@@ -72,6 +74,8 @@ namespace Funky
 			FK_DEFINE_RENDERINGBACKEND_TYPE(Mesh, u64);
 
 			RenderingBackend(API Api);
+			~RenderingBackend();
+
 			bool Init(HWND hwnd);
 			void OnViewportResized(Math::Vec2u const & NewSize);
 

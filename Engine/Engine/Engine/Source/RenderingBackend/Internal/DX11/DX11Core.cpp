@@ -379,7 +379,7 @@ namespace Funky
 
 		void DX11::Present()
 		{
-			pSwapChain->Present(1, 0);
+			pSwapChain->Present(0, 0);
 		}
 
 

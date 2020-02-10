@@ -4,6 +4,7 @@
 #include "BasicTypes.h"
 
 #include "Core/Containers.h"
+#include "Core/Thread/IThread.h"
 
 namespace Funky
 {
@@ -28,7 +29,7 @@ namespace Funky
 				/* WARNING!! wait free function! */
 				void EnqueueTask(ITask* NewTask);
 				/* WARNING!! wait free function! */
-				ITask* DequeueTask();
+				ITask* DequeueTask(Thread::Type RequiredThreadToRunOn);
 				
 				/* Mutex implementation */
 				void EnqueueTaskSafe(ITask* NewTask);
