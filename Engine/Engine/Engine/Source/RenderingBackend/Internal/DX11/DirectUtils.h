@@ -4,6 +4,8 @@
 
 #include "DebugMacros.h"
 
+#include "RenderingBackend/RenderingBackend.h"
+
 #include <d3dcommon.h>
 #include <d3d11.h>
 
@@ -24,9 +26,39 @@ namespace Funky
 			case D3D_FEATURE_LEVEL_11_1: return TEXT("D3D_FEATURE_LEVEL_11_1");
 			case D3D_FEATURE_LEVEL_12_0: return TEXT("D3D_FEATURE_LEVEL_12_0");
 			case D3D_FEATURE_LEVEL_12_1: return TEXT("D3D_FEATURE_LEVEL_12_1");
-			default: DEATH_PATH();
+			default: DEAD_PATH();
 			}
 			return TEXT("unknown");
+		}
+
+		FORCEINLINE ::D3D11_BIND_FLAG BufferToDXType(Rendering::RBuffer::Type BufferType)
+		{
+			using namespace Rendering;
+
+			switch (BufferType)
+			{
+			case RBuffer::Type::Vertex:  return D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
+			case RBuffer::Type::Index:   return D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER;
+			case RBuffer::Type::Uniform: return D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER;
+			case RBuffer::Type::None:    DEAD_PATH(); break;
+			}
+
+			return D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER;
+		}
+
+		FORCEINLINE D3D11_USAGE BufferToDXUsage(Rendering::RBuffer::UsageType BufferUsage)
+		{
+			using namespace Rendering;
+
+			switch (BufferUsage)
+			{
+			case RBuffer::UsageType::Default:  return D3D11_USAGE::D3D11_USAGE_DEFAULT;
+			case RBuffer::UsageType::Static:   return D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
+			case RBuffer::UsageType::Dynamic:  return D3D11_USAGE::D3D11_USAGE_DYNAMIC;
+			case RBuffer::UsageType::Staging:  return D3D11_USAGE::D3D11_USAGE_STAGING;
+			}
+
+			return D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
 		}
 
 		// atm it's enough
@@ -69,7 +101,7 @@ namespace Funky
 			//	};
 			//	break;
 			default:
-				DEATH_PATH();
+				DEAD_PATH();
 				break;
 			}
 		}

@@ -13,7 +13,7 @@ namespace Funky
 				UniquePtr(PtrType* NewObject = nullptr);
 				~UniquePtr();
 				
-				UniquePtr(UniquePtr&&) = delete;
+				UniquePtr(UniquePtr&& Other);
 				UniquePtr(UniquePtr const&) = delete;
 				UniquePtr& operator=(UniquePtr const&) = delete;
 				UniquePtr& operator=(UniquePtr&&) = delete;
@@ -21,6 +21,7 @@ namespace Funky
 				void Reset(PtrType* NewObject = nullptr);
 				PtrType* const Get() const;
 				operator PtrType* ();
+				operator PtrType* () const;
 				PtrType* operator->();
 
 			protected:
@@ -37,6 +38,13 @@ namespace Funky
 			}
 
 			template <typename PtrType, bool ThreadSafe /*= false*/>
+			Funky::Core::Memory::UniquePtr<PtrType, ThreadSafe>::UniquePtr(UniquePtr&& Other)
+				: Object(Other.Object)
+			{
+				Other.Object = nullptr;
+			}
+
+			template <typename PtrType, bool ThreadSafe /*= false*/>
 			Funky::Core::Memory::UniquePtr<PtrType, ThreadSafe>::~UniquePtr()
 			{
 				Free();
@@ -44,6 +52,12 @@ namespace Funky
 
 			template <typename PtrType, bool ThreadSafe /*= false*/>
 			Funky::Core::Memory::UniquePtr<PtrType, ThreadSafe>::operator PtrType* ()
+			{
+				return Get();
+			}
+
+			template <typename PtrType, bool ThreadSafe /*= false*/>
+			Funky::Core::Memory::UniquePtr<PtrType, ThreadSafe>::operator PtrType* () const
 			{
 				return Get();
 			}

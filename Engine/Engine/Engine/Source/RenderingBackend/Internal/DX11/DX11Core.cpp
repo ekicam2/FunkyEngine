@@ -6,8 +6,10 @@
 #include "atlbase.h"
 #include "Templates.h"
 
-#define FUNKY_SAFE_RELEASE(x) if(x) x->Release();
+#include "RenderingBackend/Internal/DX11/DirectUtils.h"
+#include "RenderingBackend/Internal/DX11/DX11RenderingResources.h"
 
+#define FUNKY_SAFE_RELEASE(x) if(x) x->Release();
 
 namespace Funky
 {
@@ -129,31 +131,27 @@ namespace Funky
 			return RenderingBackend::INVALID_INDEX;
 		}
 
-		RenderingBackend::ConstantBuffer DX11::CreateConstantBuffer(size SizeOfConstantBuffer)
+		Funky::Rendering::RBuffer* DX11::CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
 		{
+			// If buffer will be static it has to be initialized with correct data!
+			CHECK(Usage == RBuffer::UsageType::Static && Data != nullptr);
+
 			D3D11_BUFFER_DESC ConstantBufferDesc;
 			ZeroMemory(&ConstantBufferDesc, sizeof(D3D11_BUFFER_DESC));
-			ConstantBufferDesc.ByteWidth = (u32)SizeOfConstantBuffer;
-			ConstantBufferDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER;
-			ConstantBufferDesc.Usage = D3D11_USAGE::D3D11_USAGE_DYNAMIC;
+			ConstantBufferDesc.ByteWidth = (u32)SizeOfBuffer;
+			ConstantBufferDesc.BindFlags = DirectUtils::BufferToDXType(BufferType);
+			ConstantBufferDesc.Usage = DirectUtils::BufferToDXUsage(Usage);
 			ConstantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE;
-
-			ConstantBuffers.push_back(
-				[SizeOfConstantBuffer]
-				{
-					DX11GPUConstantBuffer Returner;
-					Returner.SizeInBytes = SizeOfConstantBuffer;
-					Returner.pConstantBuffer = nullptr;
-					return Returner;
-				}()
-			);
 			
-			const u64 Index = ConstantBuffers.size() - 1;
+			D3D11_SUBRESOURCE_DATA BufferInitData;
+			ZeroMemory(&BufferInitData, sizeof(D3D11_SUBRESOURCE_DATA));
+			BufferInitData.pSysMem = Data;
 
-			HRESULT hr = pDevice->CreateBuffer(&ConstantBufferDesc, nullptr, ConstantBuffers[Index].pConstantBuffer.GetAddressOf());
+			DX11Buffer* Ret = new DX11Buffer(BufferType, Usage);
+			HRESULT hr = pDevice->CreateBuffer(&ConstantBufferDesc, Data ? &BufferInitData : nullptr, Ret->pBuffer.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create constant buffer");
 
-			return Index;
+			return Ret;
 		}
 
 		RenderingBackend::Texture DX11::CreateTexture2D(byte const * const Data, Math::Vec2u const & Size)
@@ -243,53 +241,6 @@ namespace Funky
 			return Index;
 		}
 
-		//Funky::Rendering::RenderingBackend::MeshProxy DX11::CreateMeshProxy(Asset::StaticMesh const * Mesh)
-		//{
-		//	DX11::DX11GPUMesh Returner;
-
-		//	D3D11_BUFFER_DESC VertexBufferDesc;
-		//	VertexBufferDesc.ByteWidth = (u32)(Mesh->GetVerticesCount() * sizeof(Vertex));
-		//	VertexBufferDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
-		//	VertexBufferDesc.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
-		//	VertexBufferDesc.CPUAccessFlags = 0; // D3D11_CPU_ACCESS_FLAG 
-		//	VertexBufferDesc.MiscFlags = 0; // D3D11_RESOURCE_MISC_FLAG 
-		//	VertexBufferDesc.StructureByteStride = 0;
-
-		//	D3D11_SUBRESOURCE_DATA VertexData;
-		//	ZeroMemory(&VertexData, sizeof(D3D11_SUBRESOURCE_DATA));
-		//	VertexData.pSysMem = Mesh->GetVertices().data();
-		//	ASSERT(VertexData.SysMemPitch == 0, L"memory was not ZEROED");
-
-		//	HRESULT hr1 = pDevice->CreateBuffer(&VertexBufferDesc, &VertexData, Returner.pVertexBuffer.GetAddressOf());
-		//	ASSERT(SUCCEEDED(hr1), L" Vertex buffer was not created properly!");
-
-		//	D3D11_BUFFER_DESC IndexBufferDesc;
-		//	IndexBufferDesc.ByteWidth = (u32)(Mesh->GetIndices().size() * sizeof(u16));
-		//	IndexBufferDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
-		//		IndexBufferDesc.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE,
-		//		IndexBufferDesc.CPUAccessFlags = 0; // D3D11_CPU_ACCESS_FLAG 
-		//	IndexBufferDesc.MiscFlags = 0; // D3D11_RESOURCE_MISC_FLAG 
-		//	IndexBufferDesc.StructureByteStride = 0;
-
-		//	D3D11_SUBRESOURCE_DATA IndexData;
-		//	ZeroMemory(&IndexData, sizeof(D3D11_SUBRESOURCE_DATA));
-		//	IndexData.pSysMem = Mesh->GetIndices().data();
-		//	ASSERT(IndexData.SysMemPitch == 0, L"memory was not ZEROED");
-
-		//	HRESULT hr2 = pDevice->CreateBuffer(&IndexBufferDesc, &IndexData, Returner.pIndexBuffer.GetAddressOf());
-		//	ASSERT(SUCCEEDED(hr2), TEXT(" Index buffer was not created properly!"));
-
-		//	if (hr1 == S_OK && hr2 == S_OK)
-		//	{
-		//		Returner.IndicesCount = Mesh->GetIndicesCount();
-
-		//		Meshes.push_back(Move(Returner));
-		//		return Meshes.size() - 1;
-		//	}
-
-		//	return RenderingBackend::INVALID_INDEX;
-		//}
-
 		void DX11::BindRenderTarget(RenderingBackend::RenderTarget RenderTargetToBind)
 		{
 			//TODO(ekicam2): it's hacky to unbind it all the time, render target should cache is somehow
@@ -335,26 +286,40 @@ namespace Funky
 			pDeviceContext->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)NewTopology);
 		}
 
-		void DX11::UpdateConstantBuffer(RenderingBackend::ConstantBuffer ConstantBuffer, RenderingBackend::ConstantBufferData Data)
+		void DX11::UpdateBuffer(RBuffer* ConstantBuffer, RBuffer::Data_t Data)
 		{
 			D3D11_MAPPED_SUBRESOURCE MappedData;
 			ZeroMemory(&MappedData, sizeof(D3D11_MAPPED_SUBRESOURCE));
-
-			pDeviceContext->Map(ConstantBuffers[ConstantBuffer].pConstantBuffer.Get(), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedData);
-			memcpy(MappedData.pData, Data, ConstantBuffers[ConstantBuffer].SizeInBytes);
-			pDeviceContext->Unmap(ConstantBuffers[ConstantBuffer].pConstantBuffer.Get(), 0);
+			pDeviceContext->Map(static_cast<DX11Buffer*>(ConstantBuffer)->pBuffer.Get(), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedData);
+			memcpy(MappedData.pData, Data, static_cast<DX11Buffer*>(ConstantBuffer)->SizeInBytes);
+			pDeviceContext->Unmap(static_cast<DX11Buffer*>(ConstantBuffer)->pBuffer.Get(), 0);
 		}
 
-		void DX11::BindConstantBuffer(RenderingBackend::ShaderResourceStage Stage, Rendering::RenderingBackend::ConstantBuffer const & Buffers, u32 StartIndex)
+		void DX11::BindBuffer(RenderingBackend::ShaderResourceStage Stage, RBuffer* const Buffer, u32 StartIndex)
 		{
-			switch (Stage)
+			DX11Buffer* DXBuffer = static_cast<DX11Buffer*>(Buffer);
+
+			u32 s = 0, g = 0;
+
+			if (Buffer->GetType() == RBuffer::Type::Vertex)
 			{
-			case RenderingBackend::ShaderResourceStage::Fragment:
-				pDeviceContext->PSSetConstantBuffers(StartIndex, 1u, (ID3D11Buffer * const *)ConstantBuffers[Buffers].pConstantBuffer.GetAddressOf());
-				break;
-			case RenderingBackend::ShaderResourceStage::Vertex:
-				pDeviceContext->VSSetConstantBuffers(StartIndex, 1u, (ID3D11Buffer * const *)ConstantBuffers[Buffers].pConstantBuffer.GetAddressOf());
-				break;
+				pDeviceContext->IASetVertexBuffers(0u, 1u, DXBuffer->pBuffer.GetAddressOf(), &s, &g);
+			}
+			if (Buffer->GetType() == RBuffer::Type::Index)
+			{
+				pDeviceContext->IASetIndexBuffer(DXBuffer->pBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
+			}
+			else
+			{
+				switch (Stage)
+				{
+				case RenderingBackend::ShaderResourceStage::Fragment:
+					pDeviceContext->PSSetConstantBuffers(StartIndex, 1u, (ID3D11Buffer * const *)static_cast<DX11Buffer*>(Buffer)->pBuffer.GetAddressOf());
+					break;
+				case RenderingBackend::ShaderResourceStage::Vertex:
+					pDeviceContext->VSSetConstantBuffers(StartIndex, 1u, (ID3D11Buffer * const *)static_cast<DX11Buffer*>(Buffer)->pBuffer.GetAddressOf());
+					break;
+				}
 			}
 		}
 

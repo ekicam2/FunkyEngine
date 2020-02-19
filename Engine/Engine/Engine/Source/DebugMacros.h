@@ -99,7 +99,7 @@ namespace
 #define CHECK_ONCE(condition) if(!(condition) && OnceOnly([]{})) { if(ShowAssertionBox(MACRO_TO_STRING(condition), MACRO_TO_STRING(__FILE__), __LINE__)) BREAK(); }
 #define CHECK(condition) if(!(condition)) { if(ShowAssertionBox(MACRO_TO_STRING(condition), MACRO_TO_STRING(__FILE__), __LINE__)) BREAK(); }
 
-#define DEATH_PATH(...) ASSERT(false, TEXT("death path reached"))
+#define DEAD_PATH(...) ASSERT(false, TEXT("death path reached"))
 
 #define DEF_DEBUG_SCOPE_TIMER(TimerName) ScopeTimer<Timer::EResolution::Mills> CONCAT(ScopeTimer, __LINE__)(TimerName)
 #define DEF_DEBUG_SCOPE_TIMER_MICRO(TimerName) ScopeTimer<Timer::EResolution::Micro> CONCAT(ScopeTimer, __LINE__)(TimerName)
@@ -107,7 +107,7 @@ namespace
 
 #else
 
-#define DEATH_PATH(...) _assume(0)
+#define DEAD_PATH(...) _assume(0)
 #define ASSERT_ONCE(...)
 #define ASSERT(...)
 #define CHECK_ONCE(...) 

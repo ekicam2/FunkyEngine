@@ -5,6 +5,8 @@
 
 #include "Core/Thread/ThreadPool.h"
 
+#include "LogMacros.h"
+
 Funky::Core::Task::TaskManager::TaskManager(Thread::ThreadPool* _ThreadPool)
 	: ThreadPool(_ThreadPool)
 	, QueueMutex(Funky::Core::Thread::IMutex::Create())
@@ -61,6 +63,8 @@ void Funky::Core::Task::TaskManager::Tick()
 {
 	Thread::MutexScopeGuard ScopeGuard(QueueMutex);
 	
+	LOG("tasks ", TaskQueue.size());
+
 	//always try to dispatch worker job first	
 	Funky::Core::Thread::IThread* Thread = ThreadPool->GetIdleThread(Funky::Core::Thread::Type::Worker);
 	if (Thread != nullptr)

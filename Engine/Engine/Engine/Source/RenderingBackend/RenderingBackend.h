@@ -14,7 +14,7 @@
 #endif
 #include <windows.h>
 
-#include <stdint.h>
+#include "RenderingFrontend/IRenderingResource.h"
 
 /* 
  *	Constant buffer declaration:
@@ -68,10 +68,9 @@ namespace Funky
 			FK_DEFINE_RENDERINGBACKEND_TYPE(RenderTarget, u64);
 			FK_DEFINE_RENDERINGBACKEND_TYPE(PixelShader, u64);
 			FK_DEFINE_RENDERINGBACKEND_TYPE(VertexShader, u64);
-			FK_DEFINE_RENDERINGBACKEND_TYPE(ConstantBuffer, u64);
-			using ConstantBufferData = void*;
+
 			FK_DEFINE_RENDERINGBACKEND_TYPE(Texture, u64);
-			FK_DEFINE_RENDERINGBACKEND_TYPE(Mesh, u64);
+			FK_DEFINE_RENDERINGBACKEND_TYPE(StaticMesh, u64);
 
 			RenderingBackend(API Api);
 			~RenderingBackend();
@@ -85,7 +84,9 @@ namespace Funky
 
 			VertexShader CreateVertexShader(byte* VertexShaderData, u64 DataSize);
 			PixelShader CreatePixelShader(byte* PixelShaderData, u64 DataSize);
-			ConstantBuffer CreateConstantBuffer(size SizeOfConstantBuffer, ConstantBufferData InitData = nullptr);
+
+			RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data = nullptr);
+
 
 			Texture CreateTexture2D(byte const * const Data, Math::Vec2u const & Size);
 			Texture CreateCubemap(byte const * const Data, Math::Vec2u const & Size);
@@ -97,8 +98,8 @@ namespace Funky
 			void ClearDepthStencil(float Depth, float Stencil);
 			void SetPrimitiveTopology(PrimitiveTopology NewTopology);
 
-			void UpdateConstantBuffer(RenderingBackend::ConstantBuffer ConstantBuffer, RenderingBackend::ConstantBufferData Data);
-			void BindConstantBuffer(ShaderResourceStage Stage, ConstantBuffer const & Buffers, u32 StartIndex = 0u);
+			void UpdateConstantBuffer(RBuffer* const Buffer, RBuffer::Data_t Data);
+			void BindConstantBuffer(ShaderResourceStage Stage, RBuffer* const Buffer, u32 StartIndex = 0u);
 
 			void BindVertexShader(VertexShader VertexShaderToBind);
 			void BindPixelShader(PixelShader PixelShaderToBind);

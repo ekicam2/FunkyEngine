@@ -120,9 +120,26 @@ int main()
 	return 0;
 }
 #elif defined(ENGINE)
-int main()
+int main(i32 argc, char** argv)
 {
 	INIT_LOG();
+
+	LOG("Begin cvars");
+	for (i32 i = 0; i < argc; ++i)
+	{
+		std::string ar = argv[i];
+		LOG(i, ": ", ar);
+	}
+	LOG("End cvars");
+
+	const i32 len = 1024;
+	charx pBuf[len];
+	i32 bytes = GetModuleFileName(NULL, pBuf, len);
+	if (bytes > 0)
+	{
+		LOG(pBuf);
+	}
+
 	Funky::FunkyEngine Engine;
 	if (Engine.Init())
 		Engine.Run();

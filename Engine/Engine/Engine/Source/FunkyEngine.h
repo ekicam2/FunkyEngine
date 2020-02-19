@@ -15,6 +15,8 @@
 
 #include "Core/IIOSystem.h"
 
+#include "UserFramework/SceneManager.h"
+
 namespace Funky
 {
 	class FunkyEngine
@@ -51,6 +53,8 @@ namespace Funky
 		Core::Memory::UniquePtr<Core::Thread::ThreadPool> ThreadPool;
 
 		Core::Memory::UniquePtr<AssetRegistry> AssetManager;
+
+		Core::Memory::UniquePtr<SceneManager> MainSceneManager;
 
 		HWND hWnd;
 		HINSTANCE hInstance = GetModuleHandle(NULL);

@@ -10,16 +10,11 @@
 #include "Core/Containers.h"
 #include "Core/Assets/IAsset.h"
 
+#include "RenderingFrontend/IRenderingResource.h"
 #include "RenderingFrontend/VertexDefinition.h"
 
 namespace Funky
 {
-	namespace Rendering
-	{
-		class RenderingBackendImpl;
-		class Renderer;
-	}
-
 	namespace Asset
 	{
 		class StaticMesh : public IAsset
@@ -56,6 +51,8 @@ namespace Funky
 			StaticMesh();
 			darray<Vertex> Vertices;
 			darray<u16> Indices;
+
+			Rendering::RStaticMesh RHandle;
 		};
 	}
 }

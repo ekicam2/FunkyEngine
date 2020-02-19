@@ -38,6 +38,11 @@ namespace Funky
 			return Impl->CreatePixelShader(PixelShaderData, DataSize);
 		}
 
+		Funky::Rendering::RBuffer* RenderingBackend::CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
+		{
+			return Impl->CreateBuffer(SizeOfBuffer, BufferType, Usage, Data);
+		}
+
 		bool RenderingBackend::Init(HWND hwnd) { return Impl->Init(hwnd); }
 
 		void RenderingBackend::OnViewportResized(Math::Vec2u const & NewSize)
@@ -50,10 +55,10 @@ namespace Funky
 			Impl->BindDefaultRenderTarget();
 		}
 
-		RenderingBackend::ConstantBuffer RenderingBackend::CreateConstantBuffer(size SizeOfConstantBuffer, [[maybe_unused]]ConstantBufferData InitData)
-		{
-			return Impl->CreateConstantBuffer(SizeOfConstantBuffer);
-		}
+		//RenderingBackend::Buffer RenderingBackend::CreateConstantBuffer(size SizeOfConstantBuffer, [[maybe_unused]]ConstantBufferData InitData)
+		//{
+		//	return Impl->CreateConstantBuffer(SizeOfConstantBuffer);
+		//}
 
 		RenderingBackend::Texture RenderingBackend::CreateTexture2D(byte const * const Data, Math::Vec2u const & Size)
 		{
@@ -86,14 +91,15 @@ namespace Funky
 			Impl->SetPrimitiveTopology(NewTopology);
 		}
 
-		void RenderingBackend::UpdateConstantBuffer(RenderingBackend::ConstantBuffer ConstantBuffer, RenderingBackend::ConstantBufferData Data)
+		void RenderingBackend::UpdateConstantBuffer(RBuffer* const Buffer, RBuffer::Data_t Data)
 		{
-			Impl->UpdateConstantBuffer(ConstantBuffer, Data);
+			Impl->UpdateBuffer(Buffer, Data);
 		}
 
-		void RenderingBackend::BindConstantBuffer(ShaderResourceStage Stage, RenderingBackend::ConstantBuffer const & Buffers, u32 StartIndex)
+
+		void RenderingBackend::BindConstantBuffer(ShaderResourceStage Stage, RBuffer* const Buffer, u32 StartIndex /*= 0u*/)
 		{
-			Impl->BindConstantBuffer(Stage, Buffers, StartIndex);
+			Impl->BindBuffer(Stage, Buffer, StartIndex);
 		}
 
 		void RenderingBackend::BindVertexShader(VertexShader VertexShaderToBind)

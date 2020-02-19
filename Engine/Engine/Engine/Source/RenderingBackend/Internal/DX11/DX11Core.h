@@ -28,7 +28,8 @@ namespace Funky
 
 			virtual RenderingBackend::VertexShader CreateVertexShader(byte* VertexShaderData, u64 DataSize) override;
 			virtual RenderingBackend::PixelShader CreatePixelShader(byte* PixelShaderData, u64 DataSize) override;
-			virtual RenderingBackend::ConstantBuffer CreateConstantBuffer(size SizeOfConstantBuffer) override;
+
+			virtual Rendering::RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data = nullptr) override;
 
 			virtual RenderingBackend::Texture CreateTexture2D(byte const * const Data, Math::Vec2u const & Size) override;
 			virtual RenderingBackend::Texture CreateCubemap(byte const * const Data, Math::Vec2u const & Size) override;
@@ -39,8 +40,8 @@ namespace Funky
 			virtual void ClearDepthStencil(float Depth, float Stencil) override;
 			virtual void SetPrimitiveTopology(RenderingBackend::PrimitiveTopology NewTopology) override;
 
-			virtual void UpdateConstantBuffer(RenderingBackend::ConstantBuffer ConstantBuffer, RenderingBackend::ConstantBufferData Data) override;
-			virtual void BindConstantBuffer(RenderingBackend::ShaderResourceStage Stage, RenderingBackend::ConstantBuffer const & Buffers, u32 StartIndex) override;
+			virtual void UpdateBuffer(RBuffer* ConstantBuffer, RBuffer::Data_t Data) override;
+			virtual void BindBuffer(RenderingBackend::ShaderResourceStage Stage, RBuffer* Buffer, u32 StartIndex) override;
 
 			virtual void BindVertexShader(RenderingBackend::VertexShader VertexShaderToBind) override;
 			virtual void BindPixelShader(RenderingBackend::PixelShader PixelShaderToBind) override;
@@ -59,15 +60,7 @@ namespace Funky
 
 			friend class DX11Renderer;
 
-			struct DX11GPUMesh : GPUMesh
-			{
-				Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer = nullptr;
-				Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer = nullptr;
-
-				u64 IndicesCount = 0;
-			};
-
-			struct DX11GPUTexture : GPUTexture
+			struct DX11GPUTexture
 			{
 				D3D11_TEXTURE2D_DESC TextureDesc;
 
@@ -75,7 +68,7 @@ namespace Funky
 				Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView = nullptr;
 			};
 
-			struct DX11GPUVertexShader : GPUVertexShader
+			struct DX11GPUVertexShader
 			{
 				Microsoft::WRL::ComPtr<ID3D11InputLayout>  pInputLayout = nullptr;
 				Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader = nullptr;;
@@ -83,17 +76,13 @@ namespace Funky
 				DirectUtils::InputLayout InputLayoutDesc;
 			};
 
-			struct DX11GPUPixelShader : GPUPixelShader
+			struct DX11GPUPixelShader
 			{
 				Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader = nullptr;
 			};
 
-			struct DX11GPUConstantBuffer : GPUConstantBuffer
-			{
-				Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer = nullptr;
-			};
 
-			struct DX11GPURenderTarget : GPURenderTarget
+			struct DX11GPURenderTarget
 			{
 				Microsoft::WRL::ComPtr<ID3D11Texture2D>			 pTexture = nullptr;
 				Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView = nullptr;
@@ -112,13 +101,10 @@ namespace Funky
 			Microsoft::WRL::ComPtr<ID3D11RenderTargetView>  pBackBufferView = nullptr;
 			Microsoft::WRL::ComPtr<ID3D11DepthStencilView>  pDepthStencilView = nullptr;
 
-			darray<DX11GPUConstantBuffer>	ConstantBuffers;
 			darray<DX11GPUVertexShader>	VertexShaders;
 			darray<DX11GPUPixelShader>		PixelShaders;
 
 			darray<DX11GPUTexture> Textures;
-
-			darray<DX11GPUMesh> Meshes;
 
 			darray<DX11GPURenderTarget> RenderTargets;
 

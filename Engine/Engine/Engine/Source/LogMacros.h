@@ -135,7 +135,19 @@ namespace
 	}
 
 	template<>
+	void CONSOLELOG<char*>(char* msg)
+	{
+		std::clog << msg;
+	}
+
+	template<>
 	void CONSOLELOG<wchar_t const*>(wchar_t const* msg)
+	{
+		std::wclog << msg;
+	}
+
+	template<>
+	void CONSOLELOG<wchar_t*>(wchar_t* msg)
 	{
 		std::wclog << msg;
 	}

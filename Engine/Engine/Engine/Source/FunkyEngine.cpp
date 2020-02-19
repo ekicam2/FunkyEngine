@@ -138,6 +138,9 @@ namespace Funky
 			return false;
 		}
 
+		LOG("Initializing SceneManager");
+		MainSceneManager.Reset(new SceneManager());
+
 		return true;
 	}
 
