@@ -20,9 +20,10 @@ namespace Funky
 			virtual bool Init(RenderingBackend::RenderingBackendInitDesc* InitDesc) = 0;
 			virtual void OnViewportResized(Math::Vec2u const & NewSize) = 0;
 
-			virtual RRenderTarget* CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/) = 0;
+			virtual RRenderTarget* CreateRenderTarget(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/) = 0;
+			virtual RDepthStencil* CreateDepthStencil(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/) = 0;
 
-			virtual Rendering::RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data = nullptr) = 0;
+			virtual RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data = nullptr) = 0;
 
 			virtual RShader* CreateVertexShader(RenderingBackend::ShaderInputDesc* ShaderDesc) = 0;
 			virtual RShader* CreatePixelShader(RenderingBackend::ShaderInputDesc* ShaderDesc) = 0;

@@ -22,7 +22,12 @@ namespace Funky
 			return Impl->CreateRenderTarget(Size);
 		}
 
-		Funky::Rendering::RShader* RenderingBackend::CreateVertexShader(ShaderInputDesc* ShaderDesc)
+		RDepthStencil* RenderingBackend::CreateDepthStencil(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/)
+		{
+			return Impl->CreateDepthStencil(Size);
+		}
+
+		RShader* RenderingBackend::CreateVertexShader(ShaderInputDesc* ShaderDesc)
 {
 			return Impl->CreateVertexShader(ShaderDesc);
 		}
@@ -32,7 +37,7 @@ namespace Funky
 			return Impl->CreatePixelShader(ShaderDesc);
 		}
 
-		Funky::Rendering::RBuffer* RenderingBackend::CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
+		RBuffer* RenderingBackend::CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
 		{
 			return Impl->CreateBuffer(SizeOfBuffer, BufferType, Usage, Data);
 		}

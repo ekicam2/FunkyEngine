@@ -92,6 +92,42 @@ namespace Funky
 			return RT;
 		}
 
+		RDepthStencil* DX11::CreateDepthStencil(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/)
+		{
+			DX11DepthStencil* DS = ResourceManager->RegisterResource<DX11DepthStencil>();
+
+			 //D3D11_DEPTH_STENCIL_DESC DepthStencilDesc;
+			 //ZeroMemory(&DepthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+			 //DepthStencilDesc.DepthEnable = TRUE;
+			 //DepthStencilDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS;
+
+			D3D11_TEXTURE2D_DESC DepthStencilTextureDesc;
+			ZeroMemory(&DepthStencilTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+			DepthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			DepthStencilTextureDesc.Height = Size.X;
+			DepthStencilTextureDesc.Width = Size.Y;
+			DepthStencilTextureDesc.ArraySize = 1;
+			DepthStencilTextureDesc.MipLevels = 1;
+			DepthStencilTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
+			DepthStencilTextureDesc.SampleDesc.Count = 1;
+			
+			HRESULT hr = pDevice->CreateTexture2D(&DepthStencilTextureDesc, nullptr, DS->pTexture.GetAddressOf());
+			if (!SUCCEEDED(hr))
+			{
+				LOG_ERROR(TEXT("Couldn't create depth stencil buffer"));
+				return false;
+			}
+			
+			D3D11_DEPTH_STENCIL_VIEW_DESC DepthViewDesc;
+			ZeroMemory(&DepthViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+			DepthViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			DepthViewDesc.ViewDimension = D3D11_DSV_DIMENSION::D3D11_DSV_DIMENSION_TEXTURE2D;
+			
+			pDevice->CreateDepthStencilView(DS->pTexture.Get(), &DepthViewDesc, DS->pDepthStencilView.GetAddressOf());
+
+			return DS;
+		}
+
 		RShader* DX11::CreateVertexShader(RenderingBackend::ShaderInputDesc* ShaderDesc)
 		{
 			DX11VertexShader* Shader = ResourceManager->RegisterResource<DX11VertexShader>();

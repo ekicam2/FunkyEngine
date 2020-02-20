@@ -83,6 +83,7 @@ namespace Funky
 			RenderingBackend::API GetBackendAPI() const;
 
 			RRenderTarget* CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/);
+			RDepthStencil* CreateDepthStencil(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/);
 
 			RShader* CreateVertexShader(ShaderInputDesc* ShaderDesc);
 			RShader* CreatePixelShader(ShaderInputDesc* ShaderDesc);
