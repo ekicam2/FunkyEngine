@@ -18,6 +18,7 @@
 #include "Utils/MeshUtils.h"
 
 #include "Core/Tasks/ITask.h"
+#include "Core/Timer.h"
 
 #include "SDL.h"
 
@@ -32,7 +33,7 @@ namespace Funky
 	Core::IO::IIOSystem* FunkyEngine::_IO = nullptr;
 
 	FunkyEngine::FunkyEngine()
-		: RenderingBackend(Rendering::RenderingBackend::API::DX11)
+		: RenderingBackend()
 		, IOSystem(new Core::IO::WindowsIOSystem())
 	{
 		FunkyEngine::_Engine = this;
@@ -126,7 +127,11 @@ namespace Funky
 		//LOG_FUNKY(fk::getExecPath());
 
 		LOG("Init Rendering");
-		if (!RenderingBackend.Init(hWnd))
+		Rendering::DX11RenderingInitDesc InitDesc;
+		InitDesc.Api = Rendering::RenderingBackend::API::DX11;
+		InitDesc.hWnd = hWnd;
+
+		if (!RenderingBackend.Init(&InitDesc))
 			return false;
 
 		LOG("Create Renderer");
@@ -150,9 +155,11 @@ namespace Funky
 
 		MSG  Msg;
 		Msg.message = WM_NULL;
+		Timer FrameTimer;
 		while (WM_QUIT != Msg.message)
 		{
 			TaskManager->Tick();
+			float DeltaTime = (float)FrameTimer.Reset(Timer::EResolution::Mills);
 
 			bGotMsg = (PeekMessage(&Msg, NULL, 0U, 0U, PM_REMOVE) != 0);
 			if (bGotMsg)
@@ -165,6 +172,7 @@ namespace Funky
 			}
 			else
 			{
+				MainSceneManager->Tick(DeltaTime);
 				RenderScene();
 			}
 		}

@@ -40,7 +40,7 @@ namespace Funky
 			{
 				UNKNOWN,
 				DX11,
-				OGL
+				//OGL
 			};
 
 			enum class ShaderResourceStage
@@ -63,48 +63,48 @@ namespace Funky
 				TrianglestripAdj = 13
 			};
 
-			static constexpr u64 INVALID_INDEX = (u64)-1;
-			
-			FK_DEFINE_RENDERINGBACKEND_TYPE(RenderTarget, u64);
-			FK_DEFINE_RENDERINGBACKEND_TYPE(PixelShader, u64);
-			FK_DEFINE_RENDERINGBACKEND_TYPE(VertexShader, u64);
+			struct RenderingBackendInitDesc
+			{
+				API Api;
+			};
 
-			FK_DEFINE_RENDERINGBACKEND_TYPE(Texture, u64);
-			FK_DEFINE_RENDERINGBACKEND_TYPE(StaticMesh, u64);
+			struct ShaderInputDesc
+			{
+				byte* ShaderData;
+				u64 DataSize;
+			};
 
-			RenderingBackend(API Api);
+			RenderingBackend();
 			~RenderingBackend();
 
-			bool Init(HWND hwnd);
+			bool Init(RenderingBackendInitDesc* InitDesc);
 			void OnViewportResized(Math::Vec2u const & NewSize);
 
 			RenderingBackend::API GetBackendAPI() const;
 
-			RenderTarget CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/);
+			RRenderTarget* CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/);
 
-			VertexShader CreateVertexShader(byte* VertexShaderData, u64 DataSize);
-			PixelShader CreatePixelShader(byte* PixelShaderData, u64 DataSize);
+			RShader* CreateVertexShader(ShaderInputDesc* ShaderDesc);
+			RShader* CreatePixelShader(ShaderInputDesc* ShaderDesc);
 
 			RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data = nullptr);
 
+			RTexture* CreateTexture2D(byte const * const Data, Math::Vec2u const & Size);
+			RTexture* CreateCubemap(byte const * const Data, Math::Vec2u const & Size);
 
-			Texture CreateTexture2D(byte const * const Data, Math::Vec2u const & Size);
-			Texture CreateCubemap(byte const * const Data, Math::Vec2u const & Size);
+			void BindRenderTarget(RRenderTarget* RenderTargetToBind);
 
-			void BindRenderTarget(RenderTarget RenderTargetToBind);
-
-			void BindDefaultRenderTarget();
-			void ClearRenderTargetWithColor(Math::Vec3f const & Color, RenderingBackend::RenderTarget const & RenderTargetToClear = RenderingBackend::INVALID_INDEX);
-			void ClearDepthStencil(float Depth, float Stencil);
+			void ClearRenderTarget(RRenderTarget* RenderTargetToClear, Math::Vec3f const & Color);
+			void ClearDepthStencil(RDepthStencil* DepthStencilToClear, float Depth, float Stencil, bool bClearDepth = true, bool bClearStencil = true);
 			void SetPrimitiveTopology(PrimitiveTopology NewTopology);
 
 			void UpdateConstantBuffer(RBuffer* const Buffer, RBuffer::Data_t Data);
 			void BindConstantBuffer(ShaderResourceStage Stage, RBuffer* const Buffer, u32 StartIndex = 0u);
 
-			void BindVertexShader(VertexShader VertexShaderToBind);
-			void BindPixelShader(PixelShader PixelShaderToBind);
-			void BindTexture(ShaderResourceStage Stage, Texture const & Texture, u32 StartIndex = 0u);
-			void BindTexture(ShaderResourceStage Stage, RenderTarget const & Texture, u32 StartIndex = 0u);
+			void BindVertexShader(RShader* VertexShaderToBind);
+			void BindPixelShader(RShader* PixelShaderToBind);
+			void BindTexture(ShaderResourceStage Stage, RTexture* Texture, u32 StartIndex = 0u);
+			void BindTexture(ShaderResourceStage Stage, RRenderTarget* Texture, u32 StartIndex = 0u);
 
 			void Present();
 
@@ -112,6 +112,11 @@ namespace Funky
 		private:
 			class RenderingBackendImpl* Impl = nullptr;
 
+		};
+	
+		struct DX11RenderingInitDesc : public RenderingBackend::RenderingBackendInitDesc
+		{
+			HWND hWnd;
 		};
 	}
 }

@@ -31,8 +31,11 @@ namespace
 		wcscpy_s(pRealMsg, L"Assertion failed: ");
 		wcscat_s(pRealMsg, pCond);
 		wcscat_s(pRealMsg, L"  \n");
-		wcscat_s(pRealMsg, pMsg);
-		wcscat_s(pRealMsg, L"  \n");
+		if (pMsg != nullptr)
+		{
+			wcscat_s(pRealMsg, pMsg);
+			wcscat_s(pRealMsg, L"  \n");
+		}
 		wcscat_s(pRealMsg, pFile);
 		wcscat_s(pRealMsg, L":");
 		wchar_t pRealLine[5];
@@ -64,8 +67,11 @@ namespace
 		strcpy_s(pRealMsg, "Assertion failed: ");
 		strcat_s(pRealMsg, pCond);
 		strcat_s(pRealMsg, "  \n");
-		strcat_s(pRealMsg, pMsg);
-		strcat_s(pRealMsg, "  \n");
+		if (pMsg != nullptr)
+		{
+			strcat_s(pRealMsg, pMsg);
+			strcat_s(pRealMsg, "  \n");
+		}
 		strcat_s(pRealMsg, pFile);
 		strcat_s(pRealMsg, ":");
 		char pRealLine[5];

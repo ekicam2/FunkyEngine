@@ -63,7 +63,7 @@ void Funky::Core::Task::TaskManager::Tick()
 {
 	Thread::MutexScopeGuard ScopeGuard(QueueMutex);
 	
-	LOG("tasks ", TaskQueue.size());
+	//LOG("tasks ", TaskQueue.size());
 
 	//always try to dispatch worker job first	
 	Funky::Core::Thread::IThread* Thread = ThreadPool->GetIdleThread(Funky::Core::Thread::Type::Worker);

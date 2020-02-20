@@ -9,17 +9,21 @@
 #include "RenderingBackend/Internal/DX11/DirectUtils.h"
 #include "RenderingBackend/Internal/DX11/DX11RenderingResources.h"
 
-#define FUNKY_SAFE_RELEASE(x) if(x) x->Release();
 
 namespace Funky
 {
 	namespace Rendering
 	{
-		bool DX11::Init(HWND hwnd)
+		bool DX11::Init(RenderingBackend::RenderingBackendInitDesc* InInitDesc)
 		{
-			if (CreateDeviceAndSwapchain(hwnd))
-			{
+			CHECK(InInitDesc->Api == RenderingBackend::API::DX11);
 
+			DX11RenderingInitDesc* InitDesc = static_cast<DX11RenderingInitDesc*>(InInitDesc);
+
+			ResourceManager.Reset(new RenderingResourcesManager());
+
+			if (CreateDeviceAndSwapchain(InitDesc->hWnd))
+			{
 				return InitSwapchain();
 			}
 
@@ -33,26 +37,24 @@ namespace Funky
 
 		void DX11::OnViewportResized([[maybe_unused]]Math::Vec2u const & NewSize)
 		{
-			pDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
-			
-			FUNKY_SAFE_RELEASE(pBackBufferView);
-			FUNKY_SAFE_RELEASE(pDepthStencilView);
-
-			//FUNKY_SAFE_RELEASE(pBackBuffer);
-			FUNKY_SAFE_RELEASE(pDepthStencilBuffer);
-
-			pSwapChain->ResizeBuffers(0, 0, 0,DXGI_FORMAT::DXGI_FORMAT_UNKNOWN, 0);
-			
-			InitSwapchain();
+			CHECK(false);
+	
+			//pDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+			//
+			//FUNKY_SAFE_RELEASE(pBackBufferView);
+			//FUNKY_SAFE_RELEASE(pDepthStencilView);
+			//
+			////FUNKY_SAFE_RELEASE(pBackBuffer);
+			//FUNKY_SAFE_RELEASE(pDepthStencilBuffer);
+			//
+			//pSwapChain->ResizeBuffers(0, 0, 0,DXGI_FORMAT::DXGI_FORMAT_UNKNOWN, 0);
+			//
+			//InitSwapchain();
 		}
 
-		RenderingBackend::RenderTarget DX11::CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
+		RRenderTarget* DX11::CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
 		{
-			Microsoft::WRL::ComPtr<ID3D11Texture2D>			 pTexture = nullptr;
-			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView = nullptr;
-			Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   pRenderTargetView = nullptr;
-
-			RenderTargets.push_back(Move(DX11GPURenderTarget()));
+			DX11RenderTarget* RT = ResourceManager->RegisterResource<DX11RenderTarget>();
 
 			D3D11_TEXTURE2D_DESC RenderTargetTextureDesc;
 			ZeroMemory(&RenderTargetTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
@@ -77,61 +79,51 @@ namespace Funky
 			RenderTargetTextureShaderViewDesc.Texture2D.MostDetailedMip = 0;
 			RenderTargetTextureShaderViewDesc.Texture2D.MipLevels = 1;
 
-			const u64 Index = RenderTargets.size() - 1;
 
-			HRESULT hr = pDevice->CreateTexture2D(&RenderTargetTextureDesc, nullptr, RenderTargets[Index].pTexture.GetAddressOf());
+			HRESULT hr = pDevice->CreateTexture2D(&RenderTargetTextureDesc, nullptr, RT->pTexture.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), TEXT("couldn't create render target"));
 
-			hr = pDevice->CreateRenderTargetView(RenderTargets[Index].pTexture.Get(), &RenderTargetViewDesc, RenderTargets[Index].pRenderTargetView.GetAddressOf());
+			hr = pDevice->CreateRenderTargetView(RT->pTexture.Get(), &RenderTargetViewDesc, RT->pRenderTargetView.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"couldn't create render target view");
 
-			hr = pDevice->CreateShaderResourceView(RenderTargets[Index].pTexture.Get(), &RenderTargetTextureShaderViewDesc, RenderTargets[Index].pTextureView.GetAddressOf());
+			hr = pDevice->CreateShaderResourceView(RT->pTexture.Get(), &RenderTargetTextureShaderViewDesc, RT->pTextureView.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"couldn't create render target texture shader resource view");
 
-			return Index;
+			return RT;
 		}
 
-		RenderingBackend::VertexShader DX11::CreateVertexShader(byte* VertexShaderData, u64 DataSize)
+		RShader* DX11::CreateVertexShader(RenderingBackend::ShaderInputDesc* ShaderDesc)
 		{
-			DX11::DX11GPUVertexShader Returner;
-			//TODO(ekicam2): consume inputlayout passed from outside
-			Returner.InputLayoutDesc = DirectUtils::InputLayout::PositionColorNormalUV;
+			DX11VertexShader* Shader = ResourceManager->RegisterResource<DX11VertexShader>();
 
-			HRESULT hr = pDevice->CreateVertexShader(VertexShaderData, DataSize, nullptr, Returner.pVertexShader.GetAddressOf());
+			HRESULT hr = pDevice->CreateVertexShader(ShaderDesc->ShaderData, ShaderDesc->DataSize, nullptr, Shader->pVs.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create simple vertex shader");
 
-			darray<D3D11_INPUT_ELEMENT_DESC> InputLayoutDesc;
-			DirectUtils::GetInputLayoutDesc(Returner.InputLayoutDesc, InputLayoutDesc);
+			darray<D3D11_INPUT_ELEMENT_DESC> LayoutDesc =
+			{
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			};
 
-			hr = pDevice->CreateInputLayout(InputLayoutDesc.data(), (u32)InputLayoutDesc.size(), VertexShaderData, DataSize, Returner.pInputLayout.GetAddressOf());
+			hr = pDevice->CreateInputLayout(LayoutDesc.data(), (u32)LayoutDesc.size(), ShaderDesc->ShaderData, ShaderDesc->DataSize, Shader->pInputLayout.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create input layout");
 
-			if (hr == S_OK)
-			{
-				VertexShaders.push_back(Move(Returner));
-				return VertexShaders.size() - 1;
-			}
-
-			return RenderingBackend::INVALID_INDEX;
+			return Shader;
 		}
 
-		RenderingBackend::PixelShader DX11::CreatePixelShader(byte* PixelShaderData, u64 DataSize)
+		RShader* DX11::CreatePixelShader(RenderingBackend::ShaderInputDesc* ShaderDesc)
 		{
-			DX11::DX11GPUPixelShader Returner;
+			DX11PixelShader* Shader = ResourceManager->RegisterResource<DX11PixelShader>();
 
-			HRESULT hr = pDevice->CreatePixelShader(PixelShaderData, DataSize, nullptr, Returner.pPixelShader.GetAddressOf());
+			HRESULT hr = pDevice->CreatePixelShader(ShaderDesc->ShaderData, ShaderDesc->DataSize, nullptr, Shader->pPs.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create simple pixel shader");
 
-			if (hr == S_OK)
-			{
-				PixelShaders.push_back(Move(Returner));
-				return PixelShaders.size() - 1;
-			}
-
-			return RenderingBackend::INVALID_INDEX;
+			return Shader;
 		}
 
-		Funky::Rendering::RBuffer* DX11::CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
+		RBuffer* DX11::CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
 		{
 			// If buffer will be static it has to be initialized with correct data!
 			CHECK(Usage == RBuffer::UsageType::Static && Data != nullptr);
@@ -147,16 +139,17 @@ namespace Funky
 			ZeroMemory(&BufferInitData, sizeof(D3D11_SUBRESOURCE_DATA));
 			BufferInitData.pSysMem = Data;
 
-			DX11Buffer* Ret = new DX11Buffer(BufferType, Usage);
+			DX11Buffer* Ret = ResourceManager->RegisterResource<DX11Buffer>(BufferType, Usage);
 			HRESULT hr = pDevice->CreateBuffer(&ConstantBufferDesc, Data ? &BufferInitData : nullptr, Ret->pBuffer.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create constant buffer");
 
 			return Ret;
 		}
 
-		RenderingBackend::Texture DX11::CreateTexture2D(byte const * const Data, Math::Vec2u const & Size)
+		RTexture* DX11::CreateTexture2D(byte const * const Data, Math::Vec2u const & Size)
 		{
-			Textures.push_back(Move(
+			Data; Size;
+		/*	Textures.push_back(Move(
 				[Size]()
 				{
 					DX11GPUTexture Returner;
@@ -191,12 +184,15 @@ namespace Funky
 			hr = pDevice->CreateShaderResourceView(Textures[Index].pTexture.Get(), &TextureView, Textures[Index].pTextureView.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"couldn't create texture view");
 
-			return Index;
+			return Index;*/
+
+			return nullptr;
 		}
 
-		RenderingBackend::Texture DX11::CreateCubemap(byte const * const Data, Math::Vec2u const & Size)
+		RTexture* DX11::CreateCubemap(byte const * const Data, Math::Vec2u const & Size)
 		{
-			constexpr unsigned TexCount = 6u;
+			Data, Size;
+			/*constexpr unsigned TexCount = 6u;
 
 			Textures.push_back(Move(
 				[Size, TexCount]()
@@ -238,47 +234,47 @@ namespace Funky
 			hr = pDevice->CreateShaderResourceView(Textures[Index].pTexture.Get(), &TextureView, Textures[Index].pTextureView.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"couldn't create texture view");
 
-			return Index;
+			return Index;*/
+
+			return nullptr;
 		}
 
-		void DX11::BindRenderTarget(RenderingBackend::RenderTarget RenderTargetToBind)
+		void DX11::BindRenderTarget(RRenderTarget* RenderTargetToBind)
 		{
 			//TODO(ekicam2): it's hacky to unbind it all the time, render target should cache is somehow
 			ID3D11ShaderResourceView* rt1[] = { nullptr, nullptr, nullptr };
 			pDeviceContext->PSSetShaderResources(0, 3u, rt1);
 			pDeviceContext->VSSetShaderResources(0, 3u, rt1);
 
-			ID3D11RenderTargetView* rt[] = { RenderTargets[RenderTargetToBind].pRenderTargetView.Get() };
+			DX11RenderTarget* RT = static_cast<DX11RenderTarget*>(RenderTargetToBind);
+
+			ID3D11RenderTargetView* rt[] = { RT->pRenderTargetView.Get() };
 			//TODO(ekicam2): should we bind here defult depthstencil?
-			pDeviceContext->OMSetRenderTargets(1, rt, pDepthStencilView.Get());
+			pDeviceContext->OMSetRenderTargets(1, rt, nullptr);// pDepthStencilView.Get());
 		}
 
-		void DX11::BindDefaultRenderTarget()
-		{
-			// CComPtr<ID3DUserDefinedAnnotation> pPerf;
-			// HRESULT hr = pDeviceContext->QueryInterface(__uuidof(pPerf), reinterpret_cast<void**>(&pPerf));
-			// if (SUCCEEDED(hr))
-			// 	pPerf->BeginEvent(L"Now entering ocean rendering code");
-			// 
-			// if (SUCCEEDED(hr))
-			// 	pPerf->EndEvent();
-
-			ID3D11RenderTargetView* rt[] = { pBackBufferView.Get() };
-			pDeviceContext->OMSetRenderTargets(1, rt, pDepthStencilView.Get());
-		}
-
-		void DX11::ClearRenderTargetWithColor(Math::Vec3f const & Color, RenderingBackend::RenderTarget RenderTargetToClear)
+		void DX11::ClearRenderTarget(RRenderTarget* RenderTargetToClear, Math::Vec3f const& Color)
 		{
 			float color[4] = { Color.X, Color.Y, Color.Z, 1.0f };
 
-
-			ID3D11RenderTargetView* FinalTarget = RenderTargetToClear.IsValid() ? RenderTargets[RenderTargetToClear].pRenderTargetView.Get() : pBackBufferView.Get();
+			DX11RenderTarget* RT = static_cast<DX11RenderTarget*>(RenderTargetToClear);
+			ID3D11RenderTargetView* FinalTarget = RT->pRenderTargetView.Get();
 			pDeviceContext->ClearRenderTargetView(FinalTarget, color);
 		}
 
-		void DX11::ClearDepthStencil(float Depth, float Stencil)
+		void DX11::ClearDepthStencil(RDepthStencil* DepthStencilToClear, float Depth, float Stencil, bool bClearDepth, bool bClearStencil)
 		{
-			pDeviceContext->ClearDepthStencilView(pDepthStencilView.Get(), D3D11_CLEAR_DEPTH, Depth, (u8)Stencil);
+			CHECK(bClearDepth || bClearStencil);
+			
+			UINT ClearFlags;
+
+			if (bClearDepth)
+				ClearFlags |= D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH;
+			if (bClearStencil)
+				ClearFlags |= D3D11_CLEAR_FLAG::D3D11_CLEAR_STENCIL;
+
+			DX11DepthStencil* DepthStencil = static_cast<DX11DepthStencil*>(DepthStencilToClear);
+			pDeviceContext->ClearDepthStencilView(DepthStencil->pDepthStencilView.Get(), ClearFlags, Depth, (u8)Stencil);
 		}
 
 		void DX11::SetPrimitiveTopology(RenderingBackend::PrimitiveTopology NewTopology)
@@ -323,15 +319,18 @@ namespace Funky
 			}
 		}
 
-		void DX11::BindVertexShader(RenderingBackend::VertexShader VertexShaderToBind)
+		void DX11::BindVertexShader(RShader* VertexShaderToBind)
 		{
-			pDeviceContext->IASetInputLayout(VertexShaders[VertexShaderToBind].pInputLayout.Get());
-			pDeviceContext->VSSetShader(VertexShaders[VertexShaderToBind].pVertexShader.Get(), nullptr, 0);
+			DX11VertexShader* DShader = static_cast<DX11VertexShader*>(VertexShaderToBind);
+
+			pDeviceContext->IASetInputLayout(DShader->pInputLayout.Get());
+			pDeviceContext->VSSetShader(DShader->pVs.Get(), nullptr, 0);
 		}
 
-		void DX11::BindPixelShader(RenderingBackend::PixelShader PixelShaderToBind)
+		void DX11::BindPixelShader(RShader* PixelShaderToBind)
 		{
-			pDeviceContext->PSSetShader(PixelShaders[PixelShaderToBind].pPixelShader.Get(), nullptr, 0);
+			DX11PixelShader* DShader = static_cast<DX11PixelShader*>(PixelShaderToBind);
+			pDeviceContext->PSSetShader(DShader->pPs.Get(), nullptr, 0);
 		}
 
 		/*void DX11::DrawMesh(RenderingBackend::MeshProxy Mesh)
@@ -431,6 +430,8 @@ namespace Funky
 
 		bool DX11::InitSwapchain()
 		{
+			Microsoft::WRL::ComPtr<ID3D11Texture2D>			 pBackBuffer = nullptr;
+			Microsoft::WRL::ComPtr<ID3D11Texture2D>			 pDepthStencilBuffer = nullptr;
 			HRESULT hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pBackBuffer);
 
 			if (!SUCCEEDED(hr))
@@ -441,35 +442,35 @@ namespace Funky
 
 			D3D11_TEXTURE2D_DESC BackBufferDesc;
 			pBackBuffer->GetDesc(&BackBufferDesc);
-
+			
 			// D3D11_DEPTH_STENCIL_DESC DepthStencilDesc;
 			// ZeroMemory(&DepthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
 			// DepthStencilDesc.DepthEnable = TRUE;
 			// DepthStencilDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS;
-
-			D3D11_TEXTURE2D_DESC DepthStencilTextureDesc;
-			ZeroMemory(&DepthStencilTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
-			DepthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-			DepthStencilTextureDesc.Height = BackBufferDesc.Height;
-			DepthStencilTextureDesc.Width = BackBufferDesc.Width;
-			DepthStencilTextureDesc.ArraySize = 1;
-			DepthStencilTextureDesc.MipLevels = 1;
-			DepthStencilTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
-			DepthStencilTextureDesc.SampleDesc.Count = 1;
-
-			hr = pDevice->CreateTexture2D(&DepthStencilTextureDesc, nullptr, pDepthStencilBuffer.GetAddressOf());
-			if (!SUCCEEDED(hr))
-			{
-				LOG_ERROR(TEXT("Couldn't create depth stencil buffer"));
-				return false;
-			}
-
-			D3D11_DEPTH_STENCIL_VIEW_DESC DepthViewDesc;
-			ZeroMemory(&DepthViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
-			DepthViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-			DepthViewDesc.ViewDimension = D3D11_DSV_DIMENSION::D3D11_DSV_DIMENSION_TEXTURE2D;
-
-			pDevice->CreateDepthStencilView(pDepthStencilBuffer.Get(), &DepthViewDesc, pDepthStencilView.GetAddressOf());
+			
+			//D3D11_TEXTURE2D_DESC DepthStencilTextureDesc;
+			//ZeroMemory(&DepthStencilTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+			//DepthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			//DepthStencilTextureDesc.Height = BackBufferDesc.Height;
+			//DepthStencilTextureDesc.Width = BackBufferDesc.Width;
+			//DepthStencilTextureDesc.ArraySize = 1;
+			//DepthStencilTextureDesc.MipLevels = 1;
+			//DepthStencilTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
+			//DepthStencilTextureDesc.SampleDesc.Count = 1;
+			//
+			//hr = pDevice->CreateTexture2D(&DepthStencilTextureDesc, nullptr, pDepthStencilBuffer.GetAddressOf());
+			//if (!SUCCEEDED(hr))
+			//{
+			//	LOG_ERROR(TEXT("Couldn't create depth stencil buffer"));
+			//	return false;
+			//}
+			//
+			//D3D11_DEPTH_STENCIL_VIEW_DESC DepthViewDesc;
+			//ZeroMemory(&DepthViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+			//DepthViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			//DepthViewDesc.ViewDimension = D3D11_DSV_DIMENSION::D3D11_DSV_DIMENSION_TEXTURE2D;
+			//
+			//pDevice->CreateDepthStencilView(pDepthStencilBuffer.Get(), &DepthViewDesc, pDepthStencilView.GetAddressOf());
 
 			static const float aspectRatio = static_cast<float>(BackBufferDesc.Width) / static_cast<float>(BackBufferDesc.Height);
 
@@ -482,48 +483,48 @@ namespace Funky
 
 			pDeviceContext->RSSetViewports(1, &Viewport);
 
-			hr = pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, pBackBufferView.GetAddressOf());
-			if (!SUCCEEDED(hr))
-			{
-				LOG_ERROR(TEXT("couldn't create render target"));
-				return false;
-			}
-
+			//hr = pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, pBackBufferView.GetAddressOf());
+			//if (!SUCCEEDED(hr))
+			//{
+			//	LOG_ERROR(TEXT("couldn't create render target"));
+			//	return false;
+			//}
+			//
 			return true;
 		}
 
 		void DX11::FreeSwapchain()
 		{
-			FUNKY_SAFE_RELEASE(pBackBufferView);
-			FUNKY_SAFE_RELEASE(pDepthStencilView);
 
-			FUNKY_SAFE_RELEASE(pBackBuffer);
-			FUNKY_SAFE_RELEASE(pDepthStencilBuffer);
 
 		}
 
-		void DX11::BindTexture(RenderingBackend::ShaderResourceStage Stage, RenderingBackend::Texture const & Texture, u32 StartIndex /*= 0u*/)
+		void DX11::BindTexture(RenderingBackend::ShaderResourceStage Stage, RTexture* InTexture, u32 StartIndex /*= 0u*/)
 		{
+			DX11Texture* Texture = static_cast<DX11Texture*>(InTexture);
+
 			switch (Stage)
 			{
 			case RenderingBackend::ShaderResourceStage::Fragment:
-				pDeviceContext->PSSetShaderResources(StartIndex, 1u, Textures[Texture].pTextureView.GetAddressOf());
+				pDeviceContext->PSSetShaderResources(StartIndex, 1u, Texture->pTextureView.GetAddressOf());
 				break;
 			case RenderingBackend::ShaderResourceStage::Vertex:
-				pDeviceContext->VSSetShaderResources(StartIndex, 1u, Textures[Texture].pTextureView.GetAddressOf());
+				pDeviceContext->VSSetShaderResources(StartIndex, 1u, Texture->pTextureView.GetAddressOf());
 				break;
 			}
 		}
 
-		void DX11::BindTexture(RenderingBackend::ShaderResourceStage Stage, RenderingBackend::RenderTarget const & Texture, u32 StartIndex /*= 0u*/)
+		void DX11::BindTexture(RenderingBackend::ShaderResourceStage Stage, RRenderTarget* InTexture, u32 StartIndex /*= 0u*/)
 		{
+			DX11RenderTarget* Texture = static_cast<DX11RenderTarget*>(InTexture);
+
 			switch (Stage)
 			{
 			case RenderingBackend::ShaderResourceStage::Fragment:
-				pDeviceContext->PSSetShaderResources(StartIndex, 1u, RenderTargets[Texture].pTextureView.GetAddressOf());
+				pDeviceContext->PSSetShaderResources(StartIndex, 1u, Texture->pTextureView.GetAddressOf());
 				break;
 			case RenderingBackend::ShaderResourceStage::Vertex:
-				pDeviceContext->VSSetShaderResources(StartIndex, 1u, RenderTargets[Texture].pTextureView.GetAddressOf());
+				pDeviceContext->VSSetShaderResources(StartIndex, 1u, Texture->pTextureView.GetAddressOf());
 				break;
 			}
 		}

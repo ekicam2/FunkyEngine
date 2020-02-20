@@ -5,15 +5,9 @@ namespace Funky
 {
 	namespace Rendering
 	{
-		RenderingBackend::RenderingBackend(API Api)
+		RenderingBackend::RenderingBackend()
 		{
-			switch (Api)
-			{
-			case API::DX11:
-				delete Impl;
-				Impl = new Funky::Rendering::DX11();
-				break;
-			}
+			
 		}
 
 		RenderingBackend::~RenderingBackend()
@@ -23,19 +17,19 @@ namespace Funky
 
 		RenderingBackend::API RenderingBackend::GetBackendAPI() const { return Impl->GetBackendAPI(); }
 
-		RenderingBackend::RenderTarget RenderingBackend::CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
+		RRenderTarget* RenderingBackend::CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
 		{
 			return Impl->CreateRenderTarget(Size);
 		}
 
-		RenderingBackend::VertexShader RenderingBackend::CreateVertexShader(byte * VertexShaderData, u64 DataSize)
-		{
-			return Impl->CreateVertexShader(VertexShaderData, DataSize);
+		Funky::Rendering::RShader* RenderingBackend::CreateVertexShader(ShaderInputDesc* ShaderDesc)
+{
+			return Impl->CreateVertexShader(ShaderDesc);
 		}
 
-		RenderingBackend::PixelShader RenderingBackend::CreatePixelShader(byte * PixelShaderData, u64 DataSize)
+		RShader* RenderingBackend::CreatePixelShader(ShaderInputDesc* ShaderDesc)
 		{
-			return Impl->CreatePixelShader(PixelShaderData, DataSize);
+			return Impl->CreatePixelShader(ShaderDesc);
 		}
 
 		Funky::Rendering::RBuffer* RenderingBackend::CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
@@ -43,46 +37,46 @@ namespace Funky
 			return Impl->CreateBuffer(SizeOfBuffer, BufferType, Usage, Data);
 		}
 
-		bool RenderingBackend::Init(HWND hwnd) { return Impl->Init(hwnd); }
+		bool RenderingBackend::Init(RenderingBackendInitDesc* InitDesc) 
+		{ 
+			switch (InitDesc->Api)
+			{
+			case API::DX11:
+				delete Impl;
+				Impl = new Funky::Rendering::DX11();
+				break;
+			}
+			return Impl->Init(InitDesc); 
+		}
 
 		void RenderingBackend::OnViewportResized(Math::Vec2u const & NewSize)
 		{
 			Impl->OnViewportResized(NewSize);
 		}
 
-		void RenderingBackend::BindDefaultRenderTarget()
-		{
-			Impl->BindDefaultRenderTarget();
-		}
-
-		//RenderingBackend::Buffer RenderingBackend::CreateConstantBuffer(size SizeOfConstantBuffer, [[maybe_unused]]ConstantBufferData InitData)
-		//{
-		//	return Impl->CreateConstantBuffer(SizeOfConstantBuffer);
-		//}
-
-		RenderingBackend::Texture RenderingBackend::CreateTexture2D(byte const * const Data, Math::Vec2u const & Size)
+		RTexture* RenderingBackend::CreateTexture2D(byte const* const Data, Math::Vec2u const& Size)
 		{
 			return Impl->CreateTexture2D(Data, Size);
 		}
 
-		RenderingBackend::Texture RenderingBackend::CreateCubemap(byte const * const Data, Math::Vec2u const & Size)
+		RTexture* RenderingBackend::CreateCubemap(byte const* const Data, Math::Vec2u const& Size)
 		{
 			return Impl->CreateCubemap(Data, Size);
 		}
 
-		void RenderingBackend::BindRenderTarget(RenderTarget RenderTargetToBind)
+		void RenderingBackend::BindRenderTarget(RRenderTarget* RenderTargetToBind)
 		{
 			Impl->BindRenderTarget(RenderTargetToBind);
 		}
 
-		void RenderingBackend::ClearRenderTargetWithColor(Math::Vec3f const & Color, RenderingBackend::RenderTarget const & RenderTargetToClear /*= RenderingBackend::INVALID_INDEX*/)
+		void RenderingBackend::ClearRenderTarget(RRenderTarget* RenderTargetToClear, Math::Vec3f const& Color)
 		{
-			Impl->ClearRenderTargetWithColor(Color, RenderTargetToClear);
+			Impl->ClearRenderTarget(RenderTargetToClear, Color);
 		}
 
-		void RenderingBackend::ClearDepthStencil(float Depth, float Stencil)
+		void RenderingBackend::ClearDepthStencil(RDepthStencil* DepthStencilToClear, float Depth, float Stencil, bool bClearDepth /*= true*/, bool bClearStencil /*= true*/)
 		{
-			Impl->ClearDepthStencil(Depth, Stencil);
+			Impl->ClearDepthStencil(DepthStencilToClear, Depth, Stencil, bClearDepth, bClearStencil);
 		}
 
 		void RenderingBackend::SetPrimitiveTopology(RenderingBackend::PrimitiveTopology NewTopology)
@@ -102,22 +96,22 @@ namespace Funky
 			Impl->BindBuffer(Stage, Buffer, StartIndex);
 		}
 
-		void RenderingBackend::BindVertexShader(VertexShader VertexShaderToBind)
+		void RenderingBackend::BindVertexShader(RShader* VertexShaderToBind)
 		{
 			Impl->BindVertexShader(VertexShaderToBind);
 		}
 
-		void RenderingBackend::BindPixelShader(PixelShader PixelShaderToBind)
+		void RenderingBackend::BindPixelShader(RShader* PixelShaderToBind)
 		{
 			Impl->BindPixelShader(PixelShaderToBind);
 		}
 
-		void RenderingBackend::BindTexture(ShaderResourceStage Stage, Texture const & Texture, u32 StartIndex /*= 0u*/)
+		void RenderingBackend::BindTexture(ShaderResourceStage Stage, RTexture* Texture, u32 StartIndex /*= 0u*/)
 		{
 			Impl->BindTexture(Stage, Texture, StartIndex);
 		}
 
-		void RenderingBackend::BindTexture(ShaderResourceStage Stage, RenderTarget const & Texture, u32 StartIndex /*= 0u*/)
+		void RenderingBackend::BindTexture(ShaderResourceStage Stage, RRenderTarget* Texture, u32 StartIndex /*= 0u*/)
 		{
 			Impl->BindTexture(Stage, Texture, StartIndex);
 		}

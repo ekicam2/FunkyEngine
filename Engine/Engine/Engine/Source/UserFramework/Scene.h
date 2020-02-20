@@ -16,10 +16,10 @@ namespace Funky
 	{
 		Scene() = default;
 
-		VisibleObject Objects;
+		VisibleObject Object;
 
-		void Init() {}
+		void Init();
 		void Shutdown() {}
-		void Tick([[maybe_unused]] f32 Delta) {}
+		void Tick([[maybe_unused]] f32 Delta);
 	};
 }
