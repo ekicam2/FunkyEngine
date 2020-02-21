@@ -109,6 +109,8 @@ namespace Funky
 
 			void Present();
 
+			class RenderingResourcesManager* GetResourceManager();
+
 
 		private:
 			class RenderingBackendImpl* Impl = nullptr;

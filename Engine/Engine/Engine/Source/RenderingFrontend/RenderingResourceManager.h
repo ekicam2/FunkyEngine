@@ -35,6 +35,12 @@ namespace Funky
 				return static_cast<ResourceType*>(Resources[Resources.size() - 1].Get());
 			}
 
+			template <typename ResourceType>
+			ResourceType* GetResourceAt(u32 Index)
+			{
+				return dynamic_cast<ResourceType*>(Resources[Index].Get());
+			}
+
 			/** Not used at the moment. */
 			void Free([[maybe_unused]] IRenderingResource* ResourceToDelete)
 			{

@@ -466,9 +466,8 @@ namespace Funky
 
 		bool DX11::InitSwapchain()
 		{
-			Microsoft::WRL::ComPtr<ID3D11Texture2D>			 pBackBuffer = nullptr;
-			Microsoft::WRL::ComPtr<ID3D11Texture2D>			 pDepthStencilBuffer = nullptr;
-			HRESULT hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pBackBuffer);
+			DX11RenderTarget* RT = ResourceManager->RegisterResource<DX11RenderTarget>();
+			HRESULT hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&RT->pTexture);
 
 			if (!SUCCEEDED(hr))
 			{
@@ -477,8 +476,16 @@ namespace Funky
 			}
 
 			D3D11_TEXTURE2D_DESC BackBufferDesc;
-			pBackBuffer->GetDesc(&BackBufferDesc);
+			RT->pTexture->GetDesc(&BackBufferDesc);
 			
+			hr = pDevice->CreateRenderTargetView(RT->pTexture.Get(), nullptr, RT->pRenderTargetView.GetAddressOf());
+			if (!SUCCEEDED(hr))
+			{
+				LOG_ERROR(TEXT("couldn't create render target"));
+				return false;
+			}
+
+
 			// D3D11_DEPTH_STENCIL_DESC DepthStencilDesc;
 			// ZeroMemory(&DepthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
 			// DepthStencilDesc.DepthEnable = TRUE;
@@ -519,13 +526,7 @@ namespace Funky
 
 			pDeviceContext->RSSetViewports(1, &Viewport);
 
-			//hr = pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, pBackBufferView.GetAddressOf());
-			//if (!SUCCEEDED(hr))
-			//{
-			//	LOG_ERROR(TEXT("couldn't create render target"));
-			//	return false;
-			//}
-			//
+			
 			return true;
 		}
 

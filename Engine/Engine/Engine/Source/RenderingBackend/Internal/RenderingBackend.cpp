@@ -125,5 +125,11 @@ namespace Funky
 		{
 			Impl->Present();
 		}
+
+		RenderingResourcesManager* RenderingBackend::GetResourceManager()
+		{
+			return Impl->ResourceManager;
+		}
+
 	}
 }
