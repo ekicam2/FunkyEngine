@@ -108,8 +108,7 @@ namespace Funky
 			void BindTexture(ShaderResourceStage Stage, RRenderTarget* Texture, u32 StartIndex = 0u);
 
 			void Draw(RBuffer* VertexBuffer);
-
-			void DrawIndexed(RBuffer* VertexBuffer, u32 Stride, u32 Offset, RBuffer* IndexBuffer, u16 Indices);
+			void DrawIndexed(RBuffer* VertexBuffer, RBuffer* IndexBuffer);
 
 			void Present();
 

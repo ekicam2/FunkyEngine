@@ -128,13 +128,12 @@ namespace Funky
 			Impl->Draw(VertexBuffer);
 		}
 
-		void RenderingBackend::DrawIndexed([[maybe_unused]] RBuffer* VertexBuffer, [[maybe_unused]] u32 Stride, [[maybe_unused]] u32 Offset, [[maybe_unused]] RBuffer* IndexBuffer, [[maybe_unused]] u16 Indices)
+		void RenderingBackend::DrawIndexed(RBuffer* VertexBuffer, RBuffer* IndexBuffer)
 		{
 			CHECK(VertexBuffer->BufferType == RBuffer::Type::Vertex);
 			CHECK(IndexBuffer->BufferType == RBuffer::Type::Index);
 
 			Impl->DrawIndexed(VertexBuffer, IndexBuffer);
-
 		}
 
 		void RenderingBackend::Present()
