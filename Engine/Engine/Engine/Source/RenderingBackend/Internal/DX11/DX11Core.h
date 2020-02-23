@@ -48,6 +48,7 @@ namespace Funky
 			virtual void BindTexture(RenderingBackend::ShaderResourceStage Stage, RRenderTarget* Texture, u32 StartIndex = 0u) override;
 
 			virtual void Draw(RBuffer* VertexBuffer) override;
+			virtual void DrawIndexed(RBuffer* VertexBuffer, RBuffer* IndexBuffer) override;
 
 			virtual void Present() override;
 

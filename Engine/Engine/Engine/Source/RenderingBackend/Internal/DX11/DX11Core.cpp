@@ -177,6 +177,8 @@ namespace Funky
 
 			DX11Buffer* Ret = ResourceManager->RegisterResource<DX11Buffer>(BufferType, Usage);
 			Ret->Stride = 12;
+			Ret->ElementCount = (BufferType == RBuffer::Type::Vertex || BufferType == RBuffer::Type::Index) ? 3 : 0;
+
 			HRESULT hr = pDevice->CreateBuffer(&ConstantBufferDesc, Data ? &BufferInitData : nullptr, Ret->pBuffer.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create buffer");
 
@@ -334,11 +336,11 @@ namespace Funky
 
 			u32 s = 0, g = 0;
 
-			if (Buffer->GetType() == RBuffer::Type::Vertex)
+			if (Buffer->BufferType == RBuffer::Type::Vertex)
 			{
 				pDeviceContext->IASetVertexBuffers(0u, 1u, DXBuffer->pBuffer.GetAddressOf(), &s, &g);
 			}
-			if (Buffer->GetType() == RBuffer::Type::Index)
+			if (Buffer->BufferType == RBuffer::Type::Index)
 			{
 				pDeviceContext->IASetIndexBuffer(DXBuffer->pBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
 			}
@@ -380,6 +382,19 @@ namespace Funky
 			//pDeviceContext->IASetIndexBuffer(Meshes[Mesh].pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
 			//pDeviceContext->DrawIndexed((u32)Meshes[Mesh].IndicesCount, 0, 0);
 		}
+
+
+		void DX11::DrawIndexed(RBuffer* InVertexBuffer, RBuffer* InIndexBuffer)
+		{
+			DX11Buffer* VertexBuffer = reinterpret_cast<DX11Buffer*>(InVertexBuffer);
+			DX11Buffer* IndexBuffer = reinterpret_cast<DX11Buffer*>(InIndexBuffer);
+
+			pDeviceContext->IASetVertexBuffers(0u, 1u, VertexBuffer->pBuffer.GetAddressOf(), &(VertexBuffer->Stride), &(VertexBuffer->Offset));
+
+			pDeviceContext->IASetIndexBuffer(IndexBuffer->pBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
+			pDeviceContext->DrawIndexed(IndexBuffer->ElementCount, 0u, 0u);
+		}
+
 
 		void DX11::Present()
 		{
@@ -555,6 +570,5 @@ namespace Funky
 				break;
 			}
 		}
-
 	}
 }

@@ -104,6 +104,8 @@ void Funky::Rendering::Renderer::DrawScene(class RenderScene* SceneToRender)
 	RenderingBackend.BindPixelShader(Shaders.PS);
 
 	RenderingBackend.Draw(vb);
+	RenderingBackend.DrawIndexed(vb,0u,0u,ib,0u);
+
 
 
 	RenderingBackend.Present();
