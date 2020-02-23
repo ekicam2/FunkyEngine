@@ -58,6 +58,7 @@ namespace Funky
 			RBuffer() = default;
 			RBuffer(Type NewType, UsageType NewUsageType) : BufferType(NewType), Usage(NewUsageType) {}
 			Type GetType() const { return BufferType; }
+			UsageType GetUsage() const { return Usage; }
 		private:
 			Type BufferType = Type::None;
 			UsageType Usage = UsageType::Default;

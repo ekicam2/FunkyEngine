@@ -4,7 +4,14 @@
 
 #include <RenderingBackend/Internal/DX11/DX11Core.h>
 
-#define FUNKY_D3D11_SAFE_RELEASE(x) if(x) x->Release();
+//#define FUNKY_D3D11_SAFE_RELEASE(x)		\
+//	if(x)								\
+//	{									\
+//		x->Release();					\
+//		x = nullptr;					\
+//	}
+
+#define FUNKY_D3D11_SAFE_RELEASE(x)	
 
 
 namespace Funky
@@ -20,9 +27,9 @@ namespace Funky
 
 			~DX11RenderTarget()
 			{
-				FUNKY_D3D11_SAFE_RELEASE(pTexture);
 				FUNKY_D3D11_SAFE_RELEASE(pTextureView);
 				FUNKY_D3D11_SAFE_RELEASE(pRenderTargetView);
+				FUNKY_D3D11_SAFE_RELEASE(pTexture);
 			}
 		};
 
@@ -47,6 +54,8 @@ namespace Funky
 			DX11Buffer(Type NewType, UsageType NewUsageType) : RBuffer(NewType, NewUsageType) {}
 			Microsoft::WRL::ComPtr<ID3D11Buffer> pBuffer = nullptr;
 			size SizeInBytes = 0u;
+			u32 Stride = 0u;
+			u32 Offset = 0u;
 
 			~DX11Buffer()
 			{
@@ -59,6 +68,11 @@ namespace Funky
 		public:
 			Microsoft::WRL::ComPtr<ID3D11VertexShader> pVs;
 			Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
+			
+			DX11VertexShader()
+			{
+				ShaderType = (RShader::Type::Vertex);
+			}
 
 			~DX11VertexShader()
 			{

@@ -104,8 +104,8 @@ namespace Funky
 			D3D11_TEXTURE2D_DESC DepthStencilTextureDesc;
 			ZeroMemory(&DepthStencilTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
 			DepthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-			DepthStencilTextureDesc.Height = Size.X;
-			DepthStencilTextureDesc.Width = Size.Y;
+			DepthStencilTextureDesc.Width = Size.X;
+			DepthStencilTextureDesc.Height = Size.Y;
 			DepthStencilTextureDesc.ArraySize = 1;
 			DepthStencilTextureDesc.MipLevels = 1;
 			DepthStencilTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
@@ -137,10 +137,10 @@ namespace Funky
 
 			darray<D3D11_INPUT_ELEMENT_DESC> LayoutDesc =
 			{
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+				//{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				//{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				//{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			};
 
 			hr = pDevice->CreateInputLayout(LayoutDesc.data(), (u32)LayoutDesc.size(), ShaderDesc->ShaderData, ShaderDesc->DataSize, Shader->pInputLayout.GetAddressOf());
@@ -169,15 +169,16 @@ namespace Funky
 			ConstantBufferDesc.ByteWidth = (u32)SizeOfBuffer;
 			ConstantBufferDesc.BindFlags = DirectUtils::BufferToDXType(BufferType);
 			ConstantBufferDesc.Usage = DirectUtils::BufferToDXUsage(Usage);
-			ConstantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE;
+			ConstantBufferDesc.CPUAccessFlags = Usage == RBuffer::UsageType::Static ? 0 : D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE;
 			
 			D3D11_SUBRESOURCE_DATA BufferInitData;
 			ZeroMemory(&BufferInitData, sizeof(D3D11_SUBRESOURCE_DATA));
 			BufferInitData.pSysMem = Data;
 
 			DX11Buffer* Ret = ResourceManager->RegisterResource<DX11Buffer>(BufferType, Usage);
+			Ret->Stride = 12;
 			HRESULT hr = pDevice->CreateBuffer(&ConstantBufferDesc, Data ? &BufferInitData : nullptr, Ret->pBuffer.GetAddressOf());
-			ASSERT(SUCCEEDED(hr), L"Couldn't create constant buffer");
+			ASSERT(SUCCEEDED(hr), L"Couldn't create buffer");
 
 			return Ret;
 		}
@@ -284,7 +285,7 @@ namespace Funky
 
 			DX11RenderTarget* RT = static_cast<DX11RenderTarget*>(RenderTargetToBind);
 
-			ID3D11RenderTargetView* rt[] = { RT->pRenderTargetView.Get() };
+			ID3D11RenderTargetView* rt[] = { RT ? RT->pRenderTargetView.Get() : nullptr };
 			//TODO(ekicam2): should we bind here defult depthstencil?
 			pDeviceContext->OMSetRenderTargets(1, rt, nullptr);// pDepthStencilView.Get());
 		}
@@ -369,13 +370,16 @@ namespace Funky
 			pDeviceContext->PSSetShader(DShader->pPs.Get(), nullptr, 0);
 		}
 
-		/*void DX11::DrawMesh(RenderingBackend::MeshProxy Mesh)
+		void DX11::Draw(RBuffer* InVertexBuffer)
 		{
-			u32 stride = sizeof(Vertex), offset = 0;
-			pDeviceContext->IASetVertexBuffers(0u, 1u, Meshes[Mesh].pVertexBuffer.GetAddressOf(), &stride, &offset);
-			pDeviceContext->IASetIndexBuffer(Meshes[Mesh].pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
-			pDeviceContext->DrawIndexed((u32)Meshes[Mesh].IndicesCount, 0, 0);
-		}*/
+			DX11Buffer* VertexBuffer = reinterpret_cast<DX11Buffer*>(InVertexBuffer);
+
+			pDeviceContext->IASetVertexBuffers(0u, 1u, VertexBuffer->pBuffer.GetAddressOf(), &(VertexBuffer->Stride), &(VertexBuffer->Offset));
+			pDeviceContext->Draw(3, 0);
+
+			//pDeviceContext->IASetIndexBuffer(Meshes[Mesh].pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
+			//pDeviceContext->DrawIndexed((u32)Meshes[Mesh].IndicesCount, 0, 0);
+		}
 
 		void DX11::Present()
 		{
@@ -461,6 +465,12 @@ namespace Funky
 				ASSERT(SUCCEEDED(hr), TEXT("couldn't create swapchain"));
 			}
 
+			if (SUCCEEDED(hr))
+			{
+				hr = Factory->MakeWindowAssociation(WindowHandle, DXGI_MWA_NO_PRINT_SCREEN);
+				ASSERT(SUCCEEDED(hr), TEXT("Couldn't associate swapchain with window."));
+			}
+
 			return true;
 		}
 
@@ -485,37 +495,7 @@ namespace Funky
 				return false;
 			}
 
-
-			// D3D11_DEPTH_STENCIL_DESC DepthStencilDesc;
-			// ZeroMemory(&DepthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-			// DepthStencilDesc.DepthEnable = TRUE;
-			// DepthStencilDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS;
-			
-			//D3D11_TEXTURE2D_DESC DepthStencilTextureDesc;
-			//ZeroMemory(&DepthStencilTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
-			//DepthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-			//DepthStencilTextureDesc.Height = BackBufferDesc.Height;
-			//DepthStencilTextureDesc.Width = BackBufferDesc.Width;
-			//DepthStencilTextureDesc.ArraySize = 1;
-			//DepthStencilTextureDesc.MipLevels = 1;
-			//DepthStencilTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
-			//DepthStencilTextureDesc.SampleDesc.Count = 1;
-			//
-			//hr = pDevice->CreateTexture2D(&DepthStencilTextureDesc, nullptr, pDepthStencilBuffer.GetAddressOf());
-			//if (!SUCCEEDED(hr))
-			//{
-			//	LOG_ERROR(TEXT("Couldn't create depth stencil buffer"));
-			//	return false;
-			//}
-			//
-			//D3D11_DEPTH_STENCIL_VIEW_DESC DepthViewDesc;
-			//ZeroMemory(&DepthViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
-			//DepthViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-			//DepthViewDesc.ViewDimension = D3D11_DSV_DIMENSION::D3D11_DSV_DIMENSION_TEXTURE2D;
-			//
-			//pDevice->CreateDepthStencilView(pDepthStencilBuffer.Get(), &DepthViewDesc, pDepthStencilView.GetAddressOf());
-
-			static const float aspectRatio = static_cast<float>(BackBufferDesc.Width) / static_cast<float>(BackBufferDesc.Height);
+			CreateDepthStencil({ BackBufferDesc.Width, BackBufferDesc.Height });
 
 			D3D11_VIEWPORT Viewport;
 			ZeroMemory(&Viewport, sizeof(D3D11_VIEWPORT));
@@ -526,14 +506,24 @@ namespace Funky
 
 			pDeviceContext->RSSetViewports(1, &Viewport);
 
+			// immediate close test
 			
+			
+			//if(pDevice) pDevice->Release();
+			//if (pDeviceContext) pDeviceContext->Release();
+			//if (pSwapChain) pSwapChain->Release();
+			//
+			//FreeSwapchain();
+			
+			// immediate close test END
+
 			return true;
 		}
 
 		void DX11::FreeSwapchain()
 		{
-
-
+			// BindRenderTarget(nullptr);
+			ResourceManager->FreeAll();
 		}
 
 		void DX11::BindTexture(RenderingBackend::ShaderResourceStage Stage, RTexture* InTexture, u32 StartIndex /*= 0u*/)
@@ -565,5 +555,6 @@ namespace Funky
 				break;
 			}
 		}
+
 	}
 }

@@ -121,6 +121,18 @@ namespace Funky
 			Impl->BindTexture(Stage, Texture, StartIndex);
 		}
 
+		void RenderingBackend::Draw(RBuffer* VertexBuffer)
+		{
+			CHECK(VertexBuffer->GetType() == RBuffer::Type::Vertex);
+
+			Impl->Draw(VertexBuffer);
+		}
+
+		void RenderingBackend::DrawIndexed([[maybe_unused]] RBuffer* VertexBuffer, [[maybe_unused]] u32 Stride, [[maybe_unused]] u32 Offset, [[maybe_unused]] RBuffer* IndexBuffer, [[maybe_unused]] u16 Indices)
+		{
+			
+		}
+
 		void RenderingBackend::Present()
 		{
 			Impl->Present();

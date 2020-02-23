@@ -75,7 +75,7 @@ namespace Funky
 			};
 
 			RenderingBackend();
-			~RenderingBackend();
+			virtual ~RenderingBackend();
 
 			bool Init(RenderingBackendInitDesc* InitDesc);
 			void OnViewportResized(Math::Vec2u const & NewSize);
@@ -106,6 +106,10 @@ namespace Funky
 			void BindPixelShader(RShader* PixelShaderToBind);
 			void BindTexture(ShaderResourceStage Stage, RTexture* Texture, u32 StartIndex = 0u);
 			void BindTexture(ShaderResourceStage Stage, RRenderTarget* Texture, u32 StartIndex = 0u);
+
+			void Draw(RBuffer* VertexBuffer);
+
+			void DrawIndexed(RBuffer* VertexBuffer, u32 Stride, u32 Offset, RBuffer* IndexBuffer, u16 Indices);
 
 			void Present();
 

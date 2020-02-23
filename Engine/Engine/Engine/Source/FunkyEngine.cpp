@@ -63,24 +63,11 @@ namespace Funky
 		// sort through and find what code to run for the message given
 		switch (Message)
 		{
-		case WM_EXITSIZEMOVE:
-			{
-				RenderingBackend.OnViewportResized(Math::Vec2u(0u, 0u));
-				
-#ifdef FUNKY_EDITOR
-				RECT ClientArea;
-				GetClientRect(FunkyEngine::GetEngine()->hWnd, &ClientArea);
-				[[maybe_unused]] f32 DeltaX = (f32)(ClientArea.right - ClientArea.left);
-				[[maybe_unused]] f32 DeltaY = (f32)(ClientArea.bottom - ClientArea.top);
-				
-#endif
-			}
-			break;
-			// this message is read when the window is closed
 		case WM_DESTROY:
 		{
+			bShouldRun = false;
 			// close the application entirely
-			PostQuitMessage(0);
+			//PostQuitMessage(0);
 			return 0;
 		} break;
 		}
@@ -91,8 +78,8 @@ namespace Funky
 
 	bool FunkyEngine::Init()
 	{
-		ThreadPool.Reset(new Core::Thread::ThreadPool({ {Core::Thread::Type::Rendering, (u16)1u}, {Core::Thread::Type::Worker, (u16)5u} }));
-		TaskManager.Reset(new Core::Task::TaskManager(ThreadPool));
+		 ThreadPool.Reset(new Core::Thread::ThreadPool({ {Core::Thread::Type::Rendering, (u16)1u}, {Core::Thread::Type::Worker, (u16)5u} }));
+		 TaskManager.Reset(new Core::Task::TaskManager(ThreadPool));
 
 		AssetManager.Reset(new Funky::AssetRegistry());
 
@@ -110,7 +97,7 @@ namespace Funky
 			LOG_ERROR(TEXT("SDL_Init: Failed to init SDL!\n"));
 			return false;
 		}
-		atexit(SDL_Quit);
+		
 
 		LOG("Init SDL IMAGE");
 		int flags = IMG_INIT_JPG | IMG_INIT_PNG;
@@ -121,8 +108,6 @@ namespace Funky
 			LOG_ERROR(TEXT("IMG_Init: "), IMG_GetError());
 			return false;
 		}
-		atexit(IMG_Quit);
-
 		
 		//LOG_FUNKY(fk::getExecPath());
 
@@ -156,9 +141,10 @@ namespace Funky
 		MSG  Msg;
 		Msg.message = WM_NULL;
 		Timer FrameTimer;
-		while (WM_QUIT != Msg.message)
+		while (bShouldRun)
 		{
 			TaskManager->Tick();
+
 			float DeltaTime = (float)FrameTimer.Reset(Timer::EResolution::Mills);
 
 			bGotMsg = (PeekMessage(&Msg, NULL, 0U, 0U, PM_REMOVE) != 0);
@@ -180,6 +166,15 @@ namespace Funky
 
 	bool FunkyEngine::Shutdown()
 	{
+		LOG("FunkyEngine::Shutdown()");
+
+
+		LOG("\tExiting SDL");
+		SDL_Quit();
+		LOG("\tExiting SDL Image");
+		IMG_Quit();
+
+		LOG("Shutdown Completed!");
 		return true;
 	}
 

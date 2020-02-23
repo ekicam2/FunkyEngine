@@ -209,6 +209,7 @@
     <ClInclude Include="Source\Core\Assets\IAsset.h" />
     <ClInclude Include="Source\Core\Assets\Texture.h" />
     <ClInclude Include="Source\Core\Containers.h" />
+    <ClInclude Include="Source\Core\Events\EngineEvents.h" />
     <ClInclude Include="Source\Core\IIOSystem.h" />
     <ClInclude Include="Source\Core\Memory\Memory.h" />
     <ClInclude Include="Source\Core\Memory\MemoryPool.h" />
@@ -271,6 +272,7 @@
     <ClCompile Include="Source\Core\Assets\ITexture.cpp" />
     <ClCompile Include="Source\Core\Assets\StaticMesh.cpp" />
     <ClCompile Include="Source\Core\Assets\Texture.cpp" />
+    <ClCompile Include="Source\Core\Events\Event.h" />
     <ClCompile Include="Source\Core\IIOSystem.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsConditionVariable.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsIOSystem.cpp" />

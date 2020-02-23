@@ -144,7 +144,13 @@ int main(i32 argc, char** argv)
 	if (Engine.Init())
 		Engine.Run();
 
-	Engine.Shutdown();
+	if (!Engine.Shutdown())
+		LOG_ERROR("Error while cleaning up.");
+	
+
+	LOG("Waiting for input after close.");
+	// wait with console
+	getchar();
 
 	return 0;
 }

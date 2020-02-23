@@ -9,5 +9,5 @@ void Funky::Scene::Init()
 
 void Funky::Scene::Tick([[maybe_unused]] f32 Delta)
 {
-	LOG("SceneTick: ", Delta);
+	//LOG("SceneTick: ", Delta);
 }

@@ -46,6 +46,8 @@ namespace Funky
 			virtual void BindTexture(RenderingBackend::ShaderResourceStage Stage, RTexture* Texture, u32 StartIndex = 0u) = 0;
 			virtual void BindTexture(RenderingBackend::ShaderResourceStage Stage, RRenderTarget* Texture, u32 StartIndex = 0u) = 0;
 
+			virtual void Draw(RBuffer* VertexBuffer) = 0;
+
 			virtual void Present() = 0;
 
 			Core::Memory::UniquePtr<RenderingResourcesManager> ResourceManager;

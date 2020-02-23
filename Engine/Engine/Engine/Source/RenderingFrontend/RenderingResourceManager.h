@@ -35,10 +35,15 @@ namespace Funky
 				return static_cast<ResourceType*>(Resources[Resources.size() - 1].Get());
 			}
 
-			template <typename ResourceType>
-			ResourceType* GetResourceAt(u32 Index)
+
+			RRenderTarget* GetSwapchainRenderTarget()
 			{
-				return dynamic_cast<ResourceType*>(Resources[Index].Get());
+				return reinterpret_cast<RRenderTarget*>(Resources[0].Get());
+			}
+
+			RDepthStencil* GetSwapchainDepthStencil()
+			{
+				return reinterpret_cast<RDepthStencil*>(Resources[1].Get());
 			}
 
 			/** Not used at the moment. */

@@ -453,6 +453,9 @@
     <ClInclude Include="Source\RenderingBackend\Internal\DX11\DX11RenderingResources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Core\Events\EngineEvents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Source.cpp">
@@ -543,6 +546,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\UserFramework\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\Events\Event.h">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

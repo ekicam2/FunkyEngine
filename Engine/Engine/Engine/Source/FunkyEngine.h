@@ -40,6 +40,7 @@ namespace Funky
 
 	private:
 		bool CreateAndShowWindow(Math::Vec2u const & windowSize);
+		bool bShouldRun = true;
 
 		static FunkyEngine* _Engine;
 		static Core::IO::IIOSystem* _IO;

@@ -47,6 +47,8 @@ namespace Funky
 			virtual void BindTexture(RenderingBackend::ShaderResourceStage Stage, RTexture* Texture, u32 StartIndex = 0u) override;
 			virtual void BindTexture(RenderingBackend::ShaderResourceStage Stage, RRenderTarget* Texture, u32 StartIndex = 0u) override;
 
+			virtual void Draw(RBuffer* VertexBuffer) override;
+
 			virtual void Present() override;
 
 			bool CreateDeviceAndSwapchain(HWND hwnd);
@@ -57,9 +59,9 @@ namespace Funky
 		private:
 			HWND WindowHandle;
 
-			Microsoft::WRL::ComPtr<ID3D11Device>		pDevice = nullptr;
-			Microsoft::WRL::ComPtr<ID3D11DeviceContext> pDeviceContext = nullptr;
-			Microsoft::WRL::ComPtr<IDXGISwapChain>		pSwapChain = nullptr;
+			Microsoft::WRL::ComPtr<ID3D11Device>		pDevice			= nullptr;
+			Microsoft::WRL::ComPtr<ID3D11DeviceContext> pDeviceContext	= nullptr;
+			Microsoft::WRL::ComPtr<IDXGISwapChain>		pSwapChain		= nullptr;
 		};
 	}
 }

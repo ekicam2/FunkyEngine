@@ -15,7 +15,13 @@ namespace Funky
 			virtual void Shutdown() override;
 
 			virtual void DrawScene(class RenderScene* SceneToRender) override;
-private:
+		private:
+			RRenderTarget* RT = nullptr;
+			RDepthStencil* DS = nullptr;
+
+			RBuffer* vb = nullptr;
+			RBuffer* ib = nullptr;
+			RShaderLink Shaders;
 		};
 	}
 }
