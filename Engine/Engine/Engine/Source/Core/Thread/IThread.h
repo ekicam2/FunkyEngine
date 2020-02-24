@@ -17,7 +17,7 @@ namespace Funky
 
 		namespace Thread
 		{
-			enum class Type : u8
+			enum class Group : u8
 			{
 				Any,
 				Main,
@@ -28,7 +28,8 @@ namespace Funky
 			class IThread
 			{
 			public:
-				static IThread* CreateThread(str const& Name, Funky::Core::Thread::Type ThreadType);
+				virtual ~IThread() = default;
+				static IThread* CreateThread(str const& Name, Funky::Core::Thread::Group ThreadType);
 
 				virtual i32 Run() = 0;
 				virtual void WaitForTask() = 0;
@@ -36,14 +37,13 @@ namespace Funky
 				bool IsWaitingForTask() const;
 				void AssignTask(Task::ITask* TaskToAssign);
 
-				FORCEINLINE Thread::Type GetType() const;
+				FORCEINLINE Thread::Group GetType() const;
 
 			protected:
-				IThread(str const& Name, Thread::Type ThreadType);
-				virtual ~IThread() = default;
+				IThread(str const& Name, Thread::Group ThreadType);
 
 				str Name;
-				Thread::Type Type;
+				Thread::Group Type;
 
 				mutable IMutex* StateMutex;
 				bool IsWaitingForTaskState;
@@ -55,7 +55,7 @@ namespace Funky
 		}
 	}
 }
-FORCEINLINE Funky::Core::Thread::Type Funky::Core::Thread::IThread::GetType() const
+FORCEINLINE Funky::Core::Thread::Group Funky::Core::Thread::IThread::GetType() const
 {
 	return Type;
 }

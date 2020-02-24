@@ -63,6 +63,13 @@ namespace Funky
 		// sort through and find what code to run for the message given
 		switch (Message)
 		{
+		case WM_SIZE:
+		{
+			if(RenderingBackend && RenderingBackend->IsInitialized())
+				RenderingBackend->OnViewportResized({ LOWORD(lParam), HIWORD(lParam) });
+			return 0;
+		}
+		break;
 		case WM_DESTROY:
 		{
 			bShouldRun = false;
@@ -78,7 +85,7 @@ namespace Funky
 
 	bool FunkyEngine::Init()
 	{
-		 ThreadPool.Reset(new Core::Thread::ThreadPool({ {Core::Thread::Type::Rendering, (u16)1u}, {Core::Thread::Type::Worker, (u16)5u} }));
+		 ThreadPool.Reset(new Core::Thread::ThreadPool({ {Core::Thread::Group::Rendering, (u16)1u}, {Core::Thread::Group::Worker, (u16)5u} }));
 		 TaskManager.Reset(new Core::Task::TaskManager(ThreadPool));
 
 		AssetManager.Reset(new Funky::AssetRegistry());
@@ -110,17 +117,18 @@ namespace Funky
 		}
 		
 		//LOG_FUNKY(fk::getExecPath());
-
+		TaskManager->Tick();
 		LOG("Init Rendering");
 		Rendering::DX11RenderingInitDesc InitDesc;
 		InitDesc.Api = Rendering::RenderingBackend::API::DX11;
 		InitDesc.hWnd = hWnd;
-
-		if (!RenderingBackend.Init(&InitDesc))
+		
+		RenderingBackend.Reset(new Rendering::RenderingBackend());
+		if (!RenderingBackend->Init(&InitDesc))
 			return false;
 
 		LOG("Create Renderer");
-		Renderer.Reset(new Rendering::Renderer(RenderingBackend));
+		Renderer.Reset(new Rendering::Renderer(*RenderingBackend));
 		LOG("Init Renderer");
 		if (!Renderer->Init())
 		{
@@ -183,8 +191,12 @@ namespace Funky
 		class RenderTask : public Core::Task::ITask
 		{
 		public:
-			RenderTask(Rendering::IRenderer* InRenderer) : Core::Task::ITask(Core::Thread::Type::Rendering) { Renderer = InRenderer; }
-			virtual void Process() override { 
+			RenderTask(Rendering::IRenderer* InRenderer) 
+			{ 
+				SetThreadGroup(Core::Thread::Group::Rendering); Renderer = InRenderer; 
+			}
+			virtual void Process() override 
+			{ 
 				Renderer->DrawScene(nullptr); 
 			}
 

@@ -37,9 +37,92 @@ namespace Funky
 
 		void DX11::OnViewportResized([[maybe_unused]]Math::Vec2u const & NewSize)
 		{
-			CHECK(false);
-	
-			//pDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+			
+			// ID3D11RenderTargetView* RTs[] = { nullptr };
+			// pDeviceContext->OMSetRenderTargets(0, RTs, nullptr);
+
+			ResourceManager->ReleaseSwapchain();
+
+			pSwapChain->ResizeBuffers(0, NewSize.X, NewSize.Y, DXGI_FORMAT::DXGI_FORMAT_UNKNOWN, 0);
+
+			DX11RenderTarget* RT = new DX11RenderTarget();
+			
+			D3D11_TEXTURE2D_DESC RenderTargetTextureDesc;
+			ZeroMemory(&RenderTargetTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+			RenderTargetTextureDesc.Width = NewSize.X;
+			RenderTargetTextureDesc.Height = NewSize.Y;
+			RenderTargetTextureDesc.Format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
+			RenderTargetTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_FLAG::D3D11_BIND_RENDER_TARGET;
+			RenderTargetTextureDesc.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
+			RenderTargetTextureDesc.MipLevels = RenderTargetTextureDesc.ArraySize = 1;
+			RenderTargetTextureDesc.SampleDesc.Count = 1;
+
+			D3D11_RENDER_TARGET_VIEW_DESC RenderTargetViewDesc;
+			ZeroMemory(&RenderTargetViewDesc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
+			RenderTargetViewDesc.Format = RenderTargetTextureDesc.Format;
+			RenderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION::D3D11_RTV_DIMENSION_TEXTURE2D;
+			RenderTargetViewDesc.Texture2D.MipSlice = 0;
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC RenderTargetTextureShaderViewDesc;
+			ZeroMemory(&RenderTargetTextureShaderViewDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+			RenderTargetTextureShaderViewDesc.Format = RenderTargetTextureDesc.Format;
+			RenderTargetTextureShaderViewDesc.ViewDimension = D3D_SRV_DIMENSION::D3D11_SRV_DIMENSION_TEXTURE2D;
+			RenderTargetTextureShaderViewDesc.Texture2D.MostDetailedMip = 0;
+			RenderTargetTextureShaderViewDesc.Texture2D.MipLevels = 1;
+
+
+			//HRESULT hr = pDevice->CreateTexture2D(&RenderTargetTextureDesc, nullptr, RT->pTexture.GetAddressOf());
+			HRESULT hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&RT->pTexture);
+
+			ASSERT(SUCCEEDED(hr), TEXT("couldn't create render target"));
+
+			hr = pDevice->CreateRenderTargetView(RT->pTexture.Get(), &RenderTargetViewDesc, RT->pRenderTargetView.GetAddressOf());
+			ASSERT(SUCCEEDED(hr), L"couldn't create render target view");
+
+			D3D11_VIEWPORT Viewport;
+			ZeroMemory(&Viewport, sizeof(D3D11_VIEWPORT));
+			Viewport.Width = static_cast<float>(NewSize.X);
+			Viewport.Height = static_cast<float>(NewSize.Y);
+			Viewport.MinDepth = 0.0f;
+			Viewport.MaxDepth = 1.0f;
+
+			pDeviceContext->RSSetViewports(1, &Viewport);
+
+			// hr = pDevice->CreateShaderResourceView(RT->pTexture.Get(), &RenderTargetTextureShaderViewDesc, RT->pTextureView.GetAddressOf());
+			// ASSERT(SUCCEEDED(hr), L"couldn't create render target texture shader resource view");
+
+
+			DX11DepthStencil* DS = new DX11DepthStencil();
+
+			//D3D11_DEPTH_STENCIL_DESC DepthStencilDesc;
+			//ZeroMemory(&DepthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+			//DepthStencilDesc.DepthEnable = TRUE;
+			//DepthStencilDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS;
+
+			D3D11_TEXTURE2D_DESC DepthStencilTextureDesc;
+			ZeroMemory(&DepthStencilTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+			DepthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			DepthStencilTextureDesc.Width = NewSize.X;
+			DepthStencilTextureDesc.Height = NewSize.Y;
+			DepthStencilTextureDesc.ArraySize = 1;
+			DepthStencilTextureDesc.MipLevels = 1;
+			DepthStencilTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
+			DepthStencilTextureDesc.SampleDesc.Count = 1;
+
+			hr = pDevice->CreateTexture2D(&DepthStencilTextureDesc, nullptr, DS->pTexture.GetAddressOf());
+			if (!SUCCEEDED(hr))
+			{
+				LOG_ERROR(TEXT("Couldn't create depth stencil buffer"));
+			}
+
+			D3D11_DEPTH_STENCIL_VIEW_DESC DepthViewDesc;
+			ZeroMemory(&DepthViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+			DepthViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			DepthViewDesc.ViewDimension = D3D11_DSV_DIMENSION::D3D11_DSV_DIMENSION_TEXTURE2D;
+
+			pDevice->CreateDepthStencilView(DS->pTexture.Get(), &DepthViewDesc, DS->pDepthStencilView.GetAddressOf());
+
+			ResourceManager->AssociateSwapchain(RT, DS);
 			//
 			//FUNKY_SAFE_RELEASE(pBackBufferView);
 			//FUNKY_SAFE_RELEASE(pDepthStencilView);
@@ -47,9 +130,10 @@ namespace Funky
 			////FUNKY_SAFE_RELEASE(pBackBuffer);
 			//FUNKY_SAFE_RELEASE(pDepthStencilBuffer);
 			//
-			//pSwapChain->ResizeBuffers(0, 0, 0,DXGI_FORMAT::DXGI_FORMAT_UNKNOWN, 0);
+			//
 			//
 			//InitSwapchain();
+			
 		}
 
 		RRenderTarget* DX11::CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
@@ -285,7 +369,7 @@ namespace Funky
 			pDeviceContext->PSSetShaderResources(0, 3u, rt1);
 			pDeviceContext->VSSetShaderResources(0, 3u, rt1);
 
-			DX11RenderTarget* RT = static_cast<DX11RenderTarget*>(RenderTargetToBind);
+			DX11RenderTarget* RT = reinterpret_cast<DX11RenderTarget*>(RenderTargetToBind);
 
 			ID3D11RenderTargetView* rt[] = { RT ? RT->pRenderTargetView.Get() : nullptr };
 			//TODO(ekicam2): should we bind here defult depthstencil?
@@ -297,8 +381,7 @@ namespace Funky
 			float color[4] = { Color.X, Color.Y, Color.Z, 1.0f };
 
 			DX11RenderTarget* RT = static_cast<DX11RenderTarget*>(RenderTargetToClear);
-			ID3D11RenderTargetView* FinalTarget = RT->pRenderTargetView.Get();
-			pDeviceContext->ClearRenderTargetView(FinalTarget, color);
+			pDeviceContext->ClearRenderTargetView(RT->pRenderTargetView.Get(), color);
 		}
 
 		void DX11::ClearDepthStencil(RDepthStencil* DepthStencilToClear, float Depth, float Stencil, bool bClearDepth, bool bClearStencil)
@@ -411,28 +494,6 @@ namespace Funky
 
 			WindowHandle = hwnd;
 
-			RECT ClientSize;
-			GetClientRect(hwnd, &ClientSize);
-
-			DXGI_SWAP_CHAIN_DESC SwapChainDesc;
-			ZeroMemory(&SwapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
-
-			SwapChainDesc.Windowed = TRUE;
-			SwapChainDesc.SampleDesc.Count = 1u;
-			SwapChainDesc.SampleDesc.Quality = 0u;
-			SwapChainDesc.BufferCount = 2u;
-			SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-			SwapChainDesc.BufferDesc.Width = ClientSize.right - ClientSize.left;
-			SwapChainDesc.BufferDesc.Height = ClientSize.bottom - ClientSize.top;
-			SwapChainDesc.BufferDesc.RefreshRate.Numerator = 1u;
-			SwapChainDesc.BufferDesc.RefreshRate.Denominator = 75u;
-			SwapChainDesc.BufferDesc.Format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
-			SwapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER::DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE; // dk
-			SwapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING::DXGI_MODE_SCALING_CENTERED;
-			SwapChainDesc.OutputWindow = hwnd;
-			SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-			SwapChainDesc.Flags;
-
 			UINT iDeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT
 				| D3D11_CREATE_DEVICE_SINGLETHREADED //atm we are only on one thread
 #ifdef _DEBUG
@@ -463,7 +524,11 @@ namespace Funky
 
 			LOG(TEXT("actually supported level is: "), DirectUtils::FeatureNameToString(ActuallySupportedLevel));
 
+			return true;
+		}
 
+		bool DX11::InitSwapchain()
+		{
 			Microsoft::WRL::ComPtr<IDXGIDevice> Device;
 			pDevice.As(&Device);
 
@@ -471,8 +536,33 @@ namespace Funky
 			Device->GetAdapter(Adapter.GetAddressOf());
 
 			Microsoft::WRL::ComPtr<IDXGIFactory> Factory;
-			hr = Adapter->GetParent(IID_PPV_ARGS(&Factory));
-			ASSERT(SUCCEEDED(hr), TEXT("couldn't create swapchain"));
+			HRESULT hr = Adapter->GetParent(IID_PPV_ARGS(&Factory));
+			ASSERT(SUCCEEDED(hr), TEXT("couldn't get adapter factory"));
+
+			RECT ClientSize;
+			GetClientRect(WindowHandle, &ClientSize);
+
+			WindowSize.X = ClientSize.right - ClientSize.left;
+			WindowSize.Y = ClientSize.bottom - ClientSize.top;
+
+			DXGI_SWAP_CHAIN_DESC SwapChainDesc;
+			ZeroMemory(&SwapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
+
+			SwapChainDesc.Windowed = TRUE;
+			SwapChainDesc.SampleDesc.Count = 1u;
+			SwapChainDesc.SampleDesc.Quality = 0u;
+			SwapChainDesc.BufferCount = 3u;
+			SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+			SwapChainDesc.BufferDesc.Width = WindowSize.X;
+			SwapChainDesc.BufferDesc.Height = WindowSize.Y;
+			SwapChainDesc.BufferDesc.RefreshRate.Numerator = 1u;
+			SwapChainDesc.BufferDesc.RefreshRate.Denominator = 75u;
+			SwapChainDesc.BufferDesc.Format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
+			SwapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER::DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE; // dk
+			SwapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING::DXGI_MODE_SCALING_CENTERED;
+			SwapChainDesc.OutputWindow = WindowHandle;
+			SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+			SwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 			if (SUCCEEDED(hr))
 			{
@@ -486,13 +576,8 @@ namespace Funky
 				ASSERT(SUCCEEDED(hr), TEXT("Couldn't associate swapchain with window."));
 			}
 
-			return true;
-		}
-
-		bool DX11::InitSwapchain()
-		{
-			DX11RenderTarget* RT = ResourceManager->RegisterResource<DX11RenderTarget>();
-			HRESULT hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&RT->pTexture);
+			DX11RenderTarget* RT = new DX11RenderTarget();
+			hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&RT->pTexture);
 
 			if (!SUCCEEDED(hr))
 			{
@@ -510,12 +595,43 @@ namespace Funky
 				return false;
 			}
 
-			CreateDepthStencil({ BackBufferDesc.Width, BackBufferDesc.Height });
+			DX11DepthStencil* DS = new DX11DepthStencil();
+
+			//D3D11_DEPTH_STENCIL_DESC DepthStencilDesc;
+			//ZeroMemory(&DepthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+			//DepthStencilDesc.DepthEnable = TRUE;
+			//DepthStencilDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS;
+
+			D3D11_TEXTURE2D_DESC DepthStencilTextureDesc;
+			ZeroMemory(&DepthStencilTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+			DepthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			DepthStencilTextureDesc.Width = WindowSize.X;
+			DepthStencilTextureDesc.Height = WindowSize.Y;
+			DepthStencilTextureDesc.ArraySize = 1;
+			DepthStencilTextureDesc.MipLevels = 1;
+			DepthStencilTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
+			DepthStencilTextureDesc.SampleDesc.Count = 1;
+
+			hr = pDevice->CreateTexture2D(&DepthStencilTextureDesc, nullptr, DS->pTexture.GetAddressOf());
+			if (!SUCCEEDED(hr))
+			{
+				LOG_ERROR(TEXT("Couldn't create depth stencil buffer"));
+				return false;
+			}
+
+			D3D11_DEPTH_STENCIL_VIEW_DESC DepthViewDesc;
+			ZeroMemory(&DepthViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+			DepthViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			DepthViewDesc.ViewDimension = D3D11_DSV_DIMENSION::D3D11_DSV_DIMENSION_TEXTURE2D;
+
+			pDevice->CreateDepthStencilView(DS->pTexture.Get(), &DepthViewDesc, DS->pDepthStencilView.GetAddressOf());
+
+			ResourceManager->AssociateSwapchain(RT, DS);
 
 			D3D11_VIEWPORT Viewport;
 			ZeroMemory(&Viewport, sizeof(D3D11_VIEWPORT));
-			Viewport.Height = static_cast<float>(BackBufferDesc.Height);
-			Viewport.Width = static_cast<float>(BackBufferDesc.Width);
+			Viewport.Width = static_cast<float>(WindowSize.X);
+			Viewport.Height = static_cast<float>(WindowSize.Y);
 			Viewport.MinDepth = 0.0f;
 			Viewport.MaxDepth = 1.0f;
 

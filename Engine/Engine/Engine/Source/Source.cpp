@@ -75,7 +75,7 @@ int main()
 class TestTask : public Funky::Core::Task::ITask
 {
 public:
-	TestTask() : ITask(Funky::Core::Thread::Type::Any) {}
+	TestTask() : ITask(Funky::Core::Thread::Group::Any) {}
 	void Process()
 	{
 		using namespace std::chrono_literals;
@@ -87,7 +87,7 @@ public:
 
 int main()
 {
-	Funky::Core::Thread::ThreadPool ThreadPool({ {Funky::Core::Thread::Type::Worker, (u16)5u} });
+	Funky::Core::Thread::ThreadPool ThreadPool({ {Funky::Core::Thread::Group::Worker, (u16)5u} });
 	Funky::Core::Task::TaskManager TaskManager(&ThreadPool);
 	
 	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());

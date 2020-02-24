@@ -36,7 +36,7 @@ namespace Funky
 		void RenderScene();
 
 		AssetRegistry* GetAssetRegistry() { return AssetManager; }
-		Rendering::RenderingBackend* GetRenderingBackend() { return &RenderingBackend; }
+		Rendering::RenderingBackend* GetRenderingBackend() { return RenderingBackend.Get(); }
 
 	private:
 		bool CreateAndShowWindow(Math::Vec2u const & windowSize);
@@ -45,7 +45,7 @@ namespace Funky
 		static FunkyEngine* _Engine;
 		static Core::IO::IIOSystem* _IO;
 
-		Rendering::RenderingBackend RenderingBackend;
+		Core::Memory::UniquePtr<Rendering::RenderingBackend> RenderingBackend;
 		Core::Memory::UniquePtr<Rendering::IRenderer> Renderer;
 
 		Core::Memory::UniquePtr<Core::IO::IIOSystem> IOSystem;

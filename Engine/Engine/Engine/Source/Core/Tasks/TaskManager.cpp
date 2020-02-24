@@ -24,7 +24,7 @@ void Funky::Core::Task::TaskManager::EnqueueTask(ITask* NewTask)
 	TaskQueue.push_back(NewTask);
 }
 
-Funky::Core::Task::ITask* Funky::Core::Task::TaskManager::DequeueTask(Thread::Type RequiredThreadToRunOn)
+Funky::Core::Task::ITask* Funky::Core::Task::TaskManager::DequeueTask(Thread::Group RequiredThreadToRunOn)
 {
 	if (TaskQueue.size() == 0u) return nullptr;
 
@@ -66,7 +66,7 @@ void Funky::Core::Task::TaskManager::Tick()
 	//LOG("tasks ", TaskQueue.size());
 
 	//always try to dispatch worker job first	
-	Funky::Core::Thread::IThread* Thread = ThreadPool->GetIdleThread(Funky::Core::Thread::Type::Worker);
+	Funky::Core::Thread::IThread* Thread = ThreadPool->GetIdleThread(Funky::Core::Thread::Group::Worker);
 	if (Thread != nullptr)
 	{
 		ITask* Task = DequeueTask(Thread->GetType());
@@ -76,7 +76,7 @@ void Funky::Core::Task::TaskManager::Tick()
 		}
 	}
 
-	Thread = ThreadPool->GetIdleThread(Funky::Core::Thread::Type::Rendering);
+	Thread = ThreadPool->GetIdleThread(Funky::Core::Thread::Group::Rendering);
 	if (Thread != nullptr)
 	{
 		ITask* Task = DequeueTask(Thread->GetType());

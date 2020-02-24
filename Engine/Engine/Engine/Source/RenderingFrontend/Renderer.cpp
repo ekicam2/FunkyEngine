@@ -95,6 +95,9 @@ void Funky::Rendering::Renderer::DrawScene(class RenderScene* SceneToRender)
 {
 	(void*)SceneToRender;
 
+	RT = RenderingBackend.GetResourceManager()->GetSwapchainRenderTarget();
+	DS = RenderingBackend.GetResourceManager()->GetSwapchainDepthStencil();
+
 	RenderingBackend.BindRenderTarget(RT);
 	RenderingBackend.ClearRenderTarget(RT, { 0.392156899f, 0.584313750f, 0.929411829f });
 	RenderingBackend.ClearDepthStencil(DS, 0.0f, 0u);

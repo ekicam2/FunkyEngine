@@ -38,12 +38,24 @@ namespace Funky
 
 			RRenderTarget* GetSwapchainRenderTarget()
 			{
-				return reinterpret_cast<RRenderTarget*>(Resources[0].Get());
+				return SwapchainRT.Get();
 			}
 
 			RDepthStencil* GetSwapchainDepthStencil()
 			{
-				return reinterpret_cast<RDepthStencil*>(Resources[1].Get());
+				return SwapchainDS.Get();
+			}
+
+			void ReleaseSwapchain()
+			{
+				SwapchainRT.Reset();
+				SwapchainDS.Reset();
+			}
+
+			void AssociateSwapchain(RRenderTarget* RT, RDepthStencil* DS)
+			{
+				SwapchainRT.Reset(RT);
+				SwapchainDS.Reset(DS);
 			}
 
 			/** Not used at the moment. */
@@ -58,6 +70,9 @@ namespace Funky
 			}
 
 		private:
+			Core::Memory::UniquePtr<RRenderTarget> SwapchainRT;
+			Core::Memory::UniquePtr<RDepthStencil> SwapchainDS;
+
 			darray<Core::Memory::UniquePtr<IRenderingResource>> Resources;
 		};
 	}

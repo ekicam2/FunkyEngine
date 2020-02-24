@@ -59,6 +59,7 @@ namespace Funky
 
 		private:
 			HWND WindowHandle;
+			Math::Vec2u WindowSize = { 0u, 0u };
 
 			Microsoft::WRL::ComPtr<ID3D11Device>		pDevice			= nullptr;
 			Microsoft::WRL::ComPtr<ID3D11DeviceContext> pDeviceContext	= nullptr;

@@ -14,14 +14,17 @@ namespace Funky
 			class ITask 
 			{
 			public:
-				ITask(Thread::Type Type);
+				ITask();
 				virtual void Process() = 0;
 				virtual void PostProcess() {}
 
-				FORCEINLINE Thread::Type GetThreadToRunOn() const;
-				 bool CanRunOnThread(Thread::Type InThreadType) const;
+				FORCEINLINE Thread::Group GetThreadToRunOn() const;
+				bool CanRunOnThread(Thread::Group InThreadType) const;
+
+			protected:
+				void SetThreadGroup(Thread::Group Type);
 			private:
-				Thread::Type ThreadToRunOn;
+				Thread::Group ThreadToRunOn = Thread::Group::Any;
 			};
 		}
 	}

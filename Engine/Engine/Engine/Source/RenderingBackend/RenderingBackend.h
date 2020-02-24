@@ -77,6 +77,10 @@ namespace Funky
 			RenderingBackend();
 			virtual ~RenderingBackend();
 
+			bool IsInitialized() const {
+				return Impl != nullptr;
+			}
+
 			bool Init(RenderingBackendInitDesc* InitDesc);
 			void OnViewportResized(Math::Vec2u const & NewSize);
 

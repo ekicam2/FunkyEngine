@@ -2,7 +2,7 @@
 
 #include "Core/Thread/IMutex.h"
 
-Funky::Core::Thread::IThread::IThread(str const& Name, Thread::Type ThreadType)
+Funky::Core::Thread::IThread::IThread(str const& Name, Thread::Group ThreadType)
 	: Name(Name)
 	, Type(ThreadType)
 	, StateMutex(IMutex::Create())

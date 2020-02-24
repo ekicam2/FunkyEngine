@@ -16,11 +16,11 @@ Funky::Core::Thread::ThreadPool::ThreadPool(ThreadCreationDesc const& CreationDe
 	}
 }
 
-Funky::Core::Thread::IThread* Funky::Core::Thread::ThreadPool::GetIdleThread(Funky::Core::Thread::Type Type)
+Funky::Core::Thread::IThread* Funky::Core::Thread::ThreadPool::GetIdleThread(Funky::Core::Thread::Group Type)
 {
 	for (auto& Thread : AllThreads)
 	{
-		if ((Type == Type::Any || Thread->GetType() == Type) && Thread->IsWaitingForTask())
+		if ((Type == Group::Any || Thread->GetType() == Type) && Thread->IsWaitingForTask())
 			return Thread;
 	}
 
