@@ -28,7 +28,7 @@ namespace Funky
 		}
 
 		RShader* RenderingBackend::CreateVertexShader(ShaderInputDesc* ShaderDesc)
-{
+		{
 			return Impl->CreateVertexShader(ShaderDesc);
 		}
 
@@ -37,7 +37,7 @@ namespace Funky
 			return Impl->CreatePixelShader(ShaderDesc);
 		}
 
-		RBuffer* RenderingBackend::CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
+		RBuffer* RenderingBackend::CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
 		{
 			return Impl->CreateBuffer(SizeOfBuffer, BufferType, Usage, Data);
 		}
@@ -69,9 +69,9 @@ namespace Funky
 			return Impl->CreateCubemap(Data, Size);
 		}
 
-		void RenderingBackend::BindRenderTarget(RRenderTarget* RenderTargetToBind)
+		void RenderingBackend::BindRenderTarget(RRenderTarget* RenderTargetToBind, RDepthStencil* DepthStencilToBind /*= nullptr*/)
 		{
-			Impl->BindRenderTarget(RenderTargetToBind);
+			Impl->BindRenderTarget(RenderTargetToBind, DepthStencilToBind);
 		}
 
 		void RenderingBackend::ClearRenderTarget(RRenderTarget* RenderTargetToClear, Math::Vec3f const& Color)
@@ -123,15 +123,15 @@ namespace Funky
 
 		void RenderingBackend::Draw(RBuffer* VertexBuffer)
 		{
-			CHECK(VertexBuffer->BufferType == RBuffer::Type::Vertex);
+			CHECK(VertexBuffer->BufferType == RBuffer::EType::Vertex);
 
 			Impl->Draw(VertexBuffer);
 		}
 
 		void RenderingBackend::DrawIndexed(RBuffer* VertexBuffer, RBuffer* IndexBuffer)
 		{
-			CHECK(VertexBuffer->BufferType == RBuffer::Type::Vertex);
-			CHECK(IndexBuffer->BufferType == RBuffer::Type::Index);
+			CHECK(VertexBuffer->BufferType == RBuffer::EType::Vertex);
+			CHECK(IndexBuffer->BufferType == RBuffer::EType::Index);
 
 			Impl->DrawIndexed(VertexBuffer, IndexBuffer);
 		}

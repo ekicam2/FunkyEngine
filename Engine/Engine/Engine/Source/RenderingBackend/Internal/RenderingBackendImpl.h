@@ -23,7 +23,7 @@ namespace Funky
 			virtual RRenderTarget* CreateRenderTarget(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/) = 0;
 			virtual RDepthStencil* CreateDepthStencil(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/) = 0;
 
-			virtual RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data = nullptr) = 0;
+			virtual RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data = nullptr) = 0;
 
 			virtual RShader* CreateVertexShader(RenderingBackend::ShaderInputDesc* ShaderDesc) = 0;
 			virtual RShader* CreatePixelShader(RenderingBackend::ShaderInputDesc* ShaderDesc) = 0;
@@ -31,7 +31,7 @@ namespace Funky
 			virtual RTexture* CreateTexture2D(byte const * const Data, Math::Vec2u const & Size) = 0;
 			virtual RTexture* CreateCubemap(byte const * const Data, Math::Vec2u const & Size) = 0;
 
-			virtual void BindRenderTarget(RRenderTarget* RenderTargetToBind) = 0;
+			virtual void BindRenderTarget(RRenderTarget* RenderTargetToBind, RDepthStencil* DepthStencilToBind) = 0;
 
 			virtual void ClearRenderTarget(RRenderTarget* RenderTargetToClear, Math::Vec3f const& Color) = 0;
 			virtual void ClearDepthStencil(RDepthStencil* DepthStencilToClear, float Depth, float Stencil, bool bClearDepth, bool bClearStencil) = 0;

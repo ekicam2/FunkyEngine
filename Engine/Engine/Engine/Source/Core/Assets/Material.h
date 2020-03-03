@@ -4,6 +4,7 @@
 #include "Core/String.h"
 
 #include "Core/Assets/IAsset.h"
+#include "RenderingFrontend/RenderScene.h"
 
 #include <optional>
 #include <fstream>
@@ -16,19 +17,40 @@ namespace Funky
 	{
 		struct Material : public IAsset
 		{
+			static Material* CreateMaterialFromSourceCode(char const* VSSource, char const* PSSource)
+			{
+				Material* Ret = new Material();
+				Ret->VSSource = (VSSource);
+				Ret->PSSource = (PSSource);
+				return Ret;
+			}
+
 			enum class RenderingTechnique
 			{
 				DefaultLit,
 				Internal_Depth
 			};
 
-			explicit Material(str const & Path);
-			FORCEINLINE bool IsValid();
 			static std::optional<std::pair<str, str>> ParseMaterial(str const& Path);
 
-			//Rendering::RenderingBackend::VertexShader VS = Rendering::RenderingBackend::INVALID_INDEX;
-			//Rendering::RenderingBackend::PixelShader PS = Rendering::RenderingBackend::INVALID_INDEX;
+			FORCEINLINE char const * GetVertexShaderSourceCode() const { return VSSource.c_str(); }
+			FORCEINLINE char const * GetPixelShaderSourceCode() const { return PSSource.c_str(); }
+
+			FORCEINLINE size GetVertexShaderSourceCodeLength() const {
+				return strlen(GetVertexShaderSourceCode());
+			}
+
+			FORCEINLINE size GetPixelShaderSourceCodeLength() const {
+				return strlen(GetPixelShaderSourceCode());
+			}
+			//todo cleanup
+		private:
+			str VSSource;
+			str PSSource;
+		public:
 			RenderingTechnique Technique = RenderingTechnique::DefaultLit;
+
+			Rendering::ShaderLink Linkage;
 		};
 	}
 }

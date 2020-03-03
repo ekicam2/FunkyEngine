@@ -221,10 +221,10 @@ namespace Funky
 
 			darray<D3D11_INPUT_ELEMENT_DESC> LayoutDesc =
 			{
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-				//{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				//{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				//{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			};
 
 			hr = pDevice->CreateInputLayout(LayoutDesc.data(), (u32)LayoutDesc.size(), ShaderDesc->ShaderData, ShaderDesc->DataSize, Shader->pInputLayout.GetAddressOf());
@@ -243,25 +243,26 @@ namespace Funky
 			return Shader;
 		}
 
-		RBuffer* DX11::CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
+		RBuffer* DX11::CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
 		{
-			// If buffer will be static it has to be initialized with correct data!
-			CHECK(Usage == RBuffer::UsageType::Static && Data != nullptr);
+			if(Usage == RBuffer::EUsageType::Static)
+				CHECK(Data != nullptr);
 
 			D3D11_BUFFER_DESC ConstantBufferDesc;
 			ZeroMemory(&ConstantBufferDesc, sizeof(D3D11_BUFFER_DESC));
 			ConstantBufferDesc.ByteWidth = (u32)SizeOfBuffer;
 			ConstantBufferDesc.BindFlags = DirectUtils::BufferToDXType(BufferType);
 			ConstantBufferDesc.Usage = DirectUtils::BufferToDXUsage(Usage);
-			ConstantBufferDesc.CPUAccessFlags = Usage == RBuffer::UsageType::Static ? 0 : D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE;
+			ConstantBufferDesc.CPUAccessFlags = Usage == RBuffer::EUsageType::Static ? 0 : D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE;
 			
 			D3D11_SUBRESOURCE_DATA BufferInitData;
 			ZeroMemory(&BufferInitData, sizeof(D3D11_SUBRESOURCE_DATA));
 			BufferInitData.pSysMem = Data;
 
 			DX11Buffer* Ret = ResourceManager->RegisterResource<DX11Buffer>(BufferType, Usage);
-			Ret->Stride = 12;
-			Ret->ElementCount = (BufferType == RBuffer::Type::Vertex || BufferType == RBuffer::Type::Index) ? 3 : 0;
+			Ret->Stride = (BufferType == RBuffer::EType::Vertex) ? sizeof(Vertex) : 3;
+			Ret->ElementCount = (BufferType == RBuffer::EType::Vertex || BufferType == RBuffer::EType::Index) ? 3 : 0;
+			Ret->SizeInBytes = SizeOfBuffer;
 
 			HRESULT hr = pDevice->CreateBuffer(&ConstantBufferDesc, Data ? &BufferInitData : nullptr, Ret->pBuffer.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create buffer");
@@ -362,7 +363,7 @@ namespace Funky
 			return nullptr;
 		}
 
-		void DX11::BindRenderTarget(RRenderTarget* RenderTargetToBind)
+		void DX11::BindRenderTarget(RRenderTarget* RenderTargetToBind, RDepthStencil* DepthStencilToBind)
 		{
 			//TODO(ekicam2): it's hacky to unbind it all the time, render target should cache is somehow
 			ID3D11ShaderResourceView* rt1[] = { nullptr, nullptr, nullptr };
@@ -370,10 +371,10 @@ namespace Funky
 			pDeviceContext->VSSetShaderResources(0, 3u, rt1);
 
 			DX11RenderTarget* RT = reinterpret_cast<DX11RenderTarget*>(RenderTargetToBind);
+			DX11DepthStencil* DS = reinterpret_cast<DX11DepthStencil*>(DepthStencilToBind);
 
 			ID3D11RenderTargetView* rt[] = { RT ? RT->pRenderTargetView.Get() : nullptr };
-			//TODO(ekicam2): should we bind here defult depthstencil?
-			pDeviceContext->OMSetRenderTargets(1, rt, nullptr);// pDepthStencilView.Get());
+			pDeviceContext->OMSetRenderTargets(1, rt, DS ? DS->pDepthStencilView.Get() : nullptr);
 		}
 
 		void DX11::ClearRenderTarget(RRenderTarget* RenderTargetToClear, Math::Vec3f const& Color)
@@ -419,11 +420,11 @@ namespace Funky
 
 			u32 s = 0, g = 0;
 
-			if (Buffer->BufferType == RBuffer::Type::Vertex)
+			if (Buffer->BufferType == RBuffer::EType::Vertex)
 			{
 				pDeviceContext->IASetVertexBuffers(0u, 1u, DXBuffer->pBuffer.GetAddressOf(), &s, &g);
 			}
-			if (Buffer->BufferType == RBuffer::Type::Index)
+			if (Buffer->BufferType == RBuffer::EType::Index)
 			{
 				pDeviceContext->IASetIndexBuffer(DXBuffer->pBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
 			}

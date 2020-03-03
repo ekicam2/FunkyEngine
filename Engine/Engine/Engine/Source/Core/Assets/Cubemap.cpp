@@ -1,8 +1,10 @@
 #include "Cubemap.h"
 #include "LogMacros.h"
 
-Funky::Asset::CubemapTexture* Funky::Asset::CubemapTexture::CreateFromFile(str (&pFilePath)[6])
+Funky::Asset::CubemapTexture* Funky::Asset::CubemapTexture::CreateFromFile([[maybe_unused]]str (&pFilePath)[6])
 {
+	return nullptr;
+/*
 	SDL_Surface* image[6];
 	for (u8 i = 0; i < 6; ++i)
 	{
@@ -57,6 +59,7 @@ Funky::Asset::CubemapTexture* Funky::Asset::CubemapTexture::CreateFromFile(str (
 	}
 
 	return cubemap;
+*/
 }
 
 byte* Funky::Asset::CubemapTexture::GetData() const
@@ -66,8 +69,8 @@ byte* Funky::Asset::CubemapTexture::GetData() const
 
 Funky::Asset::CubemapTexture::~CubemapTexture()
 {
-	for (u8 i = 0; i < 6; ++i)
-	{
-		SDL_FreeSurface(m_pImage[i]);
-	}
+	//for (u8 i = 0; i < 6; ++i)
+	//{
+	//	SDL_FreeSurface(m_pImage[i]);
+	//}
 }

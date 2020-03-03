@@ -27,32 +27,46 @@ namespace Funky
 
 			virtual ~StaticMesh() = default;
 
-			FORCEINLINE size_t GetIndicesCount() const
+			FORCEINLINE size GetIndicesCount() const
 			{
 				return Indices.size();
 			}
 
-			FORCEINLINE size_t GetVerticesCount() const
+			FORCEINLINE size GetVerticesCount() const
 			{
 				return Vertices.size();
 			}
 
-			FORCEINLINE darray<Vertex> const & GetVertices() const
+			FORCEINLINE size GetVertexBufferSizeInBytes() const
 			{
-				return Vertices;
+				return Vertices.size() * sizeof(Vertex);
 			}
 
-			FORCEINLINE darray<u16> const& GetIndices() const
+			FORCEINLINE size GetIndexBufferSizeInBytes() const
 			{
-				return Indices;
+				return Indices.size() * sizeof(u16);
+			}
+
+			FORCEINLINE Vertex const * GetVertices() const
+			{
+				return Vertices.data();
+			}
+
+			FORCEINLINE u16 const * GetIndices() const
+			{
+				return Indices.data();
 			}
 
 		private:
 			StaticMesh();
-			darray<Vertex> Vertices;
-			darray<u16> Indices;
 
-			Rendering::RStaticMesh RHandle;
+			darray<Vertex>	Vertices;
+			darray<u16>		Indices;
+
+			//todo rethink
+		public:
+			Rendering::RBuffer * VertexBuffer = nullptr;
+			Rendering::RBuffer * IndexBuffer  = nullptr;
 		};
 	}
 }

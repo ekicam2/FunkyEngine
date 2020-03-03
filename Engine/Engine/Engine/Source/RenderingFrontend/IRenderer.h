@@ -4,8 +4,12 @@
 
 namespace Funky
 {
+	struct IScene;
+
 	namespace Rendering
 	{
+		struct RenderScene;
+
 		class IRenderer
 		{
 		public:
@@ -15,11 +19,13 @@ namespace Funky
 			virtual bool Init() = 0;
 			virtual void Shutdown() = 0;
 
-			virtual void DrawScene(class RenderScene* SceneToRender) = 0;
+			virtual RenderScene* CreateRenderScene(IScene* Scene) = 0;
+			virtual void DrawScene(RenderScene* SceneToRender) = 0;
 
 		protected:
 			Rendering::RenderingBackend& RenderingBackend;
 		};
+
 	}
 }
 

@@ -12,12 +12,7 @@
 
 void Funky::AssetRegistry::AssetDesc::Load()
 {
-	switch (Type)
-	{
-	case Funky::Asset::EType::Material:
-		AssetPtr = new Asset::Material(Path);
-		break;
-	}
+	CHECK(false);
 }
 
 void Funky::AssetRegistry::AssetDesc::Free()

@@ -92,12 +92,12 @@ namespace Funky
 			RShader* CreateVertexShader(ShaderInputDesc* ShaderDesc);
 			RShader* CreatePixelShader(ShaderInputDesc* ShaderDesc);
 
-			RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data = nullptr);
+			RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data = nullptr);
 
 			RTexture* CreateTexture2D(byte const * const Data, Math::Vec2u const & Size);
 			RTexture* CreateCubemap(byte const * const Data, Math::Vec2u const & Size);
 
-			void BindRenderTarget(RRenderTarget* RenderTargetToBind);
+			void BindRenderTarget(RRenderTarget* RenderTargetToBind, RDepthStencil* DepthStencilToBind = nullptr);
 
 			void ClearRenderTarget(RRenderTarget* RenderTargetToClear, Math::Vec3f const & Color);
 			void ClearDepthStencil(RDepthStencil* DepthStencilToClear, float Depth, float Stencil, bool bClearDepth = true, bool bClearStencil = true);
@@ -130,11 +130,3 @@ namespace Funky
 		};
 	}
 }
-
-#define DEFINE_CONSTANT_BUFFER_BEGIN(BufferName) \
-		struct BufferName {
-
-//https://docs.microsoft.com/pl-pl/windows/desktop/direct3dhlsl/dx-graphics-hlsl-packing-rules			
-#define DEFINE_CONSTANT_BUFFER_END(BufferName)	\
-		};										\
-		static_assert((sizeof(BufferName) % 16) == 0, "Constant Buffer size must be 16-byte aligned");	

@@ -38,8 +38,8 @@ namespace Funky
 		class RBuffer : public IRenderingResource
 		{
 		public:
-			using Data_t = void*;
-			enum class Type : u8
+			using Data_t = void const * const;
+			enum class EType : u8
 			{
 				None,
 				Vertex,
@@ -47,7 +47,7 @@ namespace Funky
 				Uniform
 			};
 
-			enum class UsageType : u8
+			enum class EUsageType : u8
 			{
 				Default,
 				Static,
@@ -57,8 +57,8 @@ namespace Funky
 
 			RBuffer() = default;
 			
-			Type BufferType = Type::None;
-			UsageType Usage = UsageType::Default;
+			EType BufferType = EType::None;
+			EUsageType Usage = EUsageType::Default;
 			u32 ElementCount = 0u;
 		};
 
@@ -82,20 +82,6 @@ namespace Funky
 				Texture3D
 			} TextureType;
 
-		};
-
-		/** DIMMIES */
-
-		struct RStaticMesh
-		{
-			RBuffer* VertexBuffer;
-			RBuffer* IndexBuffer;
-		};
-
-		struct RShaderLink
-		{
-			RShader* VS;
-			RShader* PS;
 		};
 
 	}

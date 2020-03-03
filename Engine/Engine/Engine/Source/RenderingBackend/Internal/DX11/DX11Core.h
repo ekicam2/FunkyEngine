@@ -28,12 +28,12 @@ namespace Funky
 			virtual RShader* CreateVertexShader(RenderingBackend::ShaderInputDesc* ShaderDesc) override;
 			virtual RShader* CreatePixelShader(RenderingBackend::ShaderInputDesc* ShaderDesc) override;
 
-			virtual RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::Type BufferType, RBuffer::UsageType Usage, RBuffer::Data_t Data = nullptr) override;
+			virtual RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data = nullptr) override;
 
 			virtual RTexture* CreateTexture2D(byte const * const Data, Math::Vec2u const & Size) override;
 			virtual RTexture* CreateCubemap(byte const * const Data, Math::Vec2u const & Size) override;
 
-			virtual void BindRenderTarget(RRenderTarget* RenderTargetToBind) override;
+			virtual void BindRenderTarget(RRenderTarget* RenderTargetToBind, RDepthStencil* DepthStencilToBind) override;
 
 			virtual void ClearRenderTarget(RRenderTarget* RenderTargetToClear, Math::Vec3f const& Color) override;
 			virtual void ClearDepthStencil(RDepthStencil* DepthStencilToClear, float Depth, float Stencil, bool bClearDepth, bool bClearStencil) override;

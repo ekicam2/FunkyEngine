@@ -51,7 +51,7 @@ namespace Funky
 		class DX11Buffer final : public RBuffer
 		{
 		public:
-			DX11Buffer(Type NewType, UsageType NewUsageType) { BufferType = NewType; Usage = NewUsageType; }
+			DX11Buffer(EType NewType, EUsageType NewUsageType) { BufferType = NewType; Usage = NewUsageType; }
 			Microsoft::WRL::ComPtr<ID3D11Buffer> pBuffer = nullptr;
 			size SizeInBytes = 0u;
 			u32 Stride = 0u;

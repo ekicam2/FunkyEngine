@@ -52,11 +52,12 @@ i32 Funky::Core::Thread::WindowsThread::Run()
 		TaskToProcess->Process();
 		TaskToProcess->PostProcess();
 
-		MutexScopeGuard ScopeGuard(StateMutex);
-		IsWaitingForTaskState = true;
-
 		delete TaskToProcess;
 		TaskToProcess = nullptr;
+
+		MutexScopeGuard ScopeGuard1(StateMutex);
+		IsWaitingForTaskState = true;
+
 	}
 
 	return 0;

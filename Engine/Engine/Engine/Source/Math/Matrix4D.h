@@ -7,11 +7,7 @@
 #include <Math/Vector4.h>
 #include <Math/Vector3.h>
 
-#include <sstream>
 #include "LogMacros.h"
-
-#include <glm/glm.hpp>
-#include "glm/gtc/matrix_transform.hpp"
 
 namespace Math
 {
@@ -94,15 +90,28 @@ namespace Math
 			Matrix4D::RotateZ(Modified, Rotator.Z);
 		}
 
+		static void Transpose(Matrix4D& Modified)
+		{
+			Matrix4D Copy = Modified;
 
-		static Matrix4D LookAt(MyVec3 const& Position, MyVec3 const& Destination, MyVec3 const& Up)
+			Modified.m[0][0] = Copy.m[0][0]; Modified.m[0][1] = Copy.m[1][0]; Modified.m[0][2] = Copy.m[2][0]; Modified.m[0][3] = Copy.m[3][0];
+			Modified.m[1][0] = Copy.m[0][1]; Modified.m[1][1] = Copy.m[1][1]; Modified.m[1][2] = Copy.m[2][1]; Modified.m[1][3] = Copy.m[3][1];
+			Modified.m[2][0] = Copy.m[0][2]; Modified.m[2][1] = Copy.m[1][2]; Modified.m[2][2] = Copy.m[2][2]; Modified.m[2][3] = Copy.m[3][2];
+			Modified.m[3][0] = Copy.m[0][3]; Modified.m[3][1] = Copy.m[1][3]; Modified.m[3][2] = Copy.m[2][3]; Modified.m[3][3] = Copy.m[3][3];
+		}
+
+
+		static Matrix4D LookAtLH(MyVec3 const& Position, MyVec3 const& Destination, MyVec3 const& Up)
 		{
 			CHECK(Up.Length() == 1u);
 
 			const MyVec3 NewForward = (Destination - Position).Normalized();
 			const MyVec3 NewRight = Up.Cross(NewForward).Normalized();
 
-			return Matrix4D(MyVec(NewRight, 0.0), MyVec(Up, 0.0), MyVec(NewForward, 0.0), MyVec(0.0, 0.0, 0.0, 1.0));
+			Matrix4D Ret = Matrix4D::Identity;// Matrix4D(MyVec(NewRight, 0.0), MyVec(Up, 0.0), MyVec(NewForward, 0.0), MyVec(0.0, 0.0, 0.0, 1.0));
+			Matrix4D::Translate(Ret, -Position);
+			//Matrix4D::Transpose(Ret);
+			return Ret;
 
 		}
 
@@ -111,10 +120,7 @@ namespace Math
 			MyVec Row1(T(1.0) / (AspectRatio * Tan(VerticalFov * T(0.5))), T(0.0), T(0.0), T(0.0));
 			MyVec Row2(T(0.0), T(1.0) / (Tan(VerticalFov * T(0.5))), T(0.0), T(0.0));
 			MyVec Row3(T(0.0), T(0.0), (Far/(Far-Near)), T(1.0));
-			MyVec Row4(T(0.0), T(0.0), -(Far / (Far - Near)) , T(0.0));
-
-			// MyVec Row3(T(0.0), T(0.0), T((-Near - Far) / (Far - Near)), T((2.0 * Far * Near)/(Far - Near)));
-			// MyVec Row4(T(0.0), T(0.0), T(1.0), T(0.0));
+			MyVec Row4(T(0.0), T(0.0), -(Far*Near/(Far - Near)) , T(0.0));
 
 			return Matrix4D(Row1, Row2, Row3, Row4);
 		}

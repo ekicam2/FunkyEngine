@@ -2,9 +2,6 @@
 
 #include "DebugMacros.h"
 
-#define SDL_MAIN_HANDLED
-#include "3rd/SDL_image.h"
-
 #include "BasicTypes.h"
 
 #include "Math/Vector2.h"
@@ -20,7 +17,7 @@
 #include "Core/Tasks/ITask.h"
 #include "Core/Timer.h"
 
-#include "SDL.h"
+#define THREADED_RENDERING 0
 
 LRESULT CALLBACK ProcessInput(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -29,15 +26,13 @@ LRESULT CALLBACK ProcessInput(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lPa
 
 namespace Funky
 {
+
 	FunkyEngine* FunkyEngine::_Engine = nullptr;
-	Core::IO::IIOSystem* FunkyEngine::_IO = nullptr;
 
 	FunkyEngine::FunkyEngine()
-		: RenderingBackend()
-		, IOSystem(new Core::IO::WindowsIOSystem())
+		: IOSystem(new Core::IO::WindowsIOSystem())
 	{
 		FunkyEngine::_Engine = this;
-		FunkyEngine::_IO = IOSystem;
 
 	}
 
@@ -47,8 +42,8 @@ namespace Funky
 
 	Core::IO::IIOSystem* FunkyEngine::GetIO()
 	{
-		CHECK(_IO);
-		return _IO;
+		CHECK(_Engine->IOSystem);
+		return _Engine->IOSystem;
 	}
 
 	FunkyEngine* FunkyEngine::GetEngine()
@@ -57,6 +52,7 @@ namespace Funky
 		return _Engine;
 	}
 
+#pragma region OSDependent
 	LRESULT CALLBACK FunkyEngine::ProcessInput(HWND InhWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
 			
@@ -82,13 +78,16 @@ namespace Funky
 		// Handle any messages the switch statement didn't
 		return DefWindowProc(InhWnd, Message, wParam, lParam);
 	}
+#pragma endregion
 
 	bool FunkyEngine::Init()
 	{
-		 ThreadPool.Reset(new Core::Thread::ThreadPool({ {Core::Thread::Group::Rendering, (u16)1u}, {Core::Thread::Group::Worker, (u16)5u} }));
+#if THREADED_RENDERING
+		 ThreadPool.Reset(new Core::Thread::ThreadPool({ {Core::Thread::Group::Rendering, (u16)1u}, {Core::Thread::Group::Worker, (u16)2u} }));
 		 TaskManager.Reset(new Core::Task::TaskManager(ThreadPool));
-
-		AssetManager.Reset(new Funky::AssetRegistry());
+#endif
+		
+		 //AssetManager.Reset(new Funky::AssetRegistry());
 
 		constexpr unsigned uWindowWidth = 2048u;
 		constexpr unsigned uWindowHeight = 1024u;
@@ -98,26 +97,7 @@ namespace Funky
 		if (!CreateAndShowWindow({ uWindowWidth, uWindowHeight }))
 			return false;
 
-		LOG("Init SDL 2.0");
-		if (SDL_Init(SDL_INIT_AUDIO) != 0)
-		{
-			LOG_ERROR(TEXT("SDL_Init: Failed to init SDL!\n"));
-			return false;
-		}
-		
-
-		LOG("Init SDL IMAGE");
-		int flags = IMG_INIT_JPG | IMG_INIT_PNG;
-		int initted = IMG_Init(flags);
-		if ((initted&flags) != flags)
-		{
-			LOG_ERROR(TEXT("IMG_Init: Failed to init required jpg and png support!\n"));
-			LOG_ERROR(TEXT("IMG_Init: "), IMG_GetError());
-			return false;
-		}
-		
 		//LOG_FUNKY(fk::getExecPath());
-		TaskManager->Tick();
 		LOG("Init Rendering");
 		Rendering::DX11RenderingInitDesc InitDesc;
 		InitDesc.Api = Rendering::RenderingBackend::API::DX11;
@@ -139,22 +119,32 @@ namespace Funky
 		LOG("Initializing SceneManager");
 		MainSceneManager.Reset(new SceneManager());
 
+		LOG("Initializing MainScene");
+		InitScene();
+		auto CurrentScene = MainSceneManager->GetCurrentScene();
+		CurrentScene->Init();
+
 		return true;
 	}
 
 	void FunkyEngine::Run()
 	{
+#pragma region OSDependent
 		bool bGotMsg;
 
 		MSG  Msg;
 		Msg.message = WM_NULL;
 		Timer FrameTimer;
+#pragma endregion
 		while (bShouldRun)
 		{
+#if THREADED_RENDERING
 			TaskManager->Tick();
+#endif
+
 
 			float DeltaTime = (float)FrameTimer.Reset(Timer::EResolution::Mills);
-
+#pragma region OSDependent
 			bGotMsg = (PeekMessage(&Msg, NULL, 0U, 0U, PM_REMOVE) != 0);
 			if (bGotMsg)
 			{
@@ -165,6 +155,7 @@ namespace Funky
 				IOSystem->Update();
 			}
 			else
+#pragma endregion 
 			{
 				MainSceneManager->Tick(DeltaTime);
 				RenderScene();
@@ -176,18 +167,13 @@ namespace Funky
 	{
 		LOG("FunkyEngine::Shutdown()");
 
-
-		LOG("\tExiting SDL");
-		SDL_Quit();
-		LOG("\tExiting SDL Image");
-		IMG_Quit();
-
 		LOG("Shutdown Completed!");
 		return true;
 	}
 
 	void FunkyEngine::RenderScene()
 	{
+#if THREADED_RENDERING
 		class RenderTask : public Core::Task::ITask
 		{
 		public:
@@ -204,10 +190,15 @@ namespace Funky
 		};
 
 		TaskManager->EnqueueTask(new RenderTask(Renderer));
+#else
+		/* sync point*/
+		Core::Memory::UniquePtr<Rendering::RenderScene> Scene(Renderer->CreateRenderScene(MainSceneManager->GetCurrentScene()));
+		/* sync point end */
+		Renderer->DrawScene(Scene);
+#endif
 
-		//Renderer->DrawScene(nullptr /* CurrentScene->CreateDrawScene()*/);
 	}
-
+#pragma region OSDependent
 	bool FunkyEngine::CreateAndShowWindow(Math::Vec2u const & windowSize)
 	{
 		constexpr charx const * const WND_CLASS_NAME = TEXT("MainWindowClass");
@@ -242,6 +233,12 @@ namespace Funky
 		ShowWindow(hWnd, SW_SHOW);
 
 		return true;
+	}
+#pragma endregion
+
+	void FunkyEngine::InitScene()
+	{
+
 	}
 
 }

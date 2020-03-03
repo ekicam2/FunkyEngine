@@ -30,6 +30,11 @@ namespace Math
 			return { X - Rhs.X, Y - Rhs.Y, Z - Rhs.Z };
 		}
 
+		Vector3D operator-() const
+		{
+			return { -X, -Y, -Z };
+		}
+
 		Vector3D operator*(T Scalar) const
 		{
 			return { X * Scalar, Y * Scalar, Z * Scalar };

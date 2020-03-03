@@ -27,7 +27,10 @@ void Funky::Core::Thread::IThread::AssignTask(Task::ITask* TaskToAssign)
 		IsWaitingForTaskState = false;
 	}
 
-	MutexScopeGuard ScopeGuard(TaskMutex);
-	TaskToProcess = TaskToAssign;
+	{
+		MutexScopeGuard ScopeGuard(TaskMutex);
+		TaskToProcess = TaskToAssign;
+	}
+
 	TaskReadyToProcess->Wake();
 }

@@ -31,31 +31,31 @@ namespace Funky
 			return TEXT("unknown");
 		}
 
-		FORCEINLINE ::D3D11_BIND_FLAG BufferToDXType(Rendering::RBuffer::Type BufferType)
+		FORCEINLINE ::D3D11_BIND_FLAG BufferToDXType(Rendering::RBuffer::EType BufferType)
 		{
 			using namespace Rendering;
 
 			switch (BufferType)
 			{
-			case RBuffer::Type::Vertex:  return D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
-			case RBuffer::Type::Index:   return D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER;
-			case RBuffer::Type::Uniform: return D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER;
-			case RBuffer::Type::None:    DEAD_PATH(); break;
+			case RBuffer::EType::Vertex:  return D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
+			case RBuffer::EType::Index:   return D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER;
+			case RBuffer::EType::Uniform: return D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER;
+			case RBuffer::EType::None:    DEAD_PATH(); break;
 			}
 
 			return D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER;
 		}
 
-		FORCEINLINE D3D11_USAGE BufferToDXUsage(Rendering::RBuffer::UsageType BufferUsage)
+		FORCEINLINE D3D11_USAGE BufferToDXUsage(Rendering::RBuffer::EUsageType BufferUsage)
 		{
 			using namespace Rendering;
 
 			switch (BufferUsage)
 			{
-			case RBuffer::UsageType::Default:  return D3D11_USAGE::D3D11_USAGE_DEFAULT;
-			case RBuffer::UsageType::Static:   return D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
-			case RBuffer::UsageType::Dynamic:  return D3D11_USAGE::D3D11_USAGE_DYNAMIC;
-			case RBuffer::UsageType::Staging:  return D3D11_USAGE::D3D11_USAGE_STAGING;
+			case RBuffer::EUsageType::Default:  return D3D11_USAGE::D3D11_USAGE_DEFAULT;
+			case RBuffer::EUsageType::Static:   return D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
+			case RBuffer::EUsageType::Dynamic:  return D3D11_USAGE::D3D11_USAGE_DYNAMIC;
+			case RBuffer::EUsageType::Staging:  return D3D11_USAGE::D3D11_USAGE_STAGING;
 			}
 
 			return D3D11_USAGE::D3D11_USAGE_IMMUTABLE;

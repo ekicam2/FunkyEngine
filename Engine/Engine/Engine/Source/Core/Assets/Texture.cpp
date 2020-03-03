@@ -1,8 +1,10 @@
 #include "Texture.h"
 #include "LogMacros.h"
 
-Funky::Asset::Texture* Funky::Asset::Texture::CreateFromFile(str const & pFilePath)
+Funky::Asset::Texture* Funky::Asset::Texture::CreateFromFile([[maybe_unused]]str const & pFilePath)
 {
+	return nullptr;
+/*
 	SDL_Surface* image = IMG_Load(pFilePath.c_str());
 	if (!image)
 	{
@@ -39,7 +41,7 @@ Funky::Asset::Texture* Funky::Asset::Texture::CreateFromFile(str const & pFilePa
 		NewCreatedTexture->Data.push_back(color);
 	}
 
-	return NewCreatedTexture;
+	return NewCreatedTexture;*/
 }
 
 byte* Funky::Asset::Texture::GetData() const
@@ -54,5 +56,5 @@ Funky::Asset::Texture::Texture(str const& Path, TextureType Type) : ITexture(Pat
 
 Funky::Asset::Texture::~Texture()
 {
-	SDL_FreeSurface(Image);
+	//SDL_FreeSurface(Image);
 }

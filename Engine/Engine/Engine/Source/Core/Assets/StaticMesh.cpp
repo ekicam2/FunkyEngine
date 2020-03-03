@@ -37,7 +37,7 @@ Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::CreateMeshFromRawData(darray
 }
 
 Funky::Asset::StaticMesh::StaticMesh()
-	: IAsset("dynamic asset", Asset::EType::Mesh)
+	: IAsset(Asset::EType::Mesh)
 {
 
 }

@@ -26,22 +26,20 @@ namespace Funky
 		class IAsset
 		{
 		public:
-			IAsset() = delete;
-			IAsset(AssetPath const& Path, Asset::EType Type = EType::Unknown) : Path(Path), Type(Type), Loaded(false) {}
+			IAsset() = default;
+			virtual ~IAsset() = default;
 
+			IAsset(EType InType) : Type(InType) {}
 			FORCEINLINE AssetPath GetPath() const;
 			FORCEINLINE Asset::EType GetType() const;
 			FORCEINLINE bool IsLoaded() const;
 
-		protected:
 			AssetPath Path;
-			Asset::EType Type;
+			Asset::EType Type = EType::Unknown;
 
 		private:
-			bool Loaded;
-			friend class AssetRegistry;
+			bool Loaded = false;
 		};
-
 	}
 
 	FORCEINLINE Asset::AssetPath Asset::IAsset::GetPath() const

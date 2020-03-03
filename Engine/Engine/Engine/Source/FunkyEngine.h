@@ -42,8 +42,9 @@ namespace Funky
 		bool CreateAndShowWindow(Math::Vec2u const & windowSize);
 		bool bShouldRun = true;
 
+		void InitScene();
+
 		static FunkyEngine* _Engine;
-		static Core::IO::IIOSystem* _IO;
 
 		Core::Memory::UniquePtr<Rendering::RenderingBackend> RenderingBackend;
 		Core::Memory::UniquePtr<Rendering::IRenderer> Renderer;
