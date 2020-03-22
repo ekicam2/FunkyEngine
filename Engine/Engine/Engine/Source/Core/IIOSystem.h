@@ -8,7 +8,7 @@ namespace Funky
 	{
 		namespace IO
 		{
-			enum class Key : unsigned
+			enum class EKey : unsigned
 			{
 				A,
 				B,
@@ -41,6 +41,8 @@ namespace Funky
 				ARROW_LEFT,
 				ARROW_RIGHT,
 
+				SHIFT,
+
 				TAB,
 				SPACE,
 
@@ -53,8 +55,8 @@ namespace Funky
 				/* Remember to always call Frame() at the beginning of overloaded Update()! */
 				virtual void Update() = 0;
 
-				FORCEINLINE bool IsKeyPressed(IO::Key Key) const { return Keys[(u32)Key].IsPressed; }
-				FORCEINLINE bool WasKeyPressed(IO::Key Key) const { return Keys[(u32)Key].WasPressedLastFrame; }
+				FORCEINLINE bool IsKeyPressed(IO::EKey Key) const { return Keys[(u32)Key].IsPressed; }
+				FORCEINLINE bool WasKeyPressed(IO::EKey Key) const { return Keys[(u32)Key].WasPressedLastFrame; }
 
 			protected:
 				void Frame();
@@ -65,7 +67,7 @@ namespace Funky
 					u8 WasPressedLastFrame : 1;
 				};
 
-				KeyState Keys[(u32)Key::COUNT];
+				KeyState Keys[(u32)EKey::COUNT];
 			};
 
 		}

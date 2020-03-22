@@ -29,5 +29,5 @@ namespace Funky
 	}
 }
 
-#define FUNKY_DECLARE_RENDERER_CONSTRUCTOR(__name__) \
+#define FUNKY_DEFINE_RENDERER_CONSTRUCTOR(__name__) \
 __name__(Rendering::RenderingBackend& RenderingBackend) : IRenderer(RenderingBackend) {}

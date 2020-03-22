@@ -192,10 +192,13 @@
     <ClInclude Include="Source\RenderingBackend\Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Math\Matrix4D.h">
+    <ClInclude Include="Source\Math\Vector4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Math\Vector4.h">
+    <ClInclude Include="Source\Math\Matrix4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Events\ICallable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

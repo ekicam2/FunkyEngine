@@ -1,6 +1,6 @@
 #include "Scene.h"
 
-
+#include "FunkyEngine.h"
 
 void Funky::Scene::Init()
 {
@@ -29,8 +29,8 @@ void Funky::Scene::Init()
 
 	darray<u16> indices({ 0, 1, 2 });
 
-	MeshData.Reset(Asset::StaticMesh::CreateMeshFromRawData(vertices, indices));
-	Object.Mesh = MeshData.Get();
+	MeshAsset.Reset(Asset::StaticMesh::CreateMeshFromRawData(vertices, indices));
+	Objects.Mesh = MeshAsset.Get();
 
 	const char* vs = R"(
 			cbuffer ModelViewProjectionConstantBuffer : register(b0)
@@ -42,7 +42,7 @@ void Funky::Scene::Init()
 				float padding;
 			};
 
-			float4 VSMain(float3 vPosition : POSITION) : SV_POSITION
+			float4 VSMain(float3 vPosition : POSITION, float3 vColor : COLOR, float3 vNormal : NORMAL, float2 vUv : UV) : SV_POSITION
 			{	
 				matrix cosglupiego = model * mvp;
 				float4 Pos = mul(mvp, float4(vPosition, 1.0));
@@ -56,19 +56,48 @@ void Funky::Scene::Init()
 				return float4(1.0f, 0.0f, 1.0f, 1.0f);
 			}
 		)";
-	MaterialData.Reset(Asset::Material::CreateMaterialFromSourceCode(vs, ps));
-	Object.Material = MaterialData.Get();
 
-	Object.Position += Math::Vec::FORWARD * 2.0f;
+	Camera.MakePerepective((float)(2048u) / 1024u);
+
+	MaterialAsset.Reset(Asset::Material::CreateMaterialFromSourceCode(vs, ps));
+	Objects.Material = MaterialAsset.Get();
+
+	Objects.Position += Math::Vec::FORWARD * 10.0f;
 }
 
 void Funky::Scene::Tick([[maybe_unused]] f32 Delta)
 {
 	//LOG("SceneTick: ", Delta);
+
+	float Speed = 0.025f*Delta;
+	Speed *= FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::SHIFT) ? 0.25f : 1.0f;
+
+	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::W))
+		Objects.Position += Math::Vec::FORWARD * Speed;
+
+	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::S))
+		Objects.Position += -Math::Vec::FORWARD * Speed;
+
+	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::A))
+		Objects.Position += -Math::Vec::RIGHT * Speed;
+
+	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::D))
+		Objects.Position += Math::Vec::RIGHT * Speed;
+
+	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::E))
+		Objects.Position += Math::Vec::UP * Speed;
+
+	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::Q))
+		Objects.Position += -Math::Vec::UP * Speed;
 }
 
-i32 Funky::Scene::GetVisibleObjects(VisibleObject*& Objects)
+i32 Funky::Scene::GetVisibleObjects(VisibleObject*& InOutObjects)
 {
-	Objects = &Object;
+	InOutObjects = &Objects;
 	return 1;
+}
+
+Math::Camera* Funky::Scene::GetCamera()
+{
+	return &Camera;
 }

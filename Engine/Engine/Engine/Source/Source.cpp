@@ -120,6 +120,9 @@ int main()
 	return 0;
 }
 #elif defined(ENGINE)
+
+#include "Core/Events/Event.h"
+
 int main(i32 argc, char** argv)
 {
 	INIT_LOG();

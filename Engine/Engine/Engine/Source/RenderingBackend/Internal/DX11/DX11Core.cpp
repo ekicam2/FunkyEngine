@@ -123,16 +123,6 @@ namespace Funky
 			pDevice->CreateDepthStencilView(DS->pTexture.Get(), &DepthViewDesc, DS->pDepthStencilView.GetAddressOf());
 
 			ResourceManager->AssociateSwapchain(RT, DS);
-			//
-			//FUNKY_SAFE_RELEASE(pBackBufferView);
-			//FUNKY_SAFE_RELEASE(pDepthStencilView);
-			//
-			////FUNKY_SAFE_RELEASE(pBackBuffer);
-			//FUNKY_SAFE_RELEASE(pDepthStencilBuffer);
-			//
-			//
-			//
-			//InitSwapchain();
 			
 		}
 
@@ -571,9 +561,10 @@ namespace Funky
 				ASSERT(SUCCEEDED(hr), TEXT("couldn't create swapchain"));
 			}
 
+			// FU Microsoft I'll do it myself
 			if (SUCCEEDED(hr))
 			{
-				hr = Factory->MakeWindowAssociation(WindowHandle, DXGI_MWA_NO_PRINT_SCREEN);
+				hr = Factory->MakeWindowAssociation(WindowHandle, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES);
 				ASSERT(SUCCEEDED(hr), TEXT("Couldn't associate swapchain with window."));
 			}
 

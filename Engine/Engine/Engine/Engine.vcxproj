@@ -125,6 +125,7 @@
     <ClInclude Include="Source\Core\Assets\Texture.h" />
     <ClInclude Include="Source\Core\Containers.h" />
     <ClInclude Include="Source\Core\Events\EngineEvents.h" />
+    <ClInclude Include="Source\Core\Events\ICallable.h" />
     <ClInclude Include="Source\Core\IIOSystem.h" />
     <ClInclude Include="Source\Core\Memory\Memory.h" />
     <ClInclude Include="Source\Core\Memory\MemoryPool.h" />
@@ -145,7 +146,7 @@
     <ClInclude Include="Source\Core\Thread\ThreadPool.h" />
     <ClInclude Include="Source\Core\Timer.h" />
     <ClInclude Include="Source\DebugMacros.h" />
-    <ClInclude Include="Source\Math\Matrix4D.h" />
+    <ClInclude Include="Source\Math\Matrix4.h" />
     <ClInclude Include="Source\Math\Vector4.h" />
     <ClInclude Include="Source\RenderingBackend\Event.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\DX11\DX11RenderingResources.h" />

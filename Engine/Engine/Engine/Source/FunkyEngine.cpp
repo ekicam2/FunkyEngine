@@ -63,8 +63,10 @@ namespace Funky
 		{
 			if(RenderingBackend && RenderingBackend->IsInitialized())
 				RenderingBackend->OnViewportResized({ LOWORD(lParam), HIWORD(lParam) });
+				//RenderingBackend->OnViewportResized({ 2560, 1080 });
 			return 0;
 		}
+
 		break;
 		case WM_DESTROY:
 		{
@@ -89,8 +91,8 @@ namespace Funky
 		
 		 //AssetManager.Reset(new Funky::AssetRegistry());
 
-		constexpr unsigned uWindowWidth = 2048u;
-		constexpr unsigned uWindowHeight = 1024u;
+		constexpr u32 uWindowWidth = 2048u;
+		constexpr u32 uWindowHeight = 1024u;
 
 		LOG("Creating widnow with size: ", uWindowWidth, "x", uWindowHeight);
 

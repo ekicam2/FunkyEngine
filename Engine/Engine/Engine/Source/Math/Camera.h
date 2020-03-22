@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math/Vector3.h"
-#include "Math/Math.h"
+#include "Math/Matrix4.h"
 
 #define FORCEINLINE __forceinline
 
@@ -11,7 +11,7 @@ namespace Math
 	{
 	public:
 		Camera()
-			: Projection(DirectX::XMMatrixIdentity())
+			: Projection(Math::Mat4f::Identity)
 			, Position(0.0f, 0.0f, 0.0f)
 			, Rotation(0.0f, 0.0f, 0.0f)
 			, LookAt(0.0f, 0.0f, 100.f)
@@ -20,30 +20,26 @@ namespace Math
 		}
 
 		Camera(float AspectRatio, float FOV = 90.0f, float Near = 0.01f, float Far = 100.0f)
-			: Projection(DirectX::XMMatrixPerspectiveFovLH(Math::ToRad(FOV), AspectRatio, Near, Far))
-			, Position(0.0f, 0.0f, 0.0f)
-			, Rotation(0.0f, 0.0f, 0.0f)
-			, LookAt(0.0f, 0.0f, 100.f)
-			, Up(0.0f, 1.0f, 0.0f)
+			: Camera()
 		{
-			RecalculateView();
+			MakePerepective(AspectRatio, FOV, Near, Far);
 		}
 
 		void MakePerepective(float AspectRatio, float FOV = 90.0f, float Near = 0.01f, float Far = 100.0f)
 		{
-			Projection = DirectX::XMMatrixPerspectiveFovLH(Math::ToRad(FOV), AspectRatio, Near, Far);
+			Projection = Math::Mat4f::ProjectionMatrixLH(AspectRatio, FOV, Near, Far); 
 			RecalculateView();
 		}
 
-		void MakeOrtho(float Width, float Height, float Near = 0.01f, float Far = 100.0f)
+		void MakeOrtho([[maybe_unused]]float Width, [[maybe_unused]] float Height, [[maybe_unused]] float Near = 0.01f, [[maybe_unused]] float Far = 100.0f)
 		{
-			Projection = DirectX::XMMatrixOrthographicLH(Width, Height, Near, Far);
-			RecalculateView();
+			//Projection = DirectX::XMMatrixOrthographicLH(Width, Height, Near, Far);
+			//RecalculateView();
 		}
 
-		FORCEINLINE DirectX::XMMATRIX const & GetProjection() const { return Projection; }
+		FORCEINLINE Math::Mat4f const & GetProjection() const { return Projection; }
 
-		FORCEINLINE DirectX::XMMATRIX const & GetView() const
+		FORCEINLINE Math::Mat4f const & GetView() const
 		{
 			if (bViewDirty)
 				RecalculateView();
@@ -105,11 +101,14 @@ namespace Math
 
 			LookAt = Position + Forward;
 
-			View = DirectX::XMMatrixLookAtLH(
-				DirectX::XMVectorSet(Position.X, Position.Y, Position.Z, 0.0f),
-				DirectX::XMVectorSet(LookAt.X, LookAt.Y, LookAt.Z, 0.0f),
-				DirectX::XMVectorSet(Up.X, Up.Y, Up.Z, 0.0f)
-			);
+			View = Math::Mat4f::LookAtLH(Position, LookAt, Up);
+
+			//DirectX::XMMatrixLookAtLH(
+			//	DirectX::XMMatrixLookAtLH(
+			//	DirectX::XMVectorSet(Position.X, Position.Y, Position.Z, 0.0f),
+			//	DirectX::XMVectorSet(LookAt.X, LookAt.Y, LookAt.Z, 0.0f),
+			//	DirectX::XMVectorSet(Up.X, Up.Y, Up.Z, 0.0f)
+			//);
 
 			bViewDirty = false;
 		}
@@ -121,12 +120,13 @@ namespace Math
 		mutable Math::Vec3f LookAt;
 		const Math::Vec3f Up;
 
-		DirectX::XMMATRIX Projection;
+		Math::Mat4f Projection;
 
-		mutable DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(
-			DirectX::XMVectorSet(Position.X, Position.Y, Position.Z, 0.0f),
-			DirectX::XMVectorSet(LookAt.X, LookAt.Y, LookAt.Z, 0.0f),
-			DirectX::XMVectorSet(Up.X, Up.Y, Up.Z, 0.0f)
-		);
+		mutable Math::Mat4f View = Math::Mat4f::LookAtLH(Position, LookAt, Up); 
+		//DirectX::XMMatrixLookAtLH(
+		//	DirectX::XMVectorSet(Position.X, Position.Y, Position.Z, 0.0f),
+		//	DirectX::XMVectorSet(LookAt.X, LookAt.Y, LookAt.Z, 0.0f),
+		//	DirectX::XMVectorSet(Up.X, Up.Y, Up.Z, 0.0f)
+		//);
 	};
 }

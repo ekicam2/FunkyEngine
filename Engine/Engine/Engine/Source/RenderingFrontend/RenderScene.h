@@ -9,6 +9,11 @@
 
 #define MAX_RENDER_PRIMITIVES 10
 
+namespace Math
+{
+	class Camera;
+}
+
 namespace Funky
 {
 	namespace Rendering
@@ -41,6 +46,8 @@ namespace Funky
 
 		struct RenderScene
 		{
+
+			Math::Camera* Camera = nullptr;
 			RenderPrimitive Objects[MAX_RENDER_PRIMITIVES];
 		};
 	}

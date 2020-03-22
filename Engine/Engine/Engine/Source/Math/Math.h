@@ -5,6 +5,7 @@
 #include "MathGlobals.h"
 #include "Vector2.h"
 #include "Vector3.h"
+#include "Camera.h"
 #include <DirectXMath.h>
 
 namespace Math

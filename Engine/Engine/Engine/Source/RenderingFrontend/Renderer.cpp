@@ -9,7 +9,7 @@
 
 #pragma comment(lib,"d3dcompiler.lib")
 
-Math::Vec3f cmapos = { 0.0f, 0.0f, 0.0f };
+Math::Vec3f cmapos = Math::Vec::FORWARD * 14.0f;
 
 bool Funky::Rendering::Renderer::Init()
 {
@@ -27,10 +27,10 @@ void Funky::Rendering::Renderer::Shutdown()
 
 }
 
-Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(IScene* Scene)
+Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(IScene* InScene)
 {
 	VisibleObject* SceneObjects;
-	const i32 SceneObjectsNum = Scene->GetVisibleObjects(SceneObjects);
+	const i32 SceneObjectsNum = InScene->GetVisibleObjects(SceneObjects);
 
 	for (u8 i = 0; (i < SceneObjectsNum); ++i)
 	{
@@ -65,29 +65,10 @@ Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(ISc
 				Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
 				Microsoft::WRL::ComPtr <ID3DBlob> Errors;
 
-				const char* vs = R"(
-			cbuffer ModelViewProjectionConstantBuffer : register(b0)
-			{
-				// REMEMBER IN HLSL matrices are column major
-				matrix mvp;
-				matrix model;
-				float3 lookat;
-				float padding;
-			};
-
-			float4 VSMain(float3 vPosition : POSITION, float3 vColor : COLOR, float3 vNormal : NORMAL, float2 vUv : UV) : SV_POSITION
-			{	
-				matrix cosglupiego = model * mvp;
-				float4 Pos = mul(mvp, float4(vPosition, 1.0));
-				return Pos;//float4(vPosition, 1.0);
-			}
-		)";
 
 				HRESULT hr = D3DCompile(
-					//SceneObject->Material->GetVertexShaderSourceCode(), 
-					//SceneObject->Material->GetVertexShaderSourceCodeLength(),
-					vs,
-					strlen(vs),
+					SceneObject->Material->GetVertexShaderSourceCode(), 
+					SceneObject->Material->GetVertexShaderSourceCodeLength(),
 					NULL,
 					Macros,
 					NULL,
@@ -124,18 +105,9 @@ Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(ISc
 				Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
 				Microsoft::WRL::ComPtr <ID3DBlob> Errors;
 
-				const char* ps = R"(
-			float4 PSMain(float4 vPosition : SV_POSITION) : SV_TARGET0 
-			{	
-				return float4(1.0f, 0.0f, 1.0f, 1.0f);
-			}
-		)";
-
 				HRESULT hr = D3DCompile(
-					//SceneObject->Material->GetPixelShaderSourceCode(),
-					//SceneObject->Material->GetPixelShaderSourceCodeLength(),
-					ps,
-					strlen(ps),
+					SceneObject->Material->GetPixelShaderSourceCode(),
+					SceneObject->Material->GetPixelShaderSourceCodeLength(),
 					NULL, 
 					Macros, 
 					NULL, 
@@ -170,6 +142,8 @@ Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(ISc
 
 	
 	RenderScene* Ret = new RenderScene();
+	Ret->Camera = InScene->GetCamera();
+
 	for (u8 i = 0; i < SceneObjectsNum && i < MAX_RENDER_PRIMITIVES; ++i)
 	{
 		VisibleObject* const SceneObject = &SceneObjects[i];
@@ -212,20 +186,25 @@ void Funky::Rendering::Renderer::DrawScene(RenderScene* SceneToRender)
 		Math::Mat4f Model = Math::Mat4f::Identity;
 		Math::Mat4f::Translate(Model, CurrentObject->Position);
 
-		auto View = Math::Mat4f::Identity;
-		View = Math::Mat4f::LookAtLH(cmapos, Math::Vec::FORWARD * 200.0f, Math::Vec::UP);
-		
+		//auto View = Math::Mat4f::Identity;
+		//View = Math::Mat4f::LookAtLH(
+		//	cmapos, 
+		//	(Math::Vec::FORWARD * 200.0f) + cmapos,
+		//	Math::Vec::UP
+		//);
+		//
 		//View = Math::Mat4f::Identity;
+		//
+		//auto v = DirectX::XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 10.0, 0.0, 100.0f }, { 0.0f, 1.0f, 0.0 });
+		//auto v1 = DirectX::XMMatrixLookAtRH({ 0.0f, 0.0f, 0.0f }, { 10.0, 0.0, 100.0f }, { 0.0f, 1.0f, 0.0 });
+		//
+		//auto Proj = Math::Mat4f::ProjectionMatrixLH(, 90.0f, 1.f, 100.f);
+		//View * Proj;// Math::Mat4f::Identity;
 
-		auto v = DirectX::XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 10.0, 0.0, 100.0f }, { 0.0f, 1.0f, 0.0 });
-		auto v1 = DirectX::XMMatrixLookAtRH({ 0.0f, 0.0f, 0.0f }, { 10.0, 0.0, 100.0f }, { 0.0f, 1.0f, 0.0 });
-
-		auto Proj = Math::Mat4f::ProjectionMatrixLH((float)(2048u) / 1024u, 90.0f, 1.f, 100.f);
-
-		ConstantBufferData.MVP = Model * View * Proj;// Math::Mat4f::Identity;
+		ConstantBufferData.MVP = Model * SceneToRender->Camera->GetView() * SceneToRender->Camera->GetProjection();
 		
 
-		ConstantBufferData.LookAt = { 1.0, 2.0 ,3.0 };
+		ConstantBufferData.LookAt = SceneToRender->Camera->GetLookat();
 		ConstantBufferData.__padding = 24.0f;
 
 		RenderingBackend.BindConstantBuffer(RenderingBackend::ShaderResourceStage::Vertex, ConstantBuffer);
@@ -235,12 +214,12 @@ void Funky::Rendering::Renderer::DrawScene(RenderScene* SceneToRender)
 		RenderingBackend.BindPixelShader(CurrentObject->Shaders.PS);
 
 		auto& Mesh = CurrentObject->Mesh;
-		//if (Mesh.IndexBuffer->ElementCount)
-		//	RenderingBackend.DrawIndexed(
-		//		Mesh.VertexBuffer,
-		//		Mesh.IndexBuffer
-		//	);
-		//else
+		if (Mesh.IndexBuffer->ElementCount)
+			RenderingBackend.DrawIndexed(
+				Mesh.VertexBuffer,
+				Mesh.IndexBuffer
+			);
+		else
 			RenderingBackend.Draw(Mesh.VertexBuffer);
 
 	}
