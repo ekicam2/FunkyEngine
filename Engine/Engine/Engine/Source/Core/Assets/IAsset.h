@@ -9,7 +9,6 @@ namespace Funky
 {
 	namespace Asset
 	{
-		using AssetID = str;
 		using AssetPath = str;
 
 		enum class EType : u8
@@ -26,18 +25,19 @@ namespace Funky
 		class IAsset
 		{
 		public:
-			IAsset() = default;
+			IAsset(EType InType) : Type(InType) {}
+			
 			virtual ~IAsset() = default;
 
-			IAsset(EType InType) : Type(InType) {}
+			
 			FORCEINLINE AssetPath GetPath() const;
 			FORCEINLINE Asset::EType GetType() const;
 			FORCEINLINE bool IsLoaded() const;
 
+		private:
 			AssetPath Path;
 			Asset::EType Type = EType::Unknown;
 
-		private:
 			bool Loaded = false;
 		};
 	}
@@ -57,3 +57,7 @@ namespace Funky
 		return Loaded;
 	}
 }
+
+// use in the private space
+#define DECLARE_IASSET(Name, Type)	\
+	Name() : IAsset(Type) {}		

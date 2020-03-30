@@ -1,4 +1,7 @@
 #include "RenderingBackend/RenderingBackend.h"
+
+#include "Core/Events/EngineEvents.h"
+
 #include "DX11/DX11Core.h"
 
 namespace Funky
@@ -37,9 +40,9 @@ namespace Funky
 			return Impl->CreatePixelShader(ShaderDesc);
 		}
 
-		RBuffer* RenderingBackend::CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
+		RBuffer* RenderingBackend::CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data /*= nullptr*/, size Stride /*= 0u*/)
 		{
-			return Impl->CreateBuffer(SizeOfBuffer, BufferType, Usage, Data);
+			return Impl->CreateBuffer(SizeOfBuffer, BufferType, Usage, Data, Stride);
 		}
 
 		bool RenderingBackend::Init(RenderingBackendInitDesc* InitDesc) 
@@ -51,6 +54,11 @@ namespace Funky
 				Impl = new Funky::Rendering::DX11();
 				break;
 			}
+
+			Funky::OnViewportResized.RegisterLambda([this](Math::Vec2u NewSize) { 
+				OnViewportResized(NewSize);
+			});
+			
 			return Impl->Init(InitDesc); 
 		}
 
@@ -71,6 +79,8 @@ namespace Funky
 
 		void RenderingBackend::BindRenderTarget(RRenderTarget* RenderTargetToBind, RDepthStencil* DepthStencilToBind /*= nullptr*/)
 		{
+			CHECK(RenderTargetToBind->Size != Math::Vec2u(0, 0));
+
 			Impl->BindRenderTarget(RenderTargetToBind, DepthStencilToBind);
 		}
 
@@ -103,11 +113,15 @@ namespace Funky
 
 		void RenderingBackend::BindVertexShader(RShader* VertexShaderToBind)
 		{
+			CHECK(VertexShaderToBind->ShaderType == RShader::Type::Vertex);
+
 			Impl->BindVertexShader(VertexShaderToBind);
 		}
 
 		void RenderingBackend::BindPixelShader(RShader* PixelShaderToBind)
 		{
+			CHECK(PixelShaderToBind->ShaderType == RShader::Type::Pixel);
+
 			Impl->BindPixelShader(PixelShaderToBind);
 		}
 

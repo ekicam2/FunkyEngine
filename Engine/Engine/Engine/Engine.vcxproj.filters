@@ -201,6 +201,21 @@
     <ClInclude Include="Source\Core\Events\ICallable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\3rd\TinyGLTFLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\3rd\stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\3rd\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\3rd\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Platform\Windows\WindowsFileUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Source.cpp">
@@ -288,6 +303,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Core\Events\Event.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\Events\EngineEvents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\3rd\TinyGLTFLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\Platform\Windows\WindowsFileUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingBackend\Internal\DX11\DX11RenderingResources.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -27,7 +27,8 @@ namespace Funky
 
 		class RRenderTarget : public IRenderingResource
 		{
-
+		public:
+			Math::Vec2u Size = Math::Vec2u(0, 0);
 		};
 
 		class RDepthStencil : public IRenderingResource

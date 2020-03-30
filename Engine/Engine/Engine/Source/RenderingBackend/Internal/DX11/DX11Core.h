@@ -28,7 +28,7 @@ namespace Funky
 			virtual RShader* CreateVertexShader(RenderingBackend::ShaderInputDesc* ShaderDesc) override;
 			virtual RShader* CreatePixelShader(RenderingBackend::ShaderInputDesc* ShaderDesc) override;
 
-			virtual RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data = nullptr) override;
+			virtual RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data = nullptr, size Stride = 0u) override;
 
 			virtual RTexture* CreateTexture2D(byte const * const Data, Math::Vec2u const & Size) override;
 			virtual RTexture* CreateCubemap(byte const * const Data, Math::Vec2u const & Size) override;

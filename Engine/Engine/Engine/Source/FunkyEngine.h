@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Events/EngineEvents.h"
+
 #include "Core/Platform/Platform.h"
 #include "Core/Memory/UniquePtr.h"
 

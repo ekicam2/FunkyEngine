@@ -35,7 +35,7 @@ namespace Funky
 			return RenderingBackend::API::DX11;
 		}
 
-		void DX11::OnViewportResized([[maybe_unused]]Math::Vec2u const & NewSize)
+		void DX11::OnViewportResized(Math::Vec2u const & NewSize)
 		{
 			
 			// ID3D11RenderTargetView* RTs[] = { nullptr };
@@ -46,7 +46,8 @@ namespace Funky
 			pSwapChain->ResizeBuffers(0, NewSize.X, NewSize.Y, DXGI_FORMAT::DXGI_FORMAT_UNKNOWN, 0);
 
 			DX11RenderTarget* RT = new DX11RenderTarget();
-			
+			RT->Size = NewSize;
+
 			D3D11_TEXTURE2D_DESC RenderTargetTextureDesc;
 			ZeroMemory(&RenderTargetTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
 			RenderTargetTextureDesc.Width = NewSize.X;
@@ -129,6 +130,7 @@ namespace Funky
 		RRenderTarget* DX11::CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
 		{
 			DX11RenderTarget* RT = ResourceManager->RegisterResource<DX11RenderTarget>();
+			RT->Size = Size;
 
 			D3D11_TEXTURE2D_DESC RenderTargetTextureDesc;
 			ZeroMemory(&RenderTargetTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
@@ -233,7 +235,7 @@ namespace Funky
 			return Shader;
 		}
 
-		RBuffer* DX11::CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data /*= nullptr*/)
+		RBuffer* DX11::CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data /*= nullptr*/, size Stride /*= 0u*/)
 		{
 			if(Usage == RBuffer::EUsageType::Static)
 				CHECK(Data != nullptr);
@@ -250,10 +252,22 @@ namespace Funky
 			BufferInitData.pSysMem = Data;
 
 			DX11Buffer* Ret = ResourceManager->RegisterResource<DX11Buffer>(BufferType, Usage);
-			Ret->Stride = (BufferType == RBuffer::EType::Vertex) ? sizeof(Vertex) : 3;
-			Ret->ElementCount = (BufferType == RBuffer::EType::Vertex || BufferType == RBuffer::EType::Index) ? 3 : 0;
 			Ret->SizeInBytes = SizeOfBuffer;
-
+			Ret->Stride = [&BufferType, &Data, &Stride]() -> u32 
+			{
+				// if it seems ok it is ok
+				if (Data != nullptr && Stride != 0u) return (u32)Stride;
+				// if Vertex and has no Stride apply default
+				else if (BufferType == RBuffer::EType::Vertex && Stride == 0u) return sizeof(Vertex);
+				// if Index it HAS to be u16
+				else if (BufferType == RBuffer::EType::Index) return sizeof(u16);
+					
+				// if Uniform don't realy care for the stride however return 1
+				// to prevent division by 0 when calculating @ElementCount
+				return 1u;
+			}(); 
+			Ret->ElementCount = (u32)SizeOfBuffer / Ret->Stride;
+			
 			HRESULT hr = pDevice->CreateBuffer(&ConstantBufferDesc, Data ? &BufferInitData : nullptr, Ret->pBuffer.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create buffer");
 
@@ -365,6 +379,15 @@ namespace Funky
 
 			ID3D11RenderTargetView* rt[] = { RT ? RT->pRenderTargetView.Get() : nullptr };
 			pDeviceContext->OMSetRenderTargets(1, rt, DS ? DS->pDepthStencilView.Get() : nullptr);
+
+			D3D11_VIEWPORT Viewport;
+			ZeroMemory(&Viewport, sizeof(D3D11_VIEWPORT));
+			Viewport.Width = static_cast<float>(RT->Size.X);
+			Viewport.Height = static_cast<float>(RT->Size.Y);
+			Viewport.MinDepth = 0.0f;
+			Viewport.MaxDepth = 1.0f;
+
+			pDeviceContext->RSSetViewports(1, &Viewport);
 		}
 
 		void DX11::ClearRenderTarget(RRenderTarget* RenderTargetToClear, Math::Vec3f const& Color)
@@ -413,6 +436,7 @@ namespace Funky
 			if (Buffer->BufferType == RBuffer::EType::Vertex)
 			{
 				pDeviceContext->IASetVertexBuffers(0u, 1u, DXBuffer->pBuffer.GetAddressOf(), &s, &g);
+				pDeviceContext->IASetVertexBuffers(0u, 1u, DXBuffer->pBuffer.GetAddressOf(), &s, &g);
 			}
 			if (Buffer->BufferType == RBuffer::EType::Index)
 			{
@@ -451,7 +475,7 @@ namespace Funky
 			DX11Buffer* VertexBuffer = reinterpret_cast<DX11Buffer*>(InVertexBuffer);
 
 			pDeviceContext->IASetVertexBuffers(0u, 1u, VertexBuffer->pBuffer.GetAddressOf(), &(VertexBuffer->Stride), &(VertexBuffer->Offset));
-			pDeviceContext->Draw(3, 0);
+			pDeviceContext->Draw(VertexBuffer->ElementCount, 0);
 
 			//pDeviceContext->IASetIndexBuffer(Meshes[Mesh].pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
 			//pDeviceContext->DrawIndexed((u32)Meshes[Mesh].IndicesCount, 0, 0);
@@ -570,6 +594,8 @@ namespace Funky
 
 			DX11RenderTarget* RT = new DX11RenderTarget();
 			hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&RT->pTexture);
+			RT->Size.X = WindowSize.X;
+			RT->Size.Y = WindowSize.Y;
 
 			if (!SUCCEEDED(hr))
 			{

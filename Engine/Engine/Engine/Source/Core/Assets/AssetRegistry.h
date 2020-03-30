@@ -5,20 +5,21 @@
 
 #include "Core/Assets/IAsset.h"
 
+#include "3rd/json.hpp"
+#include <iostream>
 
 namespace Funky
 {
 	class AssetRegistry
 	{
 	public:
-		using AssetID = str;
+		using AssetID = i64;
 
-		inline static const str BaseAssetsPath = "AssetsRegistry\\";
+		inline static const str BaseAssetsPath = "RealData\\";
 		inline static const str AssetExtension = ".fkasset";
 
 		struct AssetDesc
 		{
-			str Name;
 			str Path;
 			Asset::EType Type = Asset::EType::Unknown;
 			class Asset::IAsset* AssetPtr = nullptr;
@@ -26,18 +27,33 @@ namespace Funky
 			void Load();
 			void Free();
 			FORCEINLINE bool IsLoaded() const { return AssetPtr != nullptr; }
+
+
+			void ToJson() const
+			{
+				nlohmann::json assetParsed;
+				assetParsed["path"] = Path;
+				assetParsed["type"] = Type;
+				std::cout << assetParsed;
+			}
+			static AssetDesc FromJson(str const& InJson)
+			{
+				auto assetParsed = nlohmann::json::parse(InJson);
+
+				AssetDesc Ret;
+				Ret.Path = assetParsed["path"];
+				Ret.Type = assetParsed["type"];
+				return Ret;
+			}
+
 		};
 
 		AssetRegistry();
 
-		Asset::IAsset* GetByName(AssetID const& Name, Asset::EType Type);
-
 	private:
-		/* Lookup for all assets in the @BaseAssetsPath and fill @AllAssets. */
-		void ParseFileTree();
+		/* Lookup for all .fkassets in the given Path and fill @AllAssets list. */
 		void ParseRecursive(str const& Path);
 
-		static AssetDesc ParseFile(str const& Path);
 		darray<AssetDesc> AllAssets;
 	};
 

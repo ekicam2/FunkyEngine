@@ -11,4 +11,5 @@
 #ifdef FUNKY_WINDOWS
 #include "Core/Platform/Windows/FunkyWindows.h"
 #include "Core/Platform/Windows/WindowsIOSystem.h"
+#include "Core/Platform/Windows/WindowsFileUtils.h"
 #endif

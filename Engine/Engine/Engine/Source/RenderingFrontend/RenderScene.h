@@ -37,8 +37,9 @@ namespace Funky
 
 		struct RenderPrimitive
 		{
-			bool bIsValid = false;
+			bool bIsValid		 = false;
 			Math::Vec3f	Position = { 0.0f, 0.0f, 0.0f };
+			Math::Vec3f	Rotation = { 0.0f, 0.0f, 0.0f };
 			
 			StaticMesh Mesh;
 			ShaderLink Shaders;

@@ -3,6 +3,9 @@
 #include "Math/Vector3.h"
 #include "Math/Matrix4.h"
 
+#include <DirectXMath.h>
+
+
 #define FORCEINLINE __forceinline
 
 namespace Math
@@ -11,24 +14,25 @@ namespace Math
 	{
 	public:
 		Camera()
-			: Projection(Math::Mat4f::Identity)
+			: Projection(DirectX::XMMatrixIdentity())
+			, View(DirectX::XMMatrixIdentity())
 			, Position(0.0f, 0.0f, 0.0f)
 			, Rotation(0.0f, 0.0f, 0.0f)
-			, LookAt(0.0f, 0.0f, 100.f)
 			, Up(0.0f, 1.0f, 0.0f)
+			, Right(1.0f, 0.0f, 0.0f)
+			, Forward(0.0f, 0.0f, 1.0f)
 		{
 		}
 
 		Camera(float AspectRatio, float FOV = 90.0f, float Near = 0.01f, float Far = 100.0f)
 			: Camera()
 		{
-			MakePerepective(AspectRatio, FOV, Near, Far);
+			MakePerspective(AspectRatio, FOV, Near, Far);
 		}
 
-		void MakePerepective(float AspectRatio, float FOV = 90.0f, float Near = 0.01f, float Far = 100.0f)
+		void MakePerspective(float AspectRatio, float FOV = 90.0f, float Near = 0.01f, float Far = 100.0f)
 		{
-			Projection = Math::Mat4f::ProjectionMatrixLH(AspectRatio, FOV, Near, Far); 
-			RecalculateView();
+			Projection = DirectX::XMMatrixPerspectiveFovLH(Math::ToRad(FOV), AspectRatio, Near, Far);
 		}
 
 		void MakeOrtho([[maybe_unused]]float Width, [[maybe_unused]] float Height, [[maybe_unused]] float Near = 0.01f, [[maybe_unused]] float Far = 100.0f)
@@ -37,28 +41,28 @@ namespace Math
 			//RecalculateView();
 		}
 
-		FORCEINLINE Math::Mat4f const & GetProjection() const { return Projection; }
+		FORCEINLINE DirectX::XMMATRIX  const & GetProjection() const { return Projection; }
 
-		FORCEINLINE Math::Mat4f const & GetView() const
+		FORCEINLINE DirectX::XMMATRIX  const & GetView() const
 		{
 			if (bViewDirty)
 				RecalculateView();
 			return View;
 		}
 
-		FORCEINLINE Math::Vec3f const & GetLookat() const { return LookAt; }
+		FORCEINLINE Math::Vec3f const& GetForward() const { return Forward; }
+		FORCEINLINE Math::Vec3f const& GetRight() const { return Right; }
 
 		FORCEINLINE Math::Vec3f const & GetPosition() const { return Position; }
 
 		void Translate(Math::Vec3f const & vTranslation)
 		{
 			Math::Vec3f Temp = vTranslation;
+			//Temp = Temp.RotateX(Rotation.X);
+			//Temp = Temp.RotateY(Rotation.Y);
+			//Temp = Temp.RotateZ(Rotation.Z);
 
-			Temp = Temp.RotateX(Rotation.X);
-			Temp = Temp.RotateY(Rotation.Y);
-			Temp = Temp.RotateZ(Rotation.Z);
-
-			Position += Temp;
+			Position += vTranslation;
 			bViewDirty = true;
 		}
 
@@ -91,42 +95,28 @@ namespace Math
 		}
 
 	private:
-		void RecalculateView() const
-		{
-			Math::Vec3f Forward(0.0f, 0.0f, 100.f);
-
-			Forward = Forward.RotateX(Rotation.X);
-			Forward = Forward.RotateY(Rotation.Y);
-			Forward = Forward.RotateZ(Rotation.Z);
-
-			LookAt = Position + Forward;
-
-			View = Math::Mat4f::LookAtLH(Position, LookAt, Up);
-
-			//DirectX::XMMatrixLookAtLH(
-			//	DirectX::XMMatrixLookAtLH(
-			//	DirectX::XMVectorSet(Position.X, Position.Y, Position.Z, 0.0f),
-			//	DirectX::XMVectorSet(LookAt.X, LookAt.Y, LookAt.Z, 0.0f),
-			//	DirectX::XMVectorSet(Up.X, Up.Y, Up.Z, 0.0f)
-			//);
-
-			bViewDirty = false;
-		}
+		void RecalculateView() const;
 
 		mutable bool bViewDirty = false;
 
 		Math::Vec3f Position;
 		Math::Vec3f Rotation;
-		mutable Math::Vec3f LookAt;
-		const Math::Vec3f Up;
 
-		Math::Mat4f Projection;
+		mutable Math::Vec3f Up;
+		mutable Math::Vec3f Right;
+		mutable Math::Vec3f Forward;
 
-		mutable Math::Mat4f View = Math::Mat4f::LookAtLH(Position, LookAt, Up); 
-		//DirectX::XMMatrixLookAtLH(
-		//	DirectX::XMVectorSet(Position.X, Position.Y, Position.Z, 0.0f),
-		//	DirectX::XMVectorSet(LookAt.X, LookAt.Y, LookAt.Z, 0.0f),
-		//	DirectX::XMVectorSet(Up.X, Up.Y, Up.Z, 0.0f)
-		//);
+		DirectX::XMMATRIX Projection;
+
+		//mutable Math::Mat4f View = mutable Math::Mat4f View = Math::Mat4f::LookAtLH(Position, LookAt, Up);
+		/*
+		 *		View Matrix layout
+		 *
+		 * | Right.X | Up.X | Forward.X | 0.0 |
+		 * | Right.Y | Up.Y | Forward.Y | 0.0 |
+		 * | Right.Z | Up.Z | Forward.Z | 0.0 |
+		 * |    A    |  B   |     C     | 1.0 |
+		 */
+		mutable DirectX::XMMATRIX View;
 	};
 }

@@ -2,11 +2,11 @@
 #include "Templates.h"
 #include "Utils/MeshUtils.h"
 
-Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::CreateFromFile(str const& Path)
+Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::CreateFromFile(str const& Path, bool bReverseIndices /*= false*/)
 {
 	if (!Path.ends_with(".obj"))
 	{
-		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadOBJFromFile(Path.c_str());
+		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadOBJFromFile(Path.c_str(), bReverseIndices);
 		return CreateMeshFromRawData(VI.Vertices, VI.Indices);
 	}
 	else if (!Path.ends_with(".gltf"))
@@ -23,17 +23,28 @@ Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::CreateFromFile(str const& Pa
 Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::CreateMeshFromRawData(darray<Vertex> const& InVertices)
 {
 	auto Ret = new StaticMesh();
-	Ret->Vertices = InVertices;
+	Ret->InitVertices(InVertices);
 	return Ret;
 }
 
 Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::CreateMeshFromRawData(darray<Vertex> const& InVertices, darray<u16> const& InIndices)
 {
 	auto Ret = new StaticMesh();
-	Ret->Vertices = InVertices;
-	Ret->Indices = InIndices;
-
+	Ret->InitVertices(InVertices);
+	Ret->InitIndices(InIndices);
 	return Ret;
+}
+
+void Funky::Asset::StaticMesh::InitVertices(darray<Vertex> InVertices)
+{
+	Vertices = InVertices;
+	VerticesSizeInBytes = Vertices.size() * sizeof(Vertex);
+}
+
+void Funky::Asset::StaticMesh::InitIndices(darray<u16> InIndices)
+{
+	Indices = InIndices;
+	IndicesSizeInBytes = Indices.size() * sizeof(u16);
 }
 
 Funky::Asset::StaticMesh::StaticMesh()

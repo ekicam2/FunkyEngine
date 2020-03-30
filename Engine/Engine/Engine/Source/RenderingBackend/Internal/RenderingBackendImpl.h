@@ -23,7 +23,7 @@ namespace Funky
 			virtual RRenderTarget* CreateRenderTarget(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/) = 0;
 			virtual RDepthStencil* CreateDepthStencil(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/) = 0;
 
-			virtual RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data = nullptr) = 0;
+			virtual RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data = nullptr, size Stride = 0u) = 0;
 
 			virtual RShader* CreateVertexShader(RenderingBackend::ShaderInputDesc* ShaderDesc) = 0;
 			virtual RShader* CreatePixelShader(RenderingBackend::ShaderInputDesc* ShaderDesc) = 0;

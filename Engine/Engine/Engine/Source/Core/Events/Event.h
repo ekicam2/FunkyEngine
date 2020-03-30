@@ -12,7 +12,6 @@ namespace Funky
 		template <typename T>
 		class Event;
 
-
 		template <typename Ret, typename ...Args>
 		class Event<Ret(Args...)>
 		{

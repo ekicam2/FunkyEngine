@@ -17,7 +17,7 @@ namespace Funky
 		public:
 			RenderingResourcesManager()
 			{
-
+				Resources.reserve(32);
 			}
 
 			~RenderingResourcesManager()
@@ -69,6 +69,8 @@ namespace Funky
 
 			void FreeAll()
 			{
+				ReleaseSwapchain();
+
 				Resources.clear();
 				CHECK(Resources.size() == 0u);
 			}
@@ -78,45 +80,8 @@ namespace Funky
 			Core::Memory::UniquePtr<RRenderTarget> SwapchainRT;
 			Core::Memory::UniquePtr<RDepthStencil> SwapchainDS;
 
-			struct ResourceList
-			{
-				ResourceList* Prev = nullptr;
-				ResourceList* Next = nullptr;
-
-				Core::Memory::UniquePtr<IRenderingResource> Resource;
-			};
-
-			size DebugAllocCounter = 0;
-			//Core::Memory::UniquePtr<ResourceList> Resources;
-
 			darray<Core::Memory::UniquePtr<IRenderingResource>> Resources;
 		};
-
-		//void RenderingResourcesManager::FreeAll()
-		//{
-		//	Resources.clear();
-		//	CHECK(Resources.size() == 0u);
-
-		//	/*ResourceList* CurrentNode = Resources.Get();
-		//	while (CurrentNode)
-		//	{
-		//		if (CurrentNode->Next)
-		//		{
-		//			CurrentNode = CurrentNode->Next;
-		//			delete CurrentNode->Prev;
-		//			continue;
-		//		}
-
-		//		delete CurrentNode;
-		//		CurrentNode = nullptr;
-		//	}*/
-		//}
-
-		//RenderingResourcesManager::RenderingResourcesManager()
-		////	: Resources(new ResourceList())
-		//{
-
-		//}
 
 	}
 }

@@ -3,6 +3,8 @@
 #include "UserFramework/Scene.h"
 
 #include <d3dcompiler.h>
+#include "Core/Platform/Platform.h"
+
 #include <wrl/client.h>
 
 #include <DirectXMath.h>
@@ -13,12 +15,114 @@ Math::Vec3f cmapos = Math::Vec::FORWARD * 14.0f;
 
 bool Funky::Rendering::Renderer::Init()
 {
-	ConstantBuffer = RenderingBackend.CreateBuffer(
-		sizeof(BaseConstantBuffer),
+	PerViewConstantBufferHandle = RenderingBackend.CreateBuffer(
+		sizeof(PerViewConstantBuffer),
 		Rendering::RBuffer::EType::Uniform,
 		Rendering::RBuffer::EUsageType::Dynamic,
-		&ConstantBufferData);
+		&PerViewConstantBufferData
+	);
 
+	PerObjectConstantBufferHandle = RenderingBackend.CreateBuffer(
+		sizeof(PerObjectConstantBuffer),
+		Rendering::RBuffer::EType::Uniform,
+		Rendering::RBuffer::EUsageType::Dynamic,
+		&PerObjectConstantBufferData
+	);
+	
+	
+	OffscreenRT = RenderingBackend.CreateRenderTarget(RenderingBackend.GetResourceManager()->GetSwapchainRenderTarget()->Size);
+
+
+	f32 PostProcessVertices[] = {
+		-1.0f,  -1.0f, 0.0f, // dl
+		-1.0f,  3.0f, 0.0f, // tl
+		 3.0f, -1.0f, 0.0f // dr
+	};
+
+	PostProcessSurfaceBuffer = RenderingBackend.CreateBuffer(
+		3 * 3 * sizeof(f32),
+		Rendering::RBuffer::EType::Vertex,
+		Rendering::RBuffer::EUsageType::Static,
+		&PostProcessVertices,
+		sizeof(f32) * 3
+	);
+
+	auto Source = Platform::ReadFile("RealData/Shaders/Source/ToonPP.hlsl");
+	PPMaterial.Reset(Asset::Material::CreateMaterialFromSourceCode(Source.c_str(), Source.c_str()));
+
+	PPMaterial->Linkage.VS = [&]() -> Rendering::RShader* {
+
+		D3D_SHADER_MACRO Macros[] = { nullptr };
+		Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
+		Microsoft::WRL::ComPtr <ID3DBlob> Errors;
+
+
+		HRESULT hr = D3DCompile(
+			PPMaterial->GetVertexShaderSourceCode(),
+			PPMaterial->GetVertexShaderSourceCodeLength(),
+			NULL,
+			Macros,
+			NULL,
+			"VSMain",
+			"vs_5_0",
+			0,
+			0,
+			CodeBlob.GetAddressOf(),
+			Errors.GetAddressOf()
+		);
+		if (!SUCCEEDED(hr))
+		{
+			const char* ErrorStr = (const char*)Errors->GetBufferPointer();
+			LOG_ERROR(ErrorStr);
+
+			CHECK(SUCCEEDED(hr));
+			return nullptr;
+		}
+
+		RenderingBackend::ShaderInputDesc ShaderDesc;
+
+		ShaderDesc.ShaderData = (byte*)CodeBlob->GetBufferPointer();
+		ShaderDesc.DataSize = CodeBlob->GetBufferSize();
+
+		return RenderingBackend.CreateVertexShader(&ShaderDesc);
+	}();
+
+	PPMaterial->Linkage.PS = [&]() -> Rendering::RShader* {
+
+
+		D3D_SHADER_MACRO Macros[] = { nullptr };
+		Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
+		Microsoft::WRL::ComPtr <ID3DBlob> Errors;
+
+		HRESULT hr = D3DCompile(
+			PPMaterial->GetPixelShaderSourceCode(),
+			PPMaterial->GetPixelShaderSourceCodeLength(),
+			NULL,
+			Macros,
+			NULL,
+			"PSMain",
+			"ps_5_0",
+			0,
+			0,
+			CodeBlob.GetAddressOf(),
+			Errors.GetAddressOf()
+		);
+		if (!SUCCEEDED(hr))
+		{
+			const char* ErrorStr = (const char*)Errors->GetBufferPointer();
+			LOG_ERROR(ErrorStr);
+
+			CHECK(SUCCEEDED(hr));
+			return nullptr;
+		}
+
+		RenderingBackend::ShaderInputDesc ShaderDesc;
+
+		ShaderDesc.ShaderData = (byte*)CodeBlob->GetBufferPointer();
+		ShaderDesc.DataSize = CodeBlob->GetBufferSize();
+
+		return RenderingBackend.CreatePixelShader(&ShaderDesc);
+	}();
 	return true;
 }
 
@@ -59,7 +163,7 @@ Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(ISc
 
 		if (!SceneObject->Material->Linkage.VS)
 		{
-			SceneObject->Material->Linkage.VS = [&]() {
+			SceneObject->Material->Linkage.VS = [&]() -> Rendering::RShader* {
 
 				D3D_SHADER_MACRO Macros[] = { nullptr };
 				Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
@@ -85,6 +189,7 @@ Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(ISc
 					LOG_ERROR(ErrorStr);
 
 					CHECK(SUCCEEDED(hr));
+					return nullptr;
 				}
 
 				RenderingBackend::ShaderInputDesc ShaderDesc;
@@ -98,7 +203,7 @@ Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(ISc
 		
 		if (!SceneObject->Material->Linkage.PS)
 		{
-			SceneObject->Material->Linkage.PS = [&]() {
+			SceneObject->Material->Linkage.PS = [&]() -> Rendering::RShader* {
 
 
 				D3D_SHADER_MACRO Macros[] = { nullptr };
@@ -124,6 +229,7 @@ Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(ISc
 					LOG_ERROR(ErrorStr);
 
 					CHECK(SUCCEEDED(hr));
+					return nullptr;
 				}
 
 				RenderingBackend::ShaderInputDesc ShaderDesc;
@@ -131,7 +237,7 @@ Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(ISc
 				ShaderDesc.ShaderData = (byte*)CodeBlob->GetBufferPointer();
 				ShaderDesc.DataSize = CodeBlob->GetBufferSize();
 
-				return RenderingBackend.CreatePixelShader(&ShaderDesc);
+ 				return RenderingBackend.CreatePixelShader(&ShaderDesc);
 			}();
 		}
 
@@ -156,6 +262,7 @@ Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(ISc
 		Ret->Objects[i].Shaders = SceneObject->Material->Linkage;
 
 		Ret->Objects[i].Position = SceneObject->Position;
+		Ret->Objects[i].Rotation = SceneObject->Rotation;
 	}
 
 	return Ret;
@@ -164,11 +271,10 @@ Funky::Rendering::RenderScene* Funky::Rendering::Renderer::CreateRenderScene(ISc
 void Funky::Rendering::Renderer::DrawScene(RenderScene* SceneToRender)
 {
 
-	auto RT = RenderingBackend.GetResourceManager()->GetSwapchainRenderTarget();
-	auto DS = RenderingBackend.GetResourceManager()->GetSwapchainDepthStencil();
-	RenderingBackend.BindRenderTarget(RT, nullptr);
-	RenderingBackend.ClearRenderTarget(RT, { 0.392156899f, 0.584313750f, 0.929411829f });
-	RenderingBackend.ClearDepthStencil(DS, 0.0f, 0u);
+	auto DefaultDS = RenderingBackend.GetResourceManager()->GetSwapchainDepthStencil();
+	RenderingBackend.BindRenderTarget(OffscreenRT, DefaultDS);
+	RenderingBackend.ClearRenderTarget(OffscreenRT, { 0.392156899f, 0.584313750f, 0.929411829f });
+	RenderingBackend.ClearDepthStencil(DefaultDS, 1.0f, 0u);
 	RenderingBackend.SetPrimitiveTopology(Rendering::RenderingBackend::PrimitiveTopology::Trianglelist);
 	//DirectX::XMMatrixLookAtLH()
 
@@ -177,14 +283,18 @@ void Funky::Rendering::Renderer::DrawScene(RenderScene* SceneToRender)
 	{
 		if(!SceneToRender->Objects[i].bIsValid) continue;
 
-		RenderPrimitive* CurrentObject = &SceneToRender->Objects[i];
+		RenderPrimitive* CurrentObject = &SceneToRender->Objects[0];
 
 		CHECK(nullptr != CurrentObject->Mesh.VertexBuffer);
 		CHECK(nullptr != CurrentObject->Mesh.IndexBuffer);
 
-
-		Math::Mat4f Model = Math::Mat4f::Identity;
-		Math::Mat4f::Translate(Model, CurrentObject->Position);
+		//Math::Mat4f Model = Math::Mat4f::Identity;
+		DirectX::XMMATRIX Model = DirectX::XMMatrixRotationRollPitchYaw(
+			Math::ToRad(CurrentObject->Rotation.X), 
+			Math::ToRad(CurrentObject->Rotation.Y), 
+			Math::ToRad(CurrentObject->Rotation.Z)
+		);
+		Model *= DirectX::XMMatrixTranslation(CurrentObject->Position.X, CurrentObject->Position.Y, CurrentObject->Position.Z);
 
 		//auto View = Math::Mat4f::Identity;
 		//View = Math::Mat4f::LookAtLH(
@@ -201,14 +311,18 @@ void Funky::Rendering::Renderer::DrawScene(RenderScene* SceneToRender)
 		//auto Proj = Math::Mat4f::ProjectionMatrixLH(, 90.0f, 1.f, 100.f);
 		//View * Proj;// Math::Mat4f::Identity;
 
-		ConstantBufferData.MVP = Model * SceneToRender->Camera->GetView() * SceneToRender->Camera->GetProjection();
-		
+		auto VP = SceneToRender->Camera->GetView() * SceneToRender->Camera->GetProjection();
 
-		ConstantBufferData.LookAt = SceneToRender->Camera->GetLookat();
-		ConstantBufferData.__padding = 24.0f;
+		PerViewConstantBufferData.VP			 = VP;
+		PerViewConstantBufferData.CameraPosition = Math::Vec4f(SceneToRender->Camera->GetPosition(), 1.0f);
+		PerViewConstantBufferData.CameraForward	 = Math::Vec4f(SceneToRender->Camera->GetForward(), 0.0f);
+		RenderingBackend.BindConstantBuffer(RenderingBackend::ShaderResourceStage::Fragment, PerViewConstantBufferHandle, 0);
+		RenderingBackend.UpdateConstantBuffer(PerViewConstantBufferHandle, &PerViewConstantBufferData);
 
-		RenderingBackend.BindConstantBuffer(RenderingBackend::ShaderResourceStage::Vertex, ConstantBuffer);
-		RenderingBackend.UpdateConstantBuffer(ConstantBuffer, &ConstantBufferData);
+		PerObjectConstantBufferData.MVP	  = Model * VP;
+		PerObjectConstantBufferData.Model = Model;
+		RenderingBackend.BindConstantBuffer(RenderingBackend::ShaderResourceStage::Vertex, PerObjectConstantBufferHandle, 0);
+		RenderingBackend.UpdateConstantBuffer(PerObjectConstantBufferHandle, &PerObjectConstantBufferData);
 
 		RenderingBackend.BindVertexShader(CurrentObject->Shaders.VS);
 		RenderingBackend.BindPixelShader(CurrentObject->Shaders.PS);
@@ -224,8 +338,21 @@ void Funky::Rendering::Renderer::DrawScene(RenderScene* SceneToRender)
 
 	}
 
-	
-	
+
+
+	// Post Process
+	//
+	auto DefaultRT = RenderingBackend.GetResourceManager()->GetSwapchainRenderTarget();
+	RenderingBackend.BindRenderTarget(DefaultRT);
+
+	RenderingBackend.BindTexture(RenderingBackend::ShaderResourceStage::Fragment, OffscreenRT);
+
+	RenderingBackend.BindVertexShader(PPMaterial->Linkage.VS);
+	RenderingBackend.BindPixelShader(PPMaterial->Linkage.PS);
+	RenderingBackend.Draw(PostProcessSurfaceBuffer);
+
+	auto DepthState = RenderingBackend::DepthState<false, false, RenderingBackend::EDepthFunc::Less>::Get();
+	//RenderingBackend.SetDepthState(DepthState);
 	
 	RenderingBackend.Present();
 }

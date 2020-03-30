@@ -65,36 +65,36 @@ namespace Math
 
 		Vector3D RotateX(T Theta) const
 		{
-			const float CosTheta = Cos(ToRad(Theta));
-			const float SinTheta = Sin(ToRad(Theta));
+			const float CosTheta = Cos(Theta);
+			const float SinTheta = Sin(Theta);
 
 			return {
 				X,
-				(Y * CosTheta) - (Z * SinTheta),
-				(Y * SinTheta) + (Z * CosTheta)
+				(Y * CosTheta) + (Z * SinTheta),
+				-(Y * SinTheta) + (Z * CosTheta)
 			};
 		}
 
 		Vector3D RotateY(T Theta) const
 		{
-			const float CosTheta = Cos(ToRad(Theta));
-			const float SinTheta = Sin(ToRad(Theta));
+			const float CosTheta = Cos(Theta);
+			const float SinTheta = Sin(Theta);
 
 			return {
-				(X * CosTheta) + (Z * SinTheta),
+				(X * CosTheta) - (Z * SinTheta),
 				Y, 
-				-(X * SinTheta) + (Z * CosTheta)
+				(X * SinTheta) + (Z * CosTheta)
 			};
 		}
 
 		Vector3D RotateZ(T Theta) const
 		{
-			const float CosTheta = Cos(ToRad(Theta));
-			const float SinTheta = Sin(ToRad(Theta));
+			const float CosTheta = Cos(Theta);
+			const float SinTheta = Sin(Theta);
 				
 			return {
-				(X * CosTheta) - (Y * SinTheta),
-				(X * SinTheta) + (Y * CosTheta),
+				(X * CosTheta) + (Y * SinTheta),
+				-(X * SinTheta) + (Y * CosTheta),
 				Z
 			};
 		}

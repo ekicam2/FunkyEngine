@@ -47,6 +47,7 @@ namespace Funky
 				Thread::ThreadPool* ThreadPool;
 
 				Thread::IMutex* QueueMutex;
+
 				// its the stupidest thing to store tasks in the std::vector
 				// MEMORY IS BEING GATHERED
 				darray<ITask*> TaskQueue;

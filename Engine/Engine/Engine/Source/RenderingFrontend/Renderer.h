@@ -5,11 +5,17 @@
 
 #include "Math/Matrix4.h"
 
-#define DEFINE_CONSTANT_BUFFER_BEGIN(BufferName) \
+#include <DirectXMath.h>
+
+
+#include "Core/Assets/Material.h"
+
+
+#define DEFINE_CONSTANT_BUFFER_STRUCT_BEGIN(BufferName) \
 		struct BufferName {
 
 //https://docs.microsoft.com/pl-pl/windows/desktop/direct3dhlsl/dx-graphics-hlsl-packing-rules			
-#define DEFINE_CONSTANT_BUFFER_END(BufferName)	\
+#define DEFINE_CONSTANT_BUFFER_STRUCT_END(BufferName)	\
 		};										\
 		static_assert((sizeof(BufferName) % 16) == 0, "Constant Buffer size must be 16-byte aligned");	
 
@@ -29,15 +35,21 @@
 	DEFINE_CONSTANT_BUFFER_PADDING1()
 
 
-
-DEFINE_CONSTANT_BUFFER_BEGIN(BaseConstantBuffer)
-	DEFINE_CONSTANT_BUFFER_MEMBER(Math::Mat4f, MVP, Math::Mat4f::Identity);
-	DEFINE_CONSTANT_BUFFER_MEMBER(Math::Mat4f, Model, Math::Mat4f::Identity);
-	DEFINE_CONSTANT_BUFFER_MEMBER(Math::Vec3f, LookAt, Math::Vec3f(0.0f, 0.0f, 0.0f));
-	DEFINE_CONSTANT_BUFFER_PADDING1();
-DEFINE_CONSTANT_BUFFER_END(BaseConstantBuffer)
+DEFINE_CONSTANT_BUFFER_STRUCT_BEGIN(PerViewConstantBuffer)
+	DEFINE_CONSTANT_BUFFER_MEMBER(Math::Vec4f, CameraPosition, Math::Vec4f(0.0f, 0.0f, 0.0f, 0.0f));
+	DEFINE_CONSTANT_BUFFER_MEMBER(Math::Vec4f, CameraForward, Math::Vec4f(0.0f, 0.0f, 0.0f, 0.0f));
+	DEFINE_CONSTANT_BUFFER_MEMBER(DirectX::XMMATRIX, VP, DirectX::XMMatrixIdentity());
+DEFINE_CONSTANT_BUFFER_STRUCT_END(PerViewConstantBuffer)
 
 
+DEFINE_CONSTANT_BUFFER_STRUCT_BEGIN(PerObjectConstantBuffer)
+	DEFINE_CONSTANT_BUFFER_MEMBER(DirectX::XMMATRIX, MVP, DirectX::XMMatrixIdentity());
+	DEFINE_CONSTANT_BUFFER_MEMBER(DirectX::XMMATRIX, Model, DirectX::XMMatrixIdentity());
+DEFINE_CONSTANT_BUFFER_STRUCT_END(PerObjectConstantBuffer)
+
+#define DEFINE_CONSTANT_BUFFER(Name)  \
+	Name Name##Data;				  \
+	ConstantBufferHandle Name##Handle;
 
 
 namespace Funky
@@ -59,8 +71,15 @@ namespace Funky
 			virtual void DrawScene(RenderScene* SceneToRender) override;
 
 		private:
-			BaseConstantBuffer ConstantBufferData;
-			ConstantBufferHandle ConstantBuffer;
+
+			DEFINE_CONSTANT_BUFFER(PerViewConstantBuffer);
+			DEFINE_CONSTANT_BUFFER(PerObjectConstantBuffer);
+
+			Core::Memory::UniquePtr<Asset::Material> PPMaterial;
+
+			Rendering::RRenderTarget* OffscreenRT;
+			Rendering::RBuffer* PostProcessSurfaceBuffer;
+			Rendering::ShaderLink PostProcessShaders;
 		};
 	}
 }

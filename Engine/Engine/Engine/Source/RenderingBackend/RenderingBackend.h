@@ -63,6 +63,27 @@ namespace Funky
 				TrianglestripAdj = 13
 			};
 
+			enum class EDepthFunc : u8
+			{
+				Less,
+				Greater
+			};
+
+			template <bool Enabled, bool ReadOnly, EDepthFunc InDepth>
+			struct DepthState
+			{
+				static constexpr bool bEnabled = Enabled;
+				static constexpr bool bReadOnly = ReadOnly;
+				static constexpr EDepthFunc DepthFunc = InDepth;
+
+
+				static DepthState& Get()
+				{
+					static DepthState Singleton;
+					return Singleton;
+				}
+			};
+
 			struct RenderingBackendInitDesc
 			{
 				API Api;
@@ -92,7 +113,7 @@ namespace Funky
 			RShader* CreateVertexShader(ShaderInputDesc* ShaderDesc);
 			RShader* CreatePixelShader(ShaderInputDesc* ShaderDesc);
 
-			RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data = nullptr);
+			RBuffer* CreateBuffer(size SizeOfBuffer, RBuffer::EType BufferType, RBuffer::EUsageType Usage, RBuffer::Data_t Data = nullptr, size Stride = 0u);
 
 			RTexture* CreateTexture2D(byte const * const Data, Math::Vec2u const & Size);
 			RTexture* CreateCubemap(byte const * const Data, Math::Vec2u const & Size);

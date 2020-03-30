@@ -61,9 +61,7 @@ namespace Funky
 		{
 		case WM_SIZE:
 		{
-			if(RenderingBackend && RenderingBackend->IsInitialized())
-				RenderingBackend->OnViewportResized({ LOWORD(lParam), HIWORD(lParam) });
-				//RenderingBackend->OnViewportResized({ 2560, 1080 });
+			Funky::OnViewportResized.Broadcast({ LOWORD(lParam), HIWORD(lParam) });
 			return 0;
 		}
 
@@ -123,8 +121,7 @@ namespace Funky
 
 		LOG("Initializing MainScene");
 		InitScene();
-		auto CurrentScene = MainSceneManager->GetCurrentScene();
-		CurrentScene->Init();
+		
 
 		return true;
 	}
@@ -156,7 +153,7 @@ namespace Funky
 
 				IOSystem->Update();
 			}
-			else
+			//else
 #pragma endregion 
 			{
 				MainSceneManager->Tick(DeltaTime);
@@ -240,7 +237,8 @@ namespace Funky
 
 	void FunkyEngine::InitScene()
 	{
-
+		auto CurrentScene = MainSceneManager->GetCurrentScene();
+		CurrentScene->Init();
 	}
 
 }

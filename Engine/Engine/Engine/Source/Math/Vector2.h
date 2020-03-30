@@ -41,6 +41,22 @@ namespace Math
 			return *this;
 		}
 
+		bool operator==(Vector2D const& Other) const
+		{
+			return X == Other.X && Y == Other.Y;
+		}
+
+		bool operator!=(Vector2D const& Other) const
+		{
+			return !operator==(Other);
+		}
+
+		Vector2D operator/(T Scalar)
+		{
+			return { X / Scalar, Y / Scalar };
+		}
+
+
 		T Dot(Vector2D const & Rhs)
 		{
 			return  X * Rhs.X + Y * Rhs.Y;

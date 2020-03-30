@@ -13,6 +13,8 @@ namespace Funky
 		Asset::Material* Material;
 
 		Math::Vec3f Position = Math::Vec3f(0.0f, 0.0f, 0.0f);
+		Math::Vec3f Rotation = Math::Vec3f(0.0f, 0.0f, 0.0f);
+
 	};
 
 	struct IScene

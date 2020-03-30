@@ -2,7 +2,10 @@
 
 #include "Math/Math.h"
 #include "Core/Timer.h"
+
 #include "3rd/TinyObjectLoader.h"
+#include "3rd/TinyGLTFLoader.h"
+
 #include "Utils/NoiseGenerator.h"
 #include "DebugMacros.h"
 
@@ -102,7 +105,7 @@ Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::CreateTerrainPlane(u32 Gri
 	return Ret;
 }
 
-Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadOBJFromFile(char const* const pFilePath)
+Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadOBJFromFile(char const* const pFilePath, bool bReverseIndices)
 {
 	tinyobj::attrib_t Attribs;
 	std::vector<tinyobj::shape_t> Shapes;
@@ -131,11 +134,11 @@ Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadOBJFromFile(char const
 
 		std::unordered_map<Vertex, unsigned> UniqueVerts = {};
 
-		for (u64 ShapeInt = 0; ShapeInt < Shapes.size(); ++ShapeInt)
+		for (u64 ShapeIndex = 0; ShapeIndex < Shapes.size(); ++ShapeIndex)
 		{
-			for (i64 IndexIndex = Shapes[ShapeInt].mesh.indices.size() - 1; IndexIndex >= 0; --IndexIndex)
+			for (i64 IndexIndex = Shapes[ShapeIndex].mesh.indices.size() - 1; IndexIndex >= 0; --IndexIndex)
 			{
-				tinyobj::index_t const& Index = Shapes[ShapeInt].mesh.indices[IndexIndex];
+				tinyobj::index_t const& Index = Shapes[ShapeIndex].mesh.indices[IndexIndex];
 
 				Vertex PropVert = {
 					Math::Vec3f(Attribs.vertices[3 * Index.vertex_index], Attribs.vertices[3 * Index.vertex_index + 1], Attribs.vertices[3 * Index.vertex_index + 2]), // position
@@ -156,11 +159,117 @@ Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadOBJFromFile(char const
 		}
 	}
 
+	if(bReverseIndices)
+		std::reverse(Indices.begin(), Indices.end());
+
 	return Ret;
 }
 
 Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadGLTFFromFile(char const* const pFilePath)
 {
-	pFilePath;
-	return {};
+	tinygltf::Model model;
+	tinygltf::TinyGLTF loader;
+
+	std::string err;
+	std::string warn;
+
+	Timer ParseTimer;
+	ParseTimer.Begin();
+	const bool success = loader.LoadASCIIFromFile(&model, &err, &warn, pFilePath);
+	ParseTimer.End();
+
+	LOG(TEXT("Parsing mesh: "), pFilePath, TEXT(". Took: "), ParseTimer.GetInMills(), TEXT(" ms."));
+
+	if (!warn.empty()) 
+	{
+		LOG_WARNING(warn);
+	}
+
+	if (!err.empty()) 
+	{
+		LOG_ERROR(err);
+	}
+
+	if (!success) 
+	{
+		LOG_ERROR("Failed to parse glTF.");
+		return {};
+	}
+
+	VertexIndexBuffer Ret;
+	auto& [Vertices, Indices] = Ret;
+
+	for (auto& primitive : model.meshes[0].primitives)
+	{
+		{
+			const tinygltf::Accessor& posAccessor = model.accessors[primitive.attributes["POSITION"]];
+			const tinygltf::BufferView& posBufferView = model.bufferViews[posAccessor.bufferView];
+
+			const tinygltf::Buffer& posBuffer = model.buffers[posBufferView.buffer];
+			const float* positions = reinterpret_cast<const float*>(&posBuffer.data[posBufferView.byteOffset + posAccessor.byteOffset]);
+
+			Vertices.reserve(posAccessor.count);
+			CHECK(Vertices.size() == 0 && Vertices.capacity() == posAccessor.count);
+
+			for (size_t i = 0; i < posAccessor.count; ++i)
+			{
+				Vertices.push_back(
+					Vertex(
+						Math::Vec3f(positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2]), // position
+						Math::Vec3f(0.0f, 0.0f, 0.0f), // colors
+						Math::Vec3f(0.0f, 0.0f, 0.0f), // normal
+						Math::Vec2f(0.0f, 0.0f) // uv
+					)
+				);
+			}
+		}
+
+		{
+			const tinygltf::Accessor& normalAccessor = model.accessors[primitive.attributes["NORMAL"]];
+			const tinygltf::BufferView& normalBufferView = model.bufferViews[normalAccessor.bufferView];
+
+			const tinygltf::Buffer& normalBuffer = model.buffers[normalBufferView.buffer];
+			const float* normals = reinterpret_cast<const float*>(&normalBuffer.data[normalBufferView.byteOffset + normalAccessor.byteOffset]);
+
+			for (size_t i = 0; i < normalAccessor.count; ++i)
+			{
+				Vertices[i].Normal.X = normals[i * 3 + 0];
+				Vertices[i].Normal.Y = normals[i * 3 + 1];
+				Vertices[i].Normal.Z = normals[i * 3 + 2];
+			}
+		}
+
+		{
+			const tinygltf::Accessor& uvsAccessor = model.accessors[primitive.attributes["TEXCOORD_0"]];
+			const tinygltf::BufferView& uvsBufferView = model.bufferViews[uvsAccessor.bufferView];
+
+			const tinygltf::Buffer& uvsBuffer = model.buffers[uvsBufferView.buffer];
+			const float* uvs = reinterpret_cast<const float*>(&uvsBuffer.data[uvsBufferView.byteOffset + uvsAccessor.byteOffset]);
+
+			for (size_t i = 0; i < uvsAccessor.count; ++i)
+			{
+				Vertices[i].Texcoords.X = uvs[i * 2 + 0];
+				Vertices[i].Texcoords.Y = uvs[i * 2 + 1];
+			}
+		}
+
+		{
+			const tinygltf::Accessor& indAccessor = model.accessors[primitive.indices];
+			const tinygltf::BufferView& indBufferView = model.bufferViews[indAccessor.bufferView];
+
+			const tinygltf::Buffer& indBuffer = model.buffers[indBufferView.buffer];
+			const u16* indices = reinterpret_cast<const u16*>(&indBuffer.data[indBufferView.byteOffset + indAccessor.byteOffset]);
+
+			Indices.reserve(indAccessor.count);
+			CHECK(Indices.size() == 0 && Indices.capacity() == indAccessor.count);
+
+			for (size_t i = 0; i < indAccessor.count; ++i)
+			{
+				Indices[i] = indices[i];
+			}
+
+		}
+	}
+
+	return Ret;
 }

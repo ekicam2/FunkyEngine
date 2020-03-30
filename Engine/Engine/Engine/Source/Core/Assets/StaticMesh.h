@@ -20,12 +20,17 @@ namespace Funky
 		class StaticMesh : public IAsset
 		{
 		public:
+			// IAsset
+			virtual ~StaticMesh() = default;
+			// IAsset END
+			
+			/** In most use cases you PREFER to use this one. */
+			static StaticMesh* CreateFromFile(str const& Path, bool bReverseIndices = false);
 
-			static StaticMesh* CreateFromFile(str const& Path);
+			/** These are leaved here if case of any dynamic generated meshes. */
 			static StaticMesh* CreateMeshFromRawData(darray<Vertex> const& InVertices);
 			static StaticMesh* CreateMeshFromRawData(darray<Vertex> const& InVertices, darray<u16> const& InIndices);
 
-			virtual ~StaticMesh() = default;
 
 			FORCEINLINE size GetIndicesCount() const
 			{
@@ -39,12 +44,12 @@ namespace Funky
 
 			FORCEINLINE size GetVertexBufferSizeInBytes() const
 			{
-				return Vertices.size() * sizeof(Vertex);
+				return VerticesSizeInBytes;
 			}
 
 			FORCEINLINE size GetIndexBufferSizeInBytes() const
 			{
-				return Indices.size() * sizeof(u16);
+				return IndicesSizeInBytes;
 			}
 
 			FORCEINLINE Vertex const * GetVertices() const
@@ -57,11 +62,18 @@ namespace Funky
 				return Indices.data();
 			}
 
+		protected:
+			void InitVertices(darray<Vertex> InVertices);
+			void InitIndices(darray<u16> InIndices);
+
 		private:
 			StaticMesh();
 
 			darray<Vertex>	Vertices;
+			size VerticesSizeInBytes = 0u;
+
 			darray<u16>		Indices;
+			size IndicesSizeInBytes = 0u;
 
 			//todo rethink
 		public:

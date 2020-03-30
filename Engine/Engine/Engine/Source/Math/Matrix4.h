@@ -106,13 +106,23 @@ namespace Math
 			CHECK(Up.Length() == 1u);
 
 			const MyVec3 NewForward = (Destination - Position).Normalized();
-			const MyVec3 NewRight = Up.Cross(NewForward).Normalized();
+			const MyVec3 NewRight	= Up.Cross(NewForward).Normalized();
+			const MyVec3 NewUp		= NewForward.Cross(NewRight).Normalized();
+			
+			const MyVec3 ABC(
+				-(NewRight.Dot(Position)),
+				-(NewUp.Dot(Position)),
+				-(NewForward.Dot(Position))
+			);
+			
+			Matrix4 Ret = Matrix4(
+				MyVec(NewRight, 0.0), 
+				MyVec(NewUp, 0.0), 
+				MyVec(NewForward, 0.0), 
+				MyVec(ABC, 1.0)
+			);
 
-			Matrix4 Ret = Matrix4(MyVec(NewRight, 0.0), MyVec(Up, 0.0), MyVec(NewForward, 0.0), MyVec(0.0, 0.0, 0.0, 1.0));
-			Matrix4::Translate(Ret, Position);
-			//Matrix4D::Transpose(Ret);
 			return Ret;
-
 		}
 
 		static Matrix4 ProjectionMatrixLH(T AspectRatio, T VerticalFov, T Near, T Far)

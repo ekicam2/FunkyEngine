@@ -100,7 +100,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -117,6 +117,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Source\3rd\json.hpp" />
+    <ClInclude Include="Source\3rd\stb_image.h" />
+    <ClInclude Include="Source\3rd\stb_image_write.h" />
+    <ClInclude Include="Source\3rd\TinyGLTFLoader.h" />
     <ClInclude Include="Source\3rd\TinyObjectLoader.h" />
     <ClInclude Include="Source\BasicTypes.h" />
     <ClInclude Include="Source\Core\Assets\AssetRegistry.h" />
@@ -133,6 +137,7 @@
     <ClInclude Include="Source\Core\Path.h" />
     <ClInclude Include="Source\Core\Platform\Windows\FunkyWindows.h" />
     <ClInclude Include="Source\Core\Platform\Windows\WindowsConditionVariable.h" />
+    <ClInclude Include="Source\Core\Platform\Windows\WindowsFileUtils.h" />
     <ClInclude Include="Source\Core\Platform\Windows\WindowsIOSystem.h" />
     <ClInclude Include="Source\Core\Platform\Windows\WindowsMutex.h" />
     <ClInclude Include="Source\Core\Platform\Windows\WindowsThread.h" />
@@ -181,6 +186,7 @@
     <ClInclude Include="Source\Utils\NoiseGenerator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\3rd\TinyGLTFLoader.cpp" />
     <ClCompile Include="Source\3rd\TinyObjectLoader.cpp" />
     <ClCompile Include="Source\Core\Assets\AssetRegistry.cpp" />
     <ClCompile Include="Source\Core\Assets\Cubemap.cpp" />
@@ -188,9 +194,11 @@
     <ClCompile Include="Source\Core\Assets\ITexture.cpp" />
     <ClCompile Include="Source\Core\Assets\StaticMesh.cpp" />
     <ClCompile Include="Source\Core\Assets\Texture.cpp" />
+    <ClCompile Include="Source\Core\Events\EngineEvents.cpp" />
     <ClCompile Include="Source\Core\Events\Event.h" />
     <ClCompile Include="Source\Core\IIOSystem.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsConditionVariable.cpp" />
+    <ClCompile Include="Source\Core\Platform\Windows\WindowsFileUtils.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsIOSystem.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsMutex.cpp" />
     <ClCompile Include="Source\Core\Platform\Windows\WindowsThread.cpp" />
@@ -199,9 +207,11 @@
     <ClCompile Include="Source\Core\Thread\IThread.cpp" />
     <ClCompile Include="Source\Core\Thread\ThreadPool.cpp" />
     <ClCompile Include="Source\Core\Timer.cpp" />
+    <ClCompile Include="Source\Math\Camera.cpp" />
     <ClCompile Include="Source\RenderingBackend\Internal\DX11\DX11Core.cpp" />
     <ClCompile Include="Source\FunkyEngine.cpp" />
     <ClCompile Include="Source\Core\Assets\Material.cpp" />
+    <ClCompile Include="Source\RenderingBackend\Internal\DX11\DX11RenderingResources.cpp" />
     <ClCompile Include="Source\RenderingBackend\Internal\RenderingBackend.cpp" />
     <ClCompile Include="Source\RenderingFrontend\IRenderingResource.h" />
     <ClCompile Include="Source\RenderingFrontend\Renderer.cpp" />

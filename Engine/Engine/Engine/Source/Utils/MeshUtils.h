@@ -19,7 +19,7 @@ namespace Funky
 
 		static VertexIndexBuffer CreateTerrainPlane(u32 GridCellsX, u32 GridCellsY, f32 StepBetweenGridPoints = 0.0f);
 
-		static VertexIndexBuffer LoadOBJFromFile(char const* const pFilePath);
+		static VertexIndexBuffer LoadOBJFromFile(char const* const pFilePath, bool bReverse);
 		
 		static VertexIndexBuffer LoadGLTFFromFile(char const* const pFilePath);
 
