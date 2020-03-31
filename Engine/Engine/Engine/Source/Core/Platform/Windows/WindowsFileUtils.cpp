@@ -4,33 +4,8 @@
 #include "BasicTypes.h"
 #include "LogMacros.h"
 
-namespace 
-{
-	template <size Size>
-	struct BufferHelper final
-	{
-		BufferHelper()
-		{
-			pBuffer = new char[Size];
-		}
-		~BufferHelper()
-		{
-			delete[] pBuffer;
-		}
+#include "Core/Memory/UniquePtr.h"
 
-		char* operator* ()
-		{
-			return pBuffer;
-		}
-
-		operator char* ()
-		{
-			return pBuffer;
-		}
-
-		char* pBuffer = nullptr;
-	};
-}
 
 str Funky::Platform::ReadFile(str const& FilePath)
 {
@@ -46,9 +21,9 @@ str Funky::Platform::ReadFile(str const& FilePath)
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
-		BufferHelper<1 << 12> Buffer2;
-		sprintf_s(*Buffer2, 1024, "unable to open file \"%s\" for read.", FilePath.c_str());
-		LOG_ERROR(*Buffer2);
+		Core::Memory::UniquePtr<char[]> MsgBuffer(new char[1 << 12]);
+		sprintf_s(MsgBuffer.Get(), 1024, "unable to open file \"%s\" for read.", FilePath.c_str());
+		LOG_ERROR(MsgBuffer.Get());
 		LOG_ERROR(GetLastError());
 		return "";
 	}
@@ -56,7 +31,8 @@ str Funky::Platform::ReadFile(str const& FilePath)
 
 	constexpr size BufferSize = 1 << 13;
 	// reserve 4KB for a file
-	BufferHelper<BufferSize> Buffer;
+	Core::Memory::UniquePtr<char[]> Buffer(new char[BufferSize]);
+
 	DWORD Read;
 
 	BOOL Succeed = ::ReadFile(
@@ -70,9 +46,9 @@ str Funky::Platform::ReadFile(str const& FilePath)
 	if (!Succeed)
 	{
 		LOG_ERROR(TEXT("ReadFile"));
-		BufferHelper<1 << 12> Buffer2;
-		sprintf_s(Buffer2, 1024, "Unable to read from file.\n GetLastError=%08x", GetLastError());
-		LOG_ERROR(*Buffer2);
+		Core::Memory::UniquePtr<char[]> MsgBuffer(new char[1 << 12]);
+		sprintf_s(MsgBuffer.Get(), 1024, "Unable to read from file.\n GetLastError=%08x", GetLastError());
+		LOG_ERROR(MsgBuffer.Get());
 
 		CloseHandle(hFile);
 		return "";

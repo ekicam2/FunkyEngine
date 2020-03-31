@@ -1,5 +1,7 @@
 #pragma once
 
+#include "BasicTypes.h"
+
 namespace Funky
 {
 	template<typename ...Args>
@@ -40,4 +42,34 @@ namespace Funky
 	{
 		static constexpr bool Value = true;
 	};
+
+	namespace TypeTraits
+	{
+		template <typename T>
+		struct IsArray : False {};
+
+		template <typename T>
+		struct IsArray<T[]> : True {};
+
+		template <typename T, size N>
+		struct IsArray<T[N]> : True {};
+
+		template <typename T>
+		struct RemoveArray
+		{
+			using Value = T;
+		};
+
+		template <typename T>
+		struct RemoveArray<T[]>
+		{
+			using Value = T;
+		};
+
+		template <typename T, size N>
+		struct RemoveArray<T[N]>
+		{
+			using Value = T;
+		};
+	}
 }

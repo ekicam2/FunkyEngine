@@ -363,8 +363,6 @@ void Funky::Rendering::Renderer::DrawScene(RenderView* SceneToRender)
 		RenderingBackend.BindPixelShader(PPMaterial->Linkage.PS);
 		RenderingBackend.Draw(PostProcessSurfaceBuffer);
 
-		auto DepthState = RenderingBackend::DepthState<false, false, RenderingBackend::EDepthFunc::Less>::Get();
-		//RenderingBackend.SetDepthState(DepthState);
 	
 		RenderingBackend.Present();
 	}

@@ -21,8 +21,8 @@ namespace Funky
 
 			enum class ERenderingTechnique
 			{
-				DefaultLit,
-				Internal_Depth
+				Toon,
+				DefaultLit
 			} Technique;
 
 			FORCEINLINE char const * GetVertexShaderSourceCode() const { return VSSource.c_str(); }
@@ -36,6 +36,8 @@ namespace Funky
 
 			str VSSource;
 			str PSSource;
+
+
 		public:
 			Rendering::ShaderLink Linkage;
 		};
