@@ -9,6 +9,8 @@
 #include "RenderingBackend/Internal/DX11/DirectUtils.h"
 #include "RenderingBackend/Internal/DX11/DX11RenderingResources.h"
 
+#include "DX11Marker.h"
+
 
 namespace Funky
 {
@@ -537,6 +539,13 @@ namespace Funky
 				return false;
 			}
 
+			hr = pDeviceContext->QueryInterface(__uuidof(pDebugMarkersStack), reinterpret_cast<void**>(pDebugMarkersStack.GetAddressOf()));
+			if (FAILED(hr))
+			{
+				LOG_ERROR(TEXT("Couldn't query user defined annotations interface"));
+				return false;
+			}
+
 			LOG(TEXT("actually supported level is: "), DirectUtils::FeatureNameToString(ActuallySupportedLevel));
 
 			return true;
@@ -622,12 +631,12 @@ namespace Funky
 
 			D3D11_TEXTURE2D_DESC DepthStencilTextureDesc;
 			ZeroMemory(&DepthStencilTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
-			DepthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			DepthStencilTextureDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R24G8_TYPELESS;
 			DepthStencilTextureDesc.Width = WindowSize.X;
 			DepthStencilTextureDesc.Height = WindowSize.Y;
 			DepthStencilTextureDesc.ArraySize = 1;
 			DepthStencilTextureDesc.MipLevels = 1;
-			DepthStencilTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
+			DepthStencilTextureDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_FLAG::D3D11_BIND_SHADER_RESOURCE;
 			DepthStencilTextureDesc.SampleDesc.Count = 1;
 
 			hr = pDevice->CreateTexture2D(&DepthStencilTextureDesc, nullptr, DS->pTexture.GetAddressOf());
@@ -639,10 +648,28 @@ namespace Funky
 
 			D3D11_DEPTH_STENCIL_VIEW_DESC DepthViewDesc;
 			ZeroMemory(&DepthViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
-			DepthViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			DepthViewDesc.Format = DXGI_FORMAT::DXGI_FORMAT_D24_UNORM_S8_UINT;
 			DepthViewDesc.ViewDimension = D3D11_DSV_DIMENSION::D3D11_DSV_DIMENSION_TEXTURE2D;
 
-			pDevice->CreateDepthStencilView(DS->pTexture.Get(), &DepthViewDesc, DS->pDepthStencilView.GetAddressOf());
+			hr = pDevice->CreateDepthStencilView(DS->pTexture.Get(), &DepthViewDesc, DS->pDepthStencilView.GetAddressOf());
+			if (!SUCCEEDED(hr))
+			{
+				LOG_ERROR(TEXT("Couldn't create depth stencil texture view"));
+				return false;
+			}
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC DepthTextureViewDEsc;
+			DepthTextureViewDEsc.Format = DXGI_FORMAT::DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			DepthTextureViewDEsc.ViewDimension = D3D_SRV_DIMENSION::D3D_SRV_DIMENSION_TEXTURE2D;
+			DepthTextureViewDEsc.Texture2D.MipLevels = 1;
+			DepthTextureViewDEsc.Texture2D.MostDetailedMip = 0;
+
+			hr = pDevice->CreateShaderResourceView(DS->pTexture.Get(), &DepthTextureViewDEsc, DS->pTextureView.GetAddressOf());
+			if (!SUCCEEDED(hr))
+			{
+				LOG_ERROR(TEXT("Couldn't create depth stencil view"));
+				return false;
+			}
 
 			ResourceManager->AssociateSwapchain(RT, DS);
 
@@ -654,17 +681,6 @@ namespace Funky
 			Viewport.MaxDepth = 1.0f;
 
 			pDeviceContext->RSSetViewports(1, &Viewport);
-
-			// immediate close test
-			
-			
-			//if(pDevice) pDevice->Release();
-			//if (pDeviceContext) pDeviceContext->Release();
-			//if (pSwapChain) pSwapChain->Release();
-			//
-			//FreeSwapchain();
-			
-			// immediate close test END
 
 			return true;
 		}
@@ -678,6 +694,21 @@ namespace Funky
 		void DX11::BindTexture(RenderingBackend::ShaderResourceStage Stage, RTexture* InTexture, u32 StartIndex /*= 0u*/)
 		{
 			DX11Texture* Texture = static_cast<DX11Texture*>(InTexture);
+
+			switch (Stage)
+			{
+			case RenderingBackend::ShaderResourceStage::Fragment:
+				pDeviceContext->PSSetShaderResources(StartIndex, 1u, Texture->pTextureView.GetAddressOf());
+				break;
+			case RenderingBackend::ShaderResourceStage::Vertex:
+				pDeviceContext->VSSetShaderResources(StartIndex, 1u, Texture->pTextureView.GetAddressOf());
+				break;
+			}
+		}
+
+		void DX11::BindTexture(RenderingBackend::ShaderResourceStage Stage, RDepthStencil* InTexture, u32 StartIndex /*= 0u*/)
+		{
+			DX11DepthStencil* Texture = static_cast<DX11DepthStencil*>(InTexture);
 
 			switch (Stage)
 			{
@@ -704,5 +735,11 @@ namespace Funky
 				break;
 			}
 		}
+
+		Funky::Rendering::IGPUMarker* DX11::MarkScope(str MarkerName)
+		{
+			return new Rendering::DX11Marker(pDebugMarkersStack.Get(), MarkerName);
+		}
+
 	}
 }

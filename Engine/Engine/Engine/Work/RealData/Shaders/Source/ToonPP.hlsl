@@ -24,7 +24,9 @@ VSOutPSIn VSMain(VertexInput Input)
 //////////////////////////////////////////////////////////////////////////////
 // Post process implementation
 
-Texture2D shaderTexture;
+Texture2D SceneColor : register(t0);
+Texture2D SceneDepth : register(t1);
+
 SamplerState SampleType;
 
 cbuffer PostProcessBuffer : register(b0)
@@ -79,10 +81,10 @@ float4 PSMain(VSOutPSIn Input) : SV_TARGET0
 	//if(Input.uv.y < 0.25) return float4(0.0, 1.0, 0.0, 0.0);
 
 	float2 SamplerUV = float2(Input.uv.x, 1.0 - Input.uv.y);
-	float4 InScene = shaderTexture.Sample(SampleType, SamplerUV);
+	float4 InScene = SceneColor.Sample(SampleType, SamplerUV);
 
-	float sobel = Sobel(shaderTexture, SampleType, SamplerUV);
+	float sobel = Sobel(SceneColor, SampleType, SamplerUV);
 	sobel = floor(sobel);
-	InScene = InScene * clamp((1.0 - sobel), 0.0, 1.0);// * InScene;
-	return InScene;//lerp(InScene, float4(0.0, 0.0, 0.0, 0.0), sobel * 0.1);
+	InScene = InScene * clamp((1.0 - sobel), 0.0, 1.0);
+	return InScene;
 }

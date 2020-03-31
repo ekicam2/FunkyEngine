@@ -168,9 +168,6 @@
     <ClInclude Include="Source\RenderingFrontend\IRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\RenderingFrontend\RenderScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Core\Memory\UniquePtr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -187,9 +184,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Core\Events\EngineEvents.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\RenderingBackend\Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Math\Vector4.h">
@@ -214,6 +208,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Core\Platform\Windows\WindowsFileUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingFrontend\RenderView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingBackend\Marker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingBackend\Internal\DX11\DX11Marker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -153,7 +153,8 @@
     <ClInclude Include="Source\DebugMacros.h" />
     <ClInclude Include="Source\Math\Matrix4.h" />
     <ClInclude Include="Source\Math\Vector4.h" />
-    <ClInclude Include="Source\RenderingBackend\Event.h" />
+    <ClInclude Include="Source\RenderingBackend\Internal\DX11\DX11Marker.h" />
+    <ClInclude Include="Source\RenderingBackend\Marker.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\DX11\DX11RenderingResources.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\RenderingBackendUtils.h" />
     <ClInclude Include="Source\RenderingFrontend\IRenderer.h" />
@@ -172,7 +173,7 @@
     <ClInclude Include="Source\RenderingFrontend\Light.h" />
     <ClInclude Include="Source\Core\Assets\Material.h" />
     <ClInclude Include="Source\RenderingFrontend\RenderingResourceManager.h" />
-    <ClInclude Include="Source\RenderingFrontend\RenderScene.h" />
+    <ClInclude Include="Source\RenderingFrontend\RenderView.h" />
     <ClInclude Include="Source\RenderingFrontend\VertexDefinition.h" />
     <ClInclude Include="Source\UserFramework\Scene.h" />
     <ClInclude Include="Source\UserFramework\SceneManager.h" />

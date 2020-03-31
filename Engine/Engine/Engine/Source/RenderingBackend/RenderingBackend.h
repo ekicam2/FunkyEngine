@@ -6,6 +6,7 @@
 #include "Math/Vector2.h"
 
 #include "BasicTypes.h"
+#include "Core/String.h"
 
 #include "Internal/RenderingBackendUtils.h"
 
@@ -33,6 +34,8 @@ namespace Funky
 {
 	namespace Rendering
 	{
+		class IGPUMarker;
+
 		class RenderingBackend
 		{
 		public:
@@ -63,27 +66,6 @@ namespace Funky
 				TrianglestripAdj = 13
 			};
 
-			enum class EDepthFunc : u8
-			{
-				Less,
-				Greater
-			};
-
-			template <bool Enabled, bool ReadOnly, EDepthFunc InDepth>
-			struct DepthState
-			{
-				static constexpr bool bEnabled = Enabled;
-				static constexpr bool bReadOnly = ReadOnly;
-				static constexpr EDepthFunc DepthFunc = InDepth;
-
-
-				static DepthState& Get()
-				{
-					static DepthState Singleton;
-					return Singleton;
-				}
-			};
-
 			struct RenderingBackendInitDesc
 			{
 				API Api;
@@ -98,9 +80,7 @@ namespace Funky
 			RenderingBackend();
 			virtual ~RenderingBackend();
 
-			bool IsInitialized() const {
-				return Impl != nullptr;
-			}
+			FORCEINLINE bool IsInitialized() const { return Impl != nullptr; }
 
 			bool Init(RenderingBackendInitDesc* InitDesc);
 			void OnViewportResized(Math::Vec2u const & NewSize);
@@ -130,12 +110,15 @@ namespace Funky
 			void BindVertexShader(RShader* VertexShaderToBind);
 			void BindPixelShader(RShader* PixelShaderToBind);
 			void BindTexture(ShaderResourceStage Stage, RTexture* Texture, u32 StartIndex = 0u);
+			void BindTexture(ShaderResourceStage Stage, RDepthStencil* Texture, u32 StartIndex = 0u);
 			void BindTexture(ShaderResourceStage Stage, RRenderTarget* Texture, u32 StartIndex = 0u);
 
 			void Draw(RBuffer* VertexBuffer);
 			void DrawIndexed(RBuffer* VertexBuffer, RBuffer* IndexBuffer);
 
 			void Present();
+
+			Rendering::IGPUMarker* MarkScope(str MarkerName);
 
 			class RenderingResourcesManager* GetResourceManager();
 

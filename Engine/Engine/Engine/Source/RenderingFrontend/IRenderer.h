@@ -8,7 +8,7 @@ namespace Funky
 
 	namespace Rendering
 	{
-		struct RenderScene;
+		struct RenderView;
 
 		class IRenderer
 		{
@@ -19,8 +19,8 @@ namespace Funky
 			virtual bool Init() = 0;
 			virtual void Shutdown() = 0;
 
-			virtual RenderScene* CreateRenderScene(IScene* Scene) = 0;
-			virtual void DrawScene(RenderScene* SceneToRender) = 0;
+			virtual RenderView* CreateRenderScene(IScene* Scene) = 0;
+			virtual void DrawScene(RenderView* SceneToRender) = 0;
 
 		protected:
 			Rendering::RenderingBackend& RenderingBackend;

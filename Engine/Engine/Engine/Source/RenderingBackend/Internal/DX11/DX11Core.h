@@ -4,6 +4,7 @@
 
 #include <d3dcommon.h>
 #include <d3d11.h>
+#include <d3d11_1.h>
 // comptr
 #include <wrl/client.h>
 
@@ -44,13 +45,17 @@ namespace Funky
 
 			virtual void BindVertexShader(RShader* VertexShaderToBind) override;
 			virtual void BindPixelShader(RShader* PixelShaderToBind) override;
+			
 			virtual void BindTexture(RenderingBackend::ShaderResourceStage Stage, RTexture* Texture, u32 StartIndex = 0u) override;
+			virtual void BindTexture(RenderingBackend::ShaderResourceStage Stage, RDepthStencil* Texture, u32 StartIndex = 0u) override;
 			virtual void BindTexture(RenderingBackend::ShaderResourceStage Stage, RRenderTarget* Texture, u32 StartIndex = 0u) override;
 
 			virtual void Draw(RBuffer* VertexBuffer) override;
 			virtual void DrawIndexed(RBuffer* VertexBuffer, RBuffer* IndexBuffer) override;
 
 			virtual void Present() override;
+
+			virtual Rendering::IGPUMarker* MarkScope(str MarkerName) override;
 
 			bool CreateDeviceAndSwapchain(HWND hwnd);
 			bool InitSwapchain();
@@ -64,6 +69,8 @@ namespace Funky
 			Microsoft::WRL::ComPtr<ID3D11Device>		pDevice			= nullptr;
 			Microsoft::WRL::ComPtr<ID3D11DeviceContext> pDeviceContext	= nullptr;
 			Microsoft::WRL::ComPtr<IDXGISwapChain>		pSwapChain		= nullptr;
+
+			Microsoft::WRL::ComPtr<ID3DUserDefinedAnnotation> pDebugMarkersStack = nullptr;
 		};
 	}
 }

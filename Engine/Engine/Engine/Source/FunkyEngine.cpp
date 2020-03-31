@@ -191,7 +191,7 @@ namespace Funky
 		TaskManager->EnqueueTask(new RenderTask(Renderer));
 #else
 		/* sync point*/
-		Core::Memory::UniquePtr<Rendering::RenderScene> Scene(Renderer->CreateRenderScene(MainSceneManager->GetCurrentScene()));
+		Core::Memory::UniquePtr<Rendering::RenderView> Scene(Renderer->CreateRenderScene(MainSceneManager->GetCurrentScene()));
 		/* sync point end */
 		Renderer->DrawScene(Scene);
 #endif

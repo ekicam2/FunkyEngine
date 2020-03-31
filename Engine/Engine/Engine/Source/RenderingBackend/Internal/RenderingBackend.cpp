@@ -130,6 +130,11 @@ namespace Funky
 			Impl->BindTexture(Stage, Texture, StartIndex);
 		}
 
+		void RenderingBackend::BindTexture(ShaderResourceStage Stage, RDepthStencil* Texture, u32 StartIndex /*= 0u*/)
+		{
+			Impl->BindTexture(Stage, Texture, StartIndex);
+		}
+
 		void RenderingBackend::BindTexture(ShaderResourceStage Stage, RRenderTarget* Texture, u32 StartIndex /*= 0u*/)
 		{
 			Impl->BindTexture(Stage, Texture, StartIndex);
@@ -153,6 +158,11 @@ namespace Funky
 		void RenderingBackend::Present()
 		{
 			Impl->Present();
+		}
+
+		Funky::Rendering::IGPUMarker* RenderingBackend::MarkScope(str MarkerName)
+		{
+			return Impl->MarkScope(MarkerName);
 		}
 
 		RenderingResourcesManager* RenderingBackend::GetResourceManager()

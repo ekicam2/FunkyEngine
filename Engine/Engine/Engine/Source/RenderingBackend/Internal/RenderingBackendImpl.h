@@ -43,13 +43,17 @@ namespace Funky
 
 			virtual void BindVertexShader(RShader* VertexShaderToBind) = 0;
 			virtual void BindPixelShader(RShader* PixelShaderToBind) = 0;
+
 			virtual void BindTexture(RenderingBackend::ShaderResourceStage Stage, RTexture* Texture, u32 StartIndex = 0u) = 0;
+			virtual void BindTexture(RenderingBackend::ShaderResourceStage Stage, RDepthStencil* Texture, u32 StartIndex = 0u) = 0;
 			virtual void BindTexture(RenderingBackend::ShaderResourceStage Stage, RRenderTarget* Texture, u32 StartIndex = 0u) = 0;
 
 			virtual void Draw(RBuffer* VertexBuffer) = 0;
 			virtual void DrawIndexed(RBuffer* VertexBuffer, RBuffer* IndexBuffer) = 0;
 
 			virtual void Present() = 0;
+
+			virtual Rendering::IGPUMarker* MarkScope(str MarkerName) = 0;
 
 			Core::Memory::UniquePtr<RenderingResourcesManager> ResourceManager;
 		};}

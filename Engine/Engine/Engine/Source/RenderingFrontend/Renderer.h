@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RenderingFrontend/IRenderer.h"
-#include "RenderScene.h"
+#include "RenderView.h"
 
 #include "Math/Matrix4.h"
 
@@ -67,8 +67,8 @@ namespace Funky
 			virtual void Shutdown() override;
 
 
-			virtual RenderScene* CreateRenderScene(IScene* Scene) override;
-			virtual void DrawScene(RenderScene* SceneToRender) override;
+			virtual RenderView* CreateRenderScene(IScene* Scene) override;
+			virtual void DrawScene(RenderView* SceneToRender) override;
 
 		private:
 
