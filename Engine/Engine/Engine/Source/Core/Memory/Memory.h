@@ -26,12 +26,17 @@ namespace Funky
 }
 
 
-FORCEINLINE void MemSet(void* Dest, u64 Size, byte Data)
+FORCEINLINE void MemSet(void* Dest, size Size, byte Data)
 {
 	::memset(Dest, Data, Size);
 }
 
-FORCEINLINE void ZeroMem(void* Dest, u64 Size)
+FORCEINLINE void ZeroMem(void* Dest, size Size)
 {
 	MemSet(Dest, Size, 0);
+}
+
+FORCEINLINE void Memcpy(void* Src, void* Dst, size Size)
+{
+	::memcpy(Dst, Src, Size);
 }

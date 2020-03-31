@@ -85,6 +85,6 @@ float4 PSMain(VSOutPSIn Input) : SV_TARGET0
 
 	float sobel = Sobel(SceneColor, SampleType, SamplerUV);
 	sobel = floor(sobel);
-	InScene = InScene * clamp((1.0 - sobel), 0.0, 1.0);
+	//InScene = InScene * clamp((1.0 - sobel), 0.0, 1.0);
 	return InScene;
 }

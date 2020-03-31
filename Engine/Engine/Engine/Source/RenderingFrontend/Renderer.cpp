@@ -6,11 +6,8 @@
 #include "Core/Platform/Platform.h"
 #include "RenderingBackend/Marker.h"
 
-#include <wrl/client.h>
-
 #include <DirectXMath.h>
 
-#pragma comment(lib,"d3dcompiler.lib")
 
 Math::Vec3f cmapos = Math::Vec::FORWARD * 14.0f;
 
@@ -50,40 +47,13 @@ bool Funky::Rendering::Renderer::Init()
 
 	auto Source = Platform::ReadFile("RealData/Shaders/Source/ToonPP.hlsl");
 	PPMaterial.Reset(Asset::Material::CreateMaterialFromSourceCode(Source.c_str(), Source.c_str()));
-
+	PPMaterial->Compile(RenderingBackend.GetBackendAPI());
+	
 	PPMaterial->Linkage.VS = [&]() -> Rendering::RShader* {
 
-		D3D_SHADER_MACRO Macros[] = { nullptr };
-		Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
-		Microsoft::WRL::ComPtr <ID3DBlob> Errors;
-
-
-		HRESULT hr = D3DCompile(
-			PPMaterial->GetVertexShaderSourceCode(),
-			PPMaterial->GetVertexShaderSourceCodeLength(),
-			"PostProcessMaterial",
-			Macros,
-			NULL,
-			"VSMain",
-			"vs_5_0",
-			0,
-			0,
-			CodeBlob.GetAddressOf(),
-			Errors.GetAddressOf()
-		);
-		if (!SUCCEEDED(hr))
-		{
-			const char* ErrorStr = (const char*)Errors->GetBufferPointer();
-			LOG_ERROR(ErrorStr);
-
-			CHECK(SUCCEEDED(hr));
-			return nullptr;
-		}
-
 		RenderingBackend::ShaderInputDesc ShaderDesc;
-
-		ShaderDesc.ShaderData = (byte*)CodeBlob->GetBufferPointer();
-		ShaderDesc.DataSize = CodeBlob->GetBufferSize();
+		ShaderDesc.ShaderData = PPMaterial->GetVSBuffer();
+		ShaderDesc.DataSize = PPMaterial->GetVSBufferSize();
 
 		return RenderingBackend.CreateVertexShader(&ShaderDesc);
 	}();
@@ -91,39 +61,14 @@ bool Funky::Rendering::Renderer::Init()
 	PPMaterial->Linkage.PS = [&]() -> Rendering::RShader* {
 
 
-		D3D_SHADER_MACRO Macros[] = { nullptr };
-		Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
-		Microsoft::WRL::ComPtr <ID3DBlob> Errors;
-
-		HRESULT hr = D3DCompile(
-			PPMaterial->GetPixelShaderSourceCode(),
-			PPMaterial->GetPixelShaderSourceCodeLength(),
-			NULL,
-			Macros,
-			NULL,
-			"PSMain",
-			"ps_5_0",
-			0,
-			0,
-			CodeBlob.GetAddressOf(),
-			Errors.GetAddressOf()
-		);
-		if (!SUCCEEDED(hr))
-		{
-			const char* ErrorStr = (const char*)Errors->GetBufferPointer();
-			LOG_ERROR(ErrorStr);
-
-			CHECK(SUCCEEDED(hr));
-			return nullptr;
-		}
-
 		RenderingBackend::ShaderInputDesc ShaderDesc;
-
-		ShaderDesc.ShaderData = (byte*)CodeBlob->GetBufferPointer();
-		ShaderDesc.DataSize = CodeBlob->GetBufferSize();
+		ShaderDesc.ShaderData = PPMaterial->GetPSBuffer();
+		ShaderDesc.DataSize = PPMaterial->GetPSBufferSize();
 
 		return RenderingBackend.CreatePixelShader(&ShaderDesc);
 	}();
+
+
 	return true;
 }
 
@@ -161,42 +106,15 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene(ISce
 		CHECK(SceneObject->Mesh->VertexBuffer);
 		CHECK(SceneObject->Mesh->IndexBuffer);
 
+		CHECK(SceneObject->Material->IsCompiled());
 
 		if (!SceneObject->Material->Linkage.VS)
 		{
 			SceneObject->Material->Linkage.VS = [&]() -> Rendering::RShader* {
 
-				D3D_SHADER_MACRO Macros[] = { nullptr };
-				Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
-				Microsoft::WRL::ComPtr <ID3DBlob> Errors;
-
-
-				HRESULT hr = D3DCompile(
-					SceneObject->Material->GetVertexShaderSourceCode(), 
-					SceneObject->Material->GetVertexShaderSourceCodeLength(),
-					NULL,
-					Macros,
-					NULL,
-					"VSMain",
-					"vs_5_0",
-					0,
-					0,
-					CodeBlob.GetAddressOf(),
-					Errors.GetAddressOf()
-				);
-				if (!SUCCEEDED(hr))
-				{
-					const char* ErrorStr = (const char*)Errors->GetBufferPointer();
-					LOG_ERROR(ErrorStr);
-
-					CHECK(SUCCEEDED(hr));
-					return nullptr;
-				}
-
 				RenderingBackend::ShaderInputDesc ShaderDesc;
-
-				ShaderDesc.ShaderData = (byte*)CodeBlob->GetBufferPointer();
-				ShaderDesc.DataSize = CodeBlob->GetBufferSize();
+				ShaderDesc.ShaderData = SceneObject->Material->GetVSBuffer();
+				ShaderDesc.DataSize = SceneObject->Material->GetVSBufferSize();
 
 				return RenderingBackend.CreateVertexShader(&ShaderDesc);
 			}();
@@ -207,36 +125,9 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene(ISce
 			SceneObject->Material->Linkage.PS = [&]() -> Rendering::RShader* {
 
 
-				D3D_SHADER_MACRO Macros[] = { nullptr };
-				Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
-				Microsoft::WRL::ComPtr <ID3DBlob> Errors;
-
-				HRESULT hr = D3DCompile(
-					SceneObject->Material->GetPixelShaderSourceCode(),
-					SceneObject->Material->GetPixelShaderSourceCodeLength(),
-					NULL, 
-					Macros, 
-					NULL, 
-					"PSMain", 
-					"ps_5_0", 
-					0, 
-					0, 
-					CodeBlob.GetAddressOf(), 
-					Errors.GetAddressOf()
-				);
-				if (!SUCCEEDED(hr))
-				{
-					const char* ErrorStr = (const char*)Errors->GetBufferPointer();
-					LOG_ERROR(ErrorStr);
-
-					CHECK(SUCCEEDED(hr));
-					return nullptr;
-				}
-
 				RenderingBackend::ShaderInputDesc ShaderDesc;
-
-				ShaderDesc.ShaderData = (byte*)CodeBlob->GetBufferPointer();
-				ShaderDesc.DataSize = CodeBlob->GetBufferSize();
+				ShaderDesc.ShaderData = SceneObject->Material->GetPSBuffer();
+				ShaderDesc.DataSize = SceneObject->Material->GetPSBufferSize();
 
  				return RenderingBackend.CreatePixelShader(&ShaderDesc);
 			}();
@@ -303,21 +194,6 @@ void Funky::Rendering::Renderer::DrawScene(RenderView* SceneToRender)
 			);
 			Model *= DirectX::XMMatrixTranslation(CurrentObject->Position.X, CurrentObject->Position.Y, CurrentObject->Position.Z);
 
-			//auto View = Math::Mat4f::Identity;
-			//View = Math::Mat4f::LookAtLH(
-			//	cmapos, 
-			//	(Math::Vec::FORWARD * 200.0f) + cmapos,
-			//	Math::Vec::UP
-			//);
-			//
-			//View = Math::Mat4f::Identity;
-			//
-			//auto v = DirectX::XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 10.0, 0.0, 100.0f }, { 0.0f, 1.0f, 0.0 });
-			//auto v1 = DirectX::XMMatrixLookAtRH({ 0.0f, 0.0f, 0.0f }, { 10.0, 0.0, 100.0f }, { 0.0f, 1.0f, 0.0 });
-			//
-			//auto Proj = Math::Mat4f::ProjectionMatrixLH(, 90.0f, 1.f, 100.f);
-			//View * Proj;// Math::Mat4f::Identity;
-
 			auto VP = SceneToRender->Camera->GetView() * SceneToRender->Camera->GetProjection();
 
 			PerViewConstantBufferData.VP			 = VP;
@@ -345,7 +221,6 @@ void Funky::Rendering::Renderer::DrawScene(RenderView* SceneToRender)
 
 		}
 	}
-
 
 
 	// Post Process

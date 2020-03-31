@@ -8,6 +8,7 @@
 #include "RenderingFrontend/IRenderingResource.h"
 
 #define MAX_RENDER_PRIMITIVES 10
+#define MAX_POSTPROCESSES 10
 
 namespace Math
 {
@@ -45,11 +46,17 @@ namespace Funky
 			ShaderLink Shaders;
 		};
 
+		struct PostProcess
+		{
+			ShaderLink Shaders;
+		};
+
 		struct RenderView
 		{
 			Math::Camera* Camera = nullptr;
 
 			RenderPrimitive Objects[MAX_RENDER_PRIMITIVES];
+			PostProcess PostProcesses[MAX_POSTPROCESSES];
 		};
 	}
 }

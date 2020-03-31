@@ -21,8 +21,8 @@ str Funky::Platform::ReadFile(str const& FilePath)
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
-		Core::Memory::UniquePtr<char[]> MsgBuffer(new char[1 << 12]);
-		sprintf_s(MsgBuffer.Get(), 1024, "unable to open file \"%s\" for read.", FilePath.c_str());
+		Core::Memory::UniquePtr<char[]> MsgBuffer(new char[1024]);
+		sprintf_s(MsgBuffer.Get(), 1024, "Unable to open file \"%s\" for read.", FilePath.c_str());
 		LOG_ERROR(MsgBuffer.Get());
 		LOG_ERROR(GetLastError());
 		return "";
@@ -45,8 +45,7 @@ str Funky::Platform::ReadFile(str const& FilePath)
 
 	if (!Succeed)
 	{
-		LOG_ERROR(TEXT("ReadFile"));
-		Core::Memory::UniquePtr<char[]> MsgBuffer(new char[1 << 12]);
+		Core::Memory::UniquePtr<char[]> MsgBuffer(new char[1024]);
 		sprintf_s(MsgBuffer.Get(), 1024, "Unable to read from file.\n GetLastError=%08x", GetLastError());
 		LOG_ERROR(MsgBuffer.Get());
 
