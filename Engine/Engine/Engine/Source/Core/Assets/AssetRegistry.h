@@ -24,11 +24,6 @@ namespace Funky
 			Asset::EAssetType Type = Asset::EAssetType::Unknown;
 			class Asset::IAsset* AssetPtr = nullptr;
 
-			void Load();
-			void Free();
-			FORCEINLINE bool IsLoaded() const { return AssetPtr != nullptr; }
-
-
 			void ToJson() const
 			{
 				nlohmann::json assetParsed;

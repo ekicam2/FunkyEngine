@@ -2,6 +2,8 @@
 #include "FunkyEngine.h"
 #include "LogMacros.h"
 
+#include "Core/Utils.h"
+
 #define ENGINE
 
 #ifdef MEMORY_TEST

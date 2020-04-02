@@ -118,6 +118,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Source\3rd\json.hpp" />
+    <ClInclude Include="Source\3rd\MurmurHash3.h" />
     <ClInclude Include="Source\3rd\stb_image.h" />
     <ClInclude Include="Source\3rd\stb_image_write.h" />
     <ClInclude Include="Source\3rd\TinyGLTFLoader.h" />
@@ -150,6 +151,7 @@
     <ClInclude Include="Source\Core\Thread\IThread.h" />
     <ClInclude Include="Source\Core\Thread\ThreadPool.h" />
     <ClInclude Include="Source\Core\Timer.h" />
+    <ClInclude Include="Source\Core\Utils.h" />
     <ClInclude Include="Source\DebugMacros.h" />
     <ClInclude Include="Source\Math\Matrix4.h" />
     <ClInclude Include="Source\Math\Vector4.h" />
@@ -187,6 +189,7 @@
     <ClInclude Include="Source\Utils\NoiseGenerator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\3rd\MurmurHash3.cpp" />
     <ClCompile Include="Source\3rd\TinyGLTFLoader.cpp" />
     <ClCompile Include="Source\3rd\TinyObjectLoader.cpp" />
     <ClCompile Include="Source\Core\Assets\AssetRegistry.cpp" />
