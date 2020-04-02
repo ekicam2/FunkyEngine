@@ -9,7 +9,7 @@ namespace Funky
 	struct Hash128
 	{
 		u64 v[2];
-		FORCEINLINE bool operator==(Hash128 const& Other) { return v[0] == Other.v[0] && v[1] == Other.v[1]; }
+		FORCEINLINE bool operator==(Hash128 const& Other) const { return v[0] == Other.v[0] && v[1] == Other.v[1]; }
 	};
 
 	/* It's best to use prime numbers. */
