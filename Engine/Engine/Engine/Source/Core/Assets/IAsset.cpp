@@ -1,28 +1,28 @@
 #include "IAsset.h"
 
-str const Funky::Asset::TypeToString(Asset::EType Type)
+str const Funky::Asset::TypeToString(Asset::EAssetType Type)
 {
 	switch (Type)
 	{
-	case Asset::EType::Texture:
+	case Asset::EAssetType::Texture:
 		return "Texture";
-	case Asset::EType::Mesh:
+	case Asset::EAssetType::Mesh:
 		return "Mesh";
-	case Asset::EType::Material:
+	case Asset::EAssetType::Material:
 		return "Material";
 	default:
 		return "Unknown";
 	}
 }
 
-Funky::Asset::EType const Funky::Asset::StringToType(str const& StrType)
+Funky::Asset::EAssetType const Funky::Asset::StringToType(str const& StrType)
 {
 	if (StrType == "Texture")
-		return Asset::EType::Texture;
+		return Asset::EAssetType::Texture;
 	else if (StrType == "Mesh")
-		return Asset::EType::Mesh;
+		return Asset::EAssetType::Mesh;
 	else if (StrType == "Material")
-		return Asset::EType::Material;
+		return Asset::EAssetType::Material;
 
-	return Asset::EType::Unknown;
+	return Asset::EAssetType::Unknown;
 }

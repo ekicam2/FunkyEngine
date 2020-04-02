@@ -158,6 +158,7 @@
     <ClInclude Include="Source\RenderingBackend\Internal\DX11\DX11RenderingResources.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\RenderingBackendUtils.h" />
     <ClInclude Include="Source\RenderingFrontend\IRenderer.h" />
+    <ClInclude Include="Source\RenderingFrontend\PostProcess.h" />
     <ClInclude Include="Source\RenderingFrontend\Renderer.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\DX11\DirectUtils.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\DX11\DX11Core.h" />
@@ -170,15 +171,14 @@
     <ClInclude Include="Source\Math\Vector2.h" />
     <ClInclude Include="Source\Math\Vector3.h" />
     <ClInclude Include="Source\Math\Camera.h" />
-    <ClInclude Include="Source\RenderingFrontend\Light.h" />
     <ClInclude Include="Source\Core\Assets\Material.h" />
     <ClInclude Include="Source\RenderingFrontend\RenderingResourceManager.h" />
     <ClInclude Include="Source\RenderingFrontend\RenderView.h" />
+    <ClInclude Include="Source\RenderingFrontend\ShaderCompiler.h" />
     <ClInclude Include="Source\RenderingFrontend\VertexDefinition.h" />
     <ClInclude Include="Source\UserFramework\Scene.h" />
     <ClInclude Include="Source\UserFramework\SceneManager.h" />
     <ClInclude Include="Source\Utils\MeshUtils.h" />
-    <ClInclude Include="Source\RenderingFrontend\ParticleSystem.h" />
     <ClInclude Include="Source\Core\Assets\StaticMesh.h" />
     <ClInclude Include="Source\RenderingBackend\RenderingBackend.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\RenderingBackendImpl.h" />
@@ -215,6 +215,7 @@
     <ClCompile Include="Source\RenderingBackend\Internal\DX11\DX11RenderingResources.cpp" />
     <ClCompile Include="Source\RenderingBackend\Internal\RenderingBackend.cpp" />
     <ClCompile Include="Source\RenderingFrontend\IRenderingResource.h" />
+    <ClCompile Include="Source\RenderingFrontend\PostProcess.cpp" />
     <ClCompile Include="Source\RenderingFrontend\Renderer.cpp" />
     <ClCompile Include="Source\Source.cpp" />
     <ClCompile Include="Source\UserFramework\Scene.cpp" />

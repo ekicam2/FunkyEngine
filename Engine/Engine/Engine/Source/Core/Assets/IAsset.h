@@ -11,32 +11,35 @@ namespace Funky
 	{
 		using AssetPath = str;
 
-		enum class EType : u8
+		enum class EAssetType : u8
 		{
 			Unknown,
 			Texture,
 			Mesh,
-			Material
+			Shader,
+			Material,
+
+			Count
 		};
 
-		str const TypeToString(Asset::EType EnumType);
-		Asset::EType const StringToType(str const & StrType);
+		str const TypeToString(Asset::EAssetType EnumType);
+		Asset::EAssetType const StringToType(str const & StrType);
 
 		class IAsset
 		{
 		public:
-			IAsset(EType InType) : Type(InType) {}
+			IAsset(EAssetType InType) : Type(InType) {}
 			
 			virtual ~IAsset() = default;
 
 			
 			FORCEINLINE AssetPath GetPath() const;
-			FORCEINLINE Asset::EType GetType() const;
+			FORCEINLINE Asset::EAssetType GetType() const;
 			FORCEINLINE bool IsLoaded() const;
 
 		private:
 			AssetPath Path;
-			Asset::EType Type = EType::Unknown;
+			Asset::EAssetType Type = EAssetType::Unknown;
 
 			bool Loaded = false;
 		};
@@ -47,7 +50,7 @@ namespace Funky
 		return Path;
 	}
 
-	FORCEINLINE Asset::EType Asset::IAsset::GetType() const
+	FORCEINLINE Asset::EAssetType Asset::IAsset::GetType() const
 	{
 		return Type;
 	}

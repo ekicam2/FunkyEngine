@@ -76,6 +76,9 @@ namespace Funky
 			DEFINE_CONSTANT_BUFFER(PerObjectConstantBuffer);
 
 			Core::Memory::UniquePtr<Asset::Material> PPMaterial;
+			Core::Memory::UniquePtr<Asset::Shader> PPVS;
+			Core::Memory::UniquePtr<Asset::Shader> PPPS;
+
 
 			Rendering::RRenderTarget* OffscreenRT;
 			Rendering::RBuffer* PostProcessSurfaceBuffer;

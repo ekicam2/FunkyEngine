@@ -13,8 +13,9 @@ void Funky::Scene::Init()
 	Objects.Mesh = MeshAsset.Get();
 
 	auto ShadersSource = Platform::ReadFile("RealData/Shaders/Source/ubershader.hlsl");
-	MaterialAsset.Reset(Asset::Material::CreateMaterialFromSourceCode(ShadersSource.c_str(), ShadersSource.c_str()));
-	MaterialAsset->Compile(Rendering::RenderingBackend::API::DX11);
+	auto Shader = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Vertex ,ShadersSource);
+
+	MaterialAsset.Reset(Asset::Material::CreateMaterial(Shader, Shader));
 
 	Objects.Material = MaterialAsset.Get();
 
@@ -64,8 +65,7 @@ void Funky::Scene::Tick(f32 Delta)
 		auto ShadersSource = Platform::ReadFile("RealData/Shaders/Source/ubershader.hlsl");
 		if (!ShadersSource.empty())
 		{
-			MaterialAsset.Reset(Asset::Material::CreateMaterialFromSourceCode(ShadersSource.c_str(), ShadersSource.c_str()));
-			MaterialAsset->Compile(Rendering::RenderingBackend::API::DX11);
+			//MaterialAsset.Reset(Asset::Material::CreateMaterial());
 			Objects.Material = MaterialAsset.Get();
 		}
 	}

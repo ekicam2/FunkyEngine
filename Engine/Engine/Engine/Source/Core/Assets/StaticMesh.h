@@ -25,11 +25,11 @@ namespace Funky
 			// IAsset END
 			
 			/** In most use cases you PREFER to use this one. */
-			static StaticMesh* CreateFromFile(str const& Path, bool bReverseIndices = false);
+			[[nodiscard]] static StaticMesh* CreateFromFile(str const& Path, bool bReverseIndices = false);
 
 			/** These are leaved here if case of any dynamic generated meshes. */
-			static StaticMesh* CreateMeshFromRawData(darray<Vertex> const& InVertices);
-			static StaticMesh* CreateMeshFromRawData(darray<Vertex> const& InVertices, darray<u16> const& InIndices);
+			[[nodiscard]] static StaticMesh* CreateMeshFromRawData(darray<Vertex> const& InVertices);
+			[[nodiscard]] static StaticMesh* CreateMeshFromRawData(darray<Vertex> const& InVertices, darray<u16> const& InIndices);
 
 
 			FORCEINLINE size GetIndicesCount() const

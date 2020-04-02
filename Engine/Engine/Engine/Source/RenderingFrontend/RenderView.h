@@ -2,10 +2,8 @@
 
 #include "Core/Containers.h"
 
-#include "Light.h"
-#define MAX_LIGHTS 125
-
 #include "RenderingFrontend/IRenderingResource.h"
+#include "PostProcess.h"
 
 #define MAX_RENDER_PRIMITIVES 10
 #define MAX_POSTPROCESSES 10
@@ -43,11 +41,6 @@ namespace Funky
 			Math::Vec3f	Rotation = { 0.0f, 0.0f, 0.0f };
 			
 			StaticMesh Mesh;
-			ShaderLink Shaders;
-		};
-
-		struct PostProcess
-		{
 			ShaderLink Shaders;
 		};
 

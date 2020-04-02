@@ -36,7 +36,7 @@ FORCEINLINE void ZeroMem(void* Dest, size Size)
 	MemSet(Dest, Size, 0);
 }
 
-FORCEINLINE void Memcpy(void* Src, void* Dst, size Size)
+FORCEINLINE void MemCpy(void const * Src, void* Dst, size Size)
 {
 	::memcpy(Dst, Src, Size);
 }

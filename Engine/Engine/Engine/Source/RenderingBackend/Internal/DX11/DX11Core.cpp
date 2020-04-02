@@ -18,7 +18,7 @@ namespace Funky
 	{
 		bool DX11::Init(RenderingBackend::RenderingBackendInitDesc* InInitDesc)
 		{
-			CHECK(InInitDesc->Api == RenderingBackend::API::DX11);
+			CHECK(InInitDesc->Api == RenderingBackend::EAPI::DX11);
 
 			DX11RenderingInitDesc* InitDesc = static_cast<DX11RenderingInitDesc*>(InInitDesc);
 
@@ -32,9 +32,9 @@ namespace Funky
 			return false;
 		}
 
-		RenderingBackend::API DX11::GetBackendAPI() const
+		RenderingBackend::EAPI DX11::GetBackendAPI() const
 		{
-			return RenderingBackend::API::DX11;
+			return RenderingBackend::EAPI::DX11;
 		}
 
 		void DX11::OnViewportResized(Math::Vec2u const & NewSize)

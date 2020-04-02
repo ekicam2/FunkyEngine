@@ -2,7 +2,7 @@
 #include "RenderingResourceManager.h"
 #include "UserFramework/Scene.h"
 
-#include <d3dcompiler.h>
+#include "ShaderCompiler.h"
 #include "Core/Platform/Platform.h"
 #include "RenderingBackend/Marker.h"
 
@@ -31,25 +31,22 @@ bool Funky::Rendering::Renderer::Init()
 	OffscreenRT = RenderingBackend.CreateRenderTarget(RenderingBackend.GetResourceManager()->GetSwapchainRenderTarget()->Size);
 
 
-	f32 PostProcessVertices[] = {
-		-1.0f,  -1.0f, 0.0f, // dl
-		-1.0f,  3.0f, 0.0f, // tl
-		 3.0f, -1.0f, 0.0f // dr
-	};
-
-	PostProcessSurfaceBuffer = RenderingBackend.CreateBuffer(
-		3 * 3 * sizeof(f32),
-		Rendering::RBuffer::EType::Vertex,
-		Rendering::RBuffer::EUsageType::Static,
-		&PostProcessVertices,
-		sizeof(f32) * 3
-	);
-
 	auto Source = Platform::ReadFile("RealData/Shaders/Source/ToonPP.hlsl");
-	PPMaterial.Reset(Asset::Material::CreateMaterialFromSourceCode(Source.c_str(), Source.c_str()));
-	PPMaterial->Compile(RenderingBackend.GetBackendAPI());
-	
-	PPMaterial->Linkage.VS = [&]() -> Rendering::RShader* {
+	auto Shader = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Pixel, Source);
+	PPMaterial.Reset(Asset::Material::CreateMaterial(Shader, Shader));
+
+	ShaderCompiler::ShaderDesc Desc;
+	Desc.Api = RenderingBackend.GetBackendAPI();
+	Desc.EntryPoint = "VSMain";
+	Desc.ShaderAsset = nullptr;
+
+	ShaderCompiler::CompileShader(Desc);
+
+	Desc.EntryPoint = "PSMain";
+
+
+
+	/*PPMaterial->Linkage.VS = [&]() -> Rendering::RShader* {
 
 		RenderingBackend::ShaderInputDesc ShaderDesc;
 		ShaderDesc.ShaderData = PPMaterial->GetVSBuffer();
@@ -66,7 +63,7 @@ bool Funky::Rendering::Renderer::Init()
 		ShaderDesc.DataSize = PPMaterial->GetPSBufferSize();
 
 		return RenderingBackend.CreatePixelShader(&ShaderDesc);
-	}();
+	}();*/
 
 
 	return true;
@@ -106,23 +103,23 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene(ISce
 		CHECK(SceneObject->Mesh->VertexBuffer);
 		CHECK(SceneObject->Mesh->IndexBuffer);
 
-		CHECK(SceneObject->Material->IsCompiled());
+		CHECK(SceneObject->Material->IsValid());
 
 		if (!SceneObject->Material->Linkage.VS)
 		{
-			SceneObject->Material->Linkage.VS = [&]() -> Rendering::RShader* {
+		/*	SceneObject->Material->Linkage.VS = [&]() -> Rendering::RShader* {
 
 				RenderingBackend::ShaderInputDesc ShaderDesc;
 				ShaderDesc.ShaderData = SceneObject->Material->GetVSBuffer();
 				ShaderDesc.DataSize = SceneObject->Material->GetVSBufferSize();
 
 				return RenderingBackend.CreateVertexShader(&ShaderDesc);
-			}();
+			}();*/
 		}
 		
 		if (!SceneObject->Material->Linkage.PS)
 		{
-			SceneObject->Material->Linkage.PS = [&]() -> Rendering::RShader* {
+			/*SceneObject->Material->Linkage.PS = [&]() -> Rendering::RShader* {
 
 
 				RenderingBackend::ShaderInputDesc ShaderDesc;
@@ -130,7 +127,7 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene(ISce
 				ShaderDesc.DataSize = SceneObject->Material->GetPSBufferSize();
 
  				return RenderingBackend.CreatePixelShader(&ShaderDesc);
-			}();
+			}();*/
 		}
 
 		CHECK(SceneObject->Material->Linkage.VS);

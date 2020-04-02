@@ -39,7 +39,7 @@ namespace Funky
 		class RenderingBackend
 		{
 		public:
-			enum class API
+			enum class EAPI
 			{
 				UNKNOWN,
 				DX11,
@@ -68,7 +68,7 @@ namespace Funky
 
 			struct RenderingBackendInitDesc
 			{
-				API Api;
+				EAPI Api;
 			};
 
 			struct ShaderInputDesc
@@ -85,7 +85,7 @@ namespace Funky
 			bool Init(RenderingBackendInitDesc* InitDesc);
 			void OnViewportResized(Math::Vec2u const & NewSize);
 
-			RenderingBackend::API GetBackendAPI() const;
+			RenderingBackend::EAPI GetBackendAPI() const;
 
 			RRenderTarget* CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/);
 			RDepthStencil* CreateDepthStencil(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/);

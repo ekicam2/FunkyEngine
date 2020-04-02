@@ -48,7 +48,7 @@ void Funky::Asset::StaticMesh::InitIndices(darray<u16> InIndices)
 }
 
 Funky::Asset::StaticMesh::StaticMesh()
-	: IAsset(Asset::EType::Mesh)
+	: IAsset(Asset::EAssetType::Mesh)
 {
 
 }

@@ -18,7 +18,7 @@ namespace Funky
 			delete Impl;
 		}
 
-		RenderingBackend::API RenderingBackend::GetBackendAPI() const { return Impl->GetBackendAPI(); }
+		RenderingBackend::EAPI RenderingBackend::GetBackendAPI() const { return Impl->GetBackendAPI(); }
 
 		RRenderTarget* RenderingBackend::CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
 		{
@@ -49,7 +49,7 @@ namespace Funky
 		{ 
 			switch (InitDesc->Api)
 			{
-			case API::DX11:
+			case EAPI::DX11:
 				delete Impl;
 				Impl = new Funky::Rendering::DX11();
 				break;

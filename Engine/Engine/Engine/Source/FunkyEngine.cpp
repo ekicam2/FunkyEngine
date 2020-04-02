@@ -100,7 +100,7 @@ namespace Funky
 		//LOG_FUNKY(fk::getExecPath());
 		LOG("Init Rendering");
 		Rendering::DX11RenderingInitDesc InitDesc;
-		InitDesc.Api = Rendering::RenderingBackend::API::DX11;
+		InitDesc.Api = Rendering::RenderingBackend::EAPI::DX11;
 		InitDesc.hWnd = hWnd;
 		
 		RenderingBackend.Reset(new Rendering::RenderingBackend());

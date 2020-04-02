@@ -11,14 +11,51 @@
 #include <fstream>
 
 #include "Macros.h"
+#include "DebugMacros.h"
 
 namespace Funky
 {
+	class ShaderCompiler;
+
 	namespace Asset
 	{
+		struct Shader : public IAsset
+		{
+			friend class ShaderCompiler;
+
+			enum EShaderType
+			{
+				Vertex,
+				Pixel
+			};
+
+			[[nodiscard]] static Shader* CreateShaderFromSource(EShaderType InType, str const& InSource);
+
+			FORCEINLINE EShaderType GetType() const { return Type; }
+
+			FORCEINLINE char const* GetSource() const { return Source.Get(); }
+			FORCEINLINE size GetSourceLength() const { return SourceLength; }
+
+			FORCEINLINE byte* GetBuffer() const { return CompiledBuffer.Get(); }
+			FORCEINLINE size GetBufferSize() const { return BufferSizeInBytes; }
+			FORCEINLINE bool IsValid() const { return bIsCompiled; }
+
+		private:
+			EShaderType Type;
+
+			size SourceLength;
+			Core::Memory::UniquePtr<char[]> Source;
+
+			size BufferSizeInBytes;
+			Core::Memory::UniquePtr<byte[]> CompiledBuffer;
+			bool bIsCompiled;
+
+			DECLARE_IASSET(Shader, Asset::EAssetType::Shader);
+		};
+
 		struct Material : public IAsset
 		{
-			static Material* CreateMaterialFromSourceCode(char const* VSSource, char const* PSSource);
+			[[nodiscard]] static Material* CreateMaterial(Funky::Asset::Shader* VS, Funky::Asset::Shader* PS);
 
 			enum class ERenderingTechnique
 			{
@@ -26,35 +63,17 @@ namespace Funky
 				DefaultLit
 			} Technique;
 
-			FORCEINLINE char const * GetVertexShaderSourceCode() const { return VSSource.c_str(); }
-			FORCEINLINE char const * GetPixelShaderSourceCode() const { return PSSource.c_str(); }
 
-			FORCEINLINE size GetVertexShaderSourceCodeLength() const { return strlen(GetVertexShaderSourceCode()); }
-			FORCEINLINE size GetPixelShaderSourceCodeLength() const { return strlen(GetPixelShaderSourceCode()); }
+			FORCEINLINE Shader* GetPS() const { CHECK(PS != nullptr && PS->GetType() == Shader::EShaderType::Pixel); return PS; }
+			FORCEINLINE Shader* GetVS() const { CHECK(VS != nullptr && VS->GetType() == Shader::EShaderType::Vertex); return VS; }
 
-			FORCEINLINE byte* GetVSBuffer() const { return CompiledVS.Get(); }
-			FORCEINLINE size GetVSBufferSize() const { return CompiledVSSize; }
+			FORCEINLINE bool IsValid() const { return PS != nullptr && VS != nullptr && PS->GetType() == Shader::EShaderType::Pixel && VS->GetType() == Shader::EShaderType::Vertex; }
 
-			FORCEINLINE byte* GetPSBuffer() const { return CompiledPS.Get(); }
-			FORCEINLINE size GetPSBufferSize() const { return CompiledPSSize; }
-			
-			FORCEINLINE bool IsCompiled() const { return bIsCompiled; }
-
-			void Compile(Rendering::RenderingBackend::API BackendApi);
-			
 		private:
-			DECLARE_IASSET(Material, Asset::EType::Material);
+			DECLARE_IASSET(Material, Asset::EAssetType::Material);
 
-			str VSSource;
-			str PSSource;
-
-			bool bIsCompiled = false;
-
-			Core::Memory::UniquePtr<byte[]> CompiledVS;
-			size CompiledVSSize = 0u;
-
-			Core::Memory::UniquePtr<byte[]> CompiledPS;
-			size CompiledPSSize = 0u;
+			Shader* VS = nullptr;
+			Shader* PS = nullptr;
 
 		public:
 			Rendering::ShaderLink Linkage;

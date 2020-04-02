@@ -21,7 +21,7 @@ namespace Funky
 		struct AssetDesc
 		{
 			str Path;
-			Asset::EType Type = Asset::EType::Unknown;
+			Asset::EAssetType Type = Asset::EAssetType::Unknown;
 			class Asset::IAsset* AssetPtr = nullptr;
 
 			void Load();

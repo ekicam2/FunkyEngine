@@ -20,7 +20,7 @@ namespace Funky
 		struct DX11 final : public RenderingBackendImpl
 		{
 			virtual bool Init(RenderingBackend::RenderingBackendInitDesc* InitDesc) override;
-			virtual RenderingBackend::API GetBackendAPI() const override;
+			virtual RenderingBackend::EAPI GetBackendAPI() const override;
 			virtual void OnViewportResized(Math::Vec2u const & NewSize) override;
 
 			virtual RRenderTarget* CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/) override;
