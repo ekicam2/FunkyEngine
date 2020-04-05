@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <sstream>
+#include "Core/String.h"
 #ifndef WINDOWS_LEAN_AND_MEAN
 #define WINDOWS_LEAN_AND_MEAN
 #endif
@@ -41,10 +42,6 @@ enum class ELogType
 	Error
 };
 
-namespace std
-{
-	using str = std::basic_string<charx, std::char_traits<charx>, std::allocator<charx>>;
-}
 
 #if _UNICODE
 	#define sprintf_s swprintf_s
@@ -88,11 +85,10 @@ namespace
 		OutputDebugString(m);
 	}
 
-
 	template<>
-	void IDELOG<std::str>(std::str msg)
+	void IDELOG<Str const &>(Str const & msg)
 	{
-		OutputDebugString(msg.c_str());
+		OutputDebugStringA(msg.GetBuffer());
 	}
 
 	template<>
@@ -117,15 +113,15 @@ namespace
 	}
 
 	template<>
-	void CONSOLELOG<std::string const&>(std::string const& msg)
+	void CONSOLELOG<Str>(Str msg)
 	{
-		std::clog << msg.c_str();
+		std::clog << msg.GetBuffer();
 	}
 
 	template<>
-	void CONSOLELOG<std::wstring const&>(std::wstring const& msg)
+	void CONSOLELOG<Str const&>(Str const& msg)
 	{
-		std::wclog << msg;
+		std::clog << msg.GetBuffer();
 	}
 
 	template<>

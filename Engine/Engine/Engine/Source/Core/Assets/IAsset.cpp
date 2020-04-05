@@ -1,6 +1,6 @@
 #include "IAsset.h"
 
-str const Funky::Asset::TypeToString(Asset::EAssetType Type)
+Str const Funky::Asset::TypeToString(Asset::EAssetType Type)
 {
 	switch (Type)
 	{
@@ -15,7 +15,7 @@ str const Funky::Asset::TypeToString(Asset::EAssetType Type)
 	}
 }
 
-Funky::Asset::EAssetType const Funky::Asset::StringToType(str const& StrType)
+Funky::Asset::EAssetType const Funky::Asset::StringToType(Str const& StrType)
 {
 	if (StrType == "Texture")
 		return Asset::EAssetType::Texture;

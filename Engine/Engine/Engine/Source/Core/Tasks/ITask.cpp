@@ -5,14 +5,14 @@ Funky::Core::Task::ITask::ITask()
 {
 }
 
-FORCEINLINE Funky::Core::Thread::Group  Funky::Core::Task::ITask::GetThreadToRunOn() const
+FORCEINLINE Funky::Core::Thread::EGroup  Funky::Core::Task::ITask::GetThreadToRunOn() const
 {
 	return ThreadToRunOn;
 }
 
-bool Funky::Core::Task::ITask::CanRunOnThread(Thread::Group InThreadType) const
+bool Funky::Core::Task::ITask::CanRunOnThread(Thread::EGroup InThreadType) const
 {
-	if (ThreadToRunOn == Thread::Group::Any) 
+	if (ThreadToRunOn == Thread::EGroup::Any) 
 		return true;
 	else if (ThreadToRunOn == InThreadType) 
 		return true;
@@ -20,7 +20,7 @@ bool Funky::Core::Task::ITask::CanRunOnThread(Thread::Group InThreadType) const
 	return false;
 }
 
-void Funky::Core::Task::ITask::SetThreadGroup(Thread::Group Type)
+void Funky::Core::Task::ITask::SetThreadGroup(Thread::EGroup Type)
 {
 	ThreadToRunOn = Type;
 }

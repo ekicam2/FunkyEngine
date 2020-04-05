@@ -15,7 +15,7 @@ namespace Funky
 			class WindowsThread : public IThread
 			{
 			public:
-				WindowsThread(str const& Name, Thread::Group ThreadType);
+				WindowsThread(Str const& Name, Thread::EGroup ThreadType);
 				~WindowsThread();
 
 				void SetHandle(HANDLE NewHandle);

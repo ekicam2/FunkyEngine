@@ -736,7 +736,7 @@ namespace Funky
 			}
 		}
 
-		Funky::Rendering::IGPUMarker* DX11::MarkScope(str MarkerName)
+		Funky::Rendering::IGPUMarker* DX11::MarkScope(Str MarkerName)
 		{
 			return new Rendering::DX11Marker(pDebugMarkersStack.Get(), MarkerName);
 		}

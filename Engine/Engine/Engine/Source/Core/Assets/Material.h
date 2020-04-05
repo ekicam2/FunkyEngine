@@ -29,7 +29,7 @@ namespace Funky
 				Pixel
 			};
 
-			[[nodiscard]] static Shader* CreateShaderFromSource(EShaderType InType, str const& InSource);
+			[[nodiscard]] static Shader* CreateShaderFromSource(EShaderType InType, Str const& InSource);
 
 			FORCEINLINE EShaderType GetType() const { return Type; }
 

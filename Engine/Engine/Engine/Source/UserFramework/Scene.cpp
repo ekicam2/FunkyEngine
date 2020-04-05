@@ -63,7 +63,7 @@ void Funky::Scene::Tick(f32 Delta)
 	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::R))
 	{
 		auto ShadersSource = Platform::ReadFile("RealData/Shaders/Source/ubershader.hlsl");
-		if (!ShadersSource.empty())
+		if (!ShadersSource.IsEmpty())
 		{
 			//MaterialAsset.Reset(Asset::Material::CreateMaterial());
 			Objects.Material = MaterialAsset.Get();

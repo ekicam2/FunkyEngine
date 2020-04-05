@@ -53,7 +53,7 @@ namespace Funky
 
 			virtual void Present() = 0;
 
-			virtual Rendering::IGPUMarker* MarkScope(str MarkerName) = 0;
+			virtual Rendering::IGPUMarker* MarkScope(Str MarkerName) = 0;
 
 			Core::Memory::UniquePtr<RenderingResourcesManager> ResourceManager;
 		};}

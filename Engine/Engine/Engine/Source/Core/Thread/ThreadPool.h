@@ -13,11 +13,11 @@ namespace Funky
 			class ThreadPool
 			{
 			public:
-				using ThreadCreationDesc = map<Thread::Group, u16>;
+				using ThreadCreationDesc = map<Thread::EGroup, u16>;
 
 				ThreadPool(ThreadCreationDesc const& CreationDesc);
 
-				IThread* GetIdleThread(Funky::Core::Thread::Group Type);
+				IThread* GetIdleThread(Funky::Core::Thread::EGroup Type);
 
 			private:
 				darray<IThread*> AllThreads;

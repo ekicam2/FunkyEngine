@@ -6,7 +6,7 @@ namespace Funky
 {
 	namespace Platform
 	{
-		str ReadFile(str const & FilePath);
+		Str ReadFile(Str const & FilePath);
 	}
 
 }

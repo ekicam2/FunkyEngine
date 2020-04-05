@@ -160,7 +160,7 @@ namespace Funky
 			Impl->Present();
 		}
 
-		Funky::Rendering::IGPUMarker* RenderingBackend::MarkScope(str MarkerName)
+		Funky::Rendering::IGPUMarker* RenderingBackend::MarkScope(Str MarkerName)
 		{
 			return Impl->MarkScope(MarkerName);
 		}

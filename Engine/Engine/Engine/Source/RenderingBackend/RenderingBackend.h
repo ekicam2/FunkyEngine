@@ -118,7 +118,7 @@ namespace Funky
 
 			void Present();
 
-			Rendering::IGPUMarker* MarkScope(str MarkerName);
+			Rendering::IGPUMarker* MarkScope(Str MarkerName);
 
 			class RenderingResourcesManager* GetResourceManager();
 

@@ -17,14 +17,14 @@ Funky::Asset::Material* Funky::Asset::Material::CreateMaterial(Funky::Asset::Sha
 	return Ret;
 }
 
-Funky::Asset::Shader* Funky::Asset::Shader::CreateShaderFromSource(EShaderType InType, str const& InSource)
+Funky::Asset::Shader* Funky::Asset::Shader::CreateShaderFromSource(EShaderType InType, Str const& InSource)
 {
 	auto Ret = new Shader();
 	Ret->Type = InType;
 
-	Ret->SourceLength = InSource.size();
+	Ret->SourceLength = InSource.Length();
 	Ret->Source.Reset(new char[Ret->SourceLength]);
-	MemCpy(InSource.data(), Ret->Source.Get(), Ret->SourceLength);
+	MemCpy(InSource.GetBuffer(), Ret->Source.Get(), Ret->SourceLength);
 
 	return Ret;
 }

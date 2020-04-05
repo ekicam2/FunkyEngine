@@ -7,11 +7,11 @@
 #include "Core/Memory/UniquePtr.h"
 
 
-str Funky::Platform::ReadFile(str const& FilePath)
+Str Funky::Platform::ReadFile(Str const& FilePath)
 {
 	HANDLE hFile;
 
-	hFile = ::CreateFileA(FilePath.c_str(),               // file to open
+	hFile = ::CreateFileA(FilePath.GetBuffer(),               // file to open
 		GENERIC_READ,          // open for reading
 		0,       // share for reading
 		NULL,                  // default security
@@ -22,7 +22,7 @@ str Funky::Platform::ReadFile(str const& FilePath)
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
 		Core::Memory::UniquePtr<char[]> MsgBuffer(new char[1024]);
-		sprintf_s(MsgBuffer.Get(), 1024, "Unable to open file \"%s\" for read.", FilePath.c_str());
+		sprintf_s(MsgBuffer.Get(), 1024, "Unable to open file \"%s\" for read.", FilePath.GetBuffer());
 		LOG_ERROR(MsgBuffer.Get());
 		LOG_ERROR(GetLastError());
 		return "";
@@ -56,6 +56,6 @@ str Funky::Platform::ReadFile(str const& FilePath)
 	//((char*)Buffer)
 
 	CloseHandle(hFile);
-	return Read == 0 ? "" : str(Buffer, Read);
+	return Read == 0 ? "" : Str(Buffer, Read);
 }
 

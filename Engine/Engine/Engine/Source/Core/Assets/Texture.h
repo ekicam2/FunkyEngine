@@ -7,13 +7,13 @@ namespace Funky::Asset
 {
 	struct Texture : ITexture
 	{
-		static Texture* CreateFromFile(str const & pFilePath);
+		static Texture* CreateFromFile(Str const & pFilePath);
 		virtual byte* GetData() const override;
 
 	private:
 		darray<u32> Data;
 
-		Texture(str const& Path, TextureType Type);
+		Texture(Str const& Path, ETextureType Type);
 		~Texture();
 	};
 }

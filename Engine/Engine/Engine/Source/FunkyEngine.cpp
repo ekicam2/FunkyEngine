@@ -83,7 +83,7 @@ namespace Funky
 	bool FunkyEngine::Init()
 	{
 #if THREADED_RENDERING
-		 ThreadPool.Reset(new Core::Thread::ThreadPool({ {Core::Thread::Group::Rendering, (u16)1u}, {Core::Thread::Group::Worker, (u16)2u} }));
+		 ThreadPool.Reset(new Core::Thread::ThreadPool({ {Core::Thread::EGroup::Rendering, (u16)1u}, {Core::Thread::EGroup::Worker, (u16)2u} }));
 		 TaskManager.Reset(new Core::Task::TaskManager(ThreadPool));
 #endif
 		
@@ -178,7 +178,7 @@ namespace Funky
 		public:
 			RenderTask(Rendering::IRenderer* InRenderer) 
 			{ 
-				SetThreadGroup(Core::Thread::Group::Rendering); Renderer = InRenderer; 
+				SetThreadGroup(Core::Thread::EGroup::Rendering); Renderer = InRenderer; 
 			}
 			virtual void Process() override 
 			{ 

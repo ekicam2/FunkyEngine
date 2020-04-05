@@ -22,14 +22,14 @@ namespace Funky
 
 			struct ShaderMacro
 			{
-				str Name;
-				str Value;
+				Str Name;
+				Str Value;
 			};
 
 			size MacrosCount = 0;
 			Core::Memory::UniquePtr<ShaderMacro[]> Macros;
 
-			str EntryPoint;
+			Str EntryPoint;
 		};
 
 		static bool CompileShader(ShaderDesc const & Input);
@@ -65,7 +65,7 @@ namespace Funky
 		HRESULT hr = D3DCompile(
 			Input.ShaderAsset->GetSource(),
 			Input.ShaderAsset->GetSourceLength(),
-			Input.ShaderAsset->GetPath().c_str(),
+			Input.ShaderAsset->GetPath().GetBuffer(),
 			Macros,
 			NULL,
 			"VSMain",

@@ -1,7 +1,7 @@
 #include "Texture.h"
 #include "LogMacros.h"
 
-Funky::Asset::Texture* Funky::Asset::Texture::CreateFromFile([[maybe_unused]]str const & pFilePath)
+Funky::Asset::Texture* Funky::Asset::Texture::CreateFromFile([[maybe_unused]] Str const & pFilePath)
 {
 	return nullptr;
 /*
@@ -49,7 +49,7 @@ byte* Funky::Asset::Texture::GetData() const
 	return (byte*)&Data[0];
 }
 
-Funky::Asset::Texture::Texture(str const& Path, TextureType Type) : ITexture(Path, Type)
+Funky::Asset::Texture::Texture(Str const& Path, ETextureType Type) : ITexture(Path, Type)
 {
 
 }

@@ -9,7 +9,7 @@ namespace Funky
 {
 	namespace Asset
 	{
-		using AssetPath = str;
+		using AssetPath = Str;
 
 		enum class EAssetType : u8
 		{
@@ -22,8 +22,8 @@ namespace Funky
 			Count
 		};
 
-		str const TypeToString(Asset::EAssetType EnumType);
-		Asset::EAssetType const StringToType(str const & StrType);
+		Str const TypeToString(Asset::EAssetType EnumType);
+		Asset::EAssetType const StringToType(Str const & StrType);
 
 		class IAsset
 		{

@@ -29,7 +29,7 @@ namespace Funky
 				/* WARNING!! wait free function! */
 				void EnqueueTask(ITask* NewTask);
 				/* WARNING!! wait free function! */
-				ITask* DequeueTask(Thread::Group RequiredThreadToRunOn);
+				ITask* DequeueTask(Thread::EGroup RequiredThreadToRunOn);
 				
 				/* Mutex implementation */
 				void EnqueueTaskSafe(ITask* NewTask);

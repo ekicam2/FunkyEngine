@@ -17,7 +17,7 @@ namespace Funky::Rendering
 	class GPUScopeMarker
 	{
 	public:
-		GPUScopeMarker(Rendering::RenderingBackend* pRenderingBackend, str MarkerName)
+		GPUScopeMarker(Rendering::RenderingBackend* pRenderingBackend, Str MarkerName)
 		{
 			Marker.Reset(pRenderingBackend->MarkScope(MarkerName));
 			Marker->Set();

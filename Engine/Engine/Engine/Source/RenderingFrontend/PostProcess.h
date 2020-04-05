@@ -15,7 +15,7 @@ namespace Funky
 			static void InitVS();
 			static RShader* GetVSShader();
 
-			static PostProcess* CreateFromSource(str FilePath);
+			static PostProcess* CreateFromSource(Str FilePath);
 
 		private:
 			static RBuffer* PostProcessPlaneData;

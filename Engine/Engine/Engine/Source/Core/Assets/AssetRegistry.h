@@ -15,31 +15,31 @@ namespace Funky
 	public:
 		using AssetID = i64;
 
-		inline static const str BaseAssetsPath = "RealData\\";
-		inline static const str AssetExtension = ".fkasset";
+		inline static const Str BaseAssetsPath = "RealData\\";
+		inline static const Str AssetExtension = ".fkasset";
 
 		struct AssetDesc
 		{
-			str Path;
+			Str Path;
 			Asset::EAssetType Type = Asset::EAssetType::Unknown;
 			class Asset::IAsset* AssetPtr = nullptr;
 
-			void ToJson() const
-			{
-				nlohmann::json assetParsed;
-				assetParsed["path"] = Path;
-				assetParsed["type"] = Type;
-				std::cout << assetParsed;
-			}
-			static AssetDesc FromJson(str const& InJson)
-			{
-				auto assetParsed = nlohmann::json::parse(InJson);
+			//void ToJson() const
+			//{
+			//	nlohmann::json assetParsed;
+			//	assetParsed["path"] = Path;
+			//	assetParsed["type"] = Type;
+			//	std::cout << assetParsed;
+			//}
+			//static AssetDesc FromJson(Str const& InJson)
+			//{
+			//	auto assetParsed = nlohmann::json::parse(InJson.GetBuffer());
 
-				AssetDesc Ret;
-				Ret.Path = assetParsed["path"];
-				Ret.Type = assetParsed["type"];
-				return Ret;
-			}
+			//	AssetDesc Ret;
+			//	Ret.Path = assetParsed["path"];
+			//	Ret.Type = assetParsed["type"];
+			//	return Ret;
+			//}
 
 		};
 
@@ -47,7 +47,7 @@ namespace Funky
 
 	private:
 		/* Lookup for all .fkassets in the given Path and fill @AllAssets list. */
-		void ParseRecursive(str const& Path);
+		void ParseRecursive(Str const& Path);
 
 		darray<AssetDesc> AllAssets;
 	};

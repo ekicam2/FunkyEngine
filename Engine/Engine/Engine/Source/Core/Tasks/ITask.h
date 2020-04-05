@@ -18,13 +18,13 @@ namespace Funky
 				virtual void Process() = 0;
 				virtual void PostProcess() {}
 
-				FORCEINLINE Thread::Group GetThreadToRunOn() const;
-				bool CanRunOnThread(Thread::Group InThreadType) const;
+				FORCEINLINE Thread::EGroup GetThreadToRunOn() const;
+				bool CanRunOnThread(Thread::EGroup InThreadType) const;
 
 			protected:
-				void SetThreadGroup(Thread::Group Type);
+				void SetThreadGroup(Thread::EGroup Type);
 			private:
-				Thread::Group ThreadToRunOn = Thread::Group::Any;
+				Thread::EGroup ThreadToRunOn = Thread::EGroup::Any;
 			};
 		}
 	}

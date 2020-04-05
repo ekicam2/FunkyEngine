@@ -55,7 +55,7 @@ namespace Funky
 
 			virtual void Present() override;
 
-			virtual Rendering::IGPUMarker* MarkScope(str MarkerName) override;
+			virtual Rendering::IGPUMarker* MarkScope(Str MarkerName) override;
 
 			bool CreateDeviceAndSwapchain(HWND hwnd);
 			bool InitSwapchain();

@@ -2,16 +2,16 @@
 #include "Templates.h"
 #include "Utils/MeshUtils.h"
 
-Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::CreateFromFile(str const& Path, bool bReverseIndices /*= false*/)
+Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::CreateFromFile(Str const& Path, bool bReverseIndices /*= false*/)
 {
-	if (!Path.ends_with(".obj"))
+	if (!Path.EndsWith(".obj"))
 	{
-		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadOBJFromFile(Path.c_str(), bReverseIndices);
+		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadOBJFromFile(Path.GetBuffer(), bReverseIndices);
 		return CreateMeshFromRawData(VI.Vertices, VI.Indices);
 	}
-	else if (!Path.ends_with(".gltf"))
+	else if (!Path.EndsWith(".gltf"))
 	{
-		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadGLTFFromFile(Path.c_str());
+		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadGLTFFromFile(Path.GetBuffer());
 		return CreateMeshFromRawData(VI.Vertices, VI.Indices);
 	}
 

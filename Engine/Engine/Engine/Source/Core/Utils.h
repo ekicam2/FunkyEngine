@@ -14,10 +14,10 @@ namespace Funky
 
 	/* It's best to use prime numbers. */
 	template <u32 Seed = 17>
-	Hash128 HashString(str const& InStr)
+	Hash128 HashString(Str const& InStr)
 	{
 		Hash128 Ret;
-		MurmurHash3_x64_128(InStr.c_str(), (int)InStr.size(), Seed, Ret.v);
+		MurmurHash3_x64_128(InStr.GetBuffer(), (int)InStr.Length(), Seed, Ret.v);
 		return Ret;
 	}
 }

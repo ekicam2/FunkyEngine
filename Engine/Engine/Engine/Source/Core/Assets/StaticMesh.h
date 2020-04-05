@@ -25,7 +25,7 @@ namespace Funky
 			// IAsset END
 			
 			/** In most use cases you PREFER to use this one. */
-			[[nodiscard]] static StaticMesh* CreateFromFile(str const& Path, bool bReverseIndices = false);
+			[[nodiscard]] static StaticMesh* CreateFromFile(Str const& Path, bool bReverseIndices = false);
 
 			/** These are leaved here if case of any dynamic generated meshes. */
 			[[nodiscard]] static StaticMesh* CreateMeshFromRawData(darray<Vertex> const& InVertices);

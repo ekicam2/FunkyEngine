@@ -16,18 +16,18 @@ Funky::AssetRegistry::AssetRegistry()
 }
 
 
-void Funky::AssetRegistry::ParseRecursive(str const& Path)
+void Funky::AssetRegistry::ParseRecursive(Str const& Path)
 {
-	for (const auto& entry : std::filesystem::directory_iterator(Path))
+	for (const auto& entry : std::filesystem::directory_iterator(Path.GetBuffer()))
 	{
 		if (entry.is_directory())
 		{
 			//std::cout << std::setw(level * 3) << "" << filenameStr << '\n';
-			ParseRecursive(entry.path().string());
+			ParseRecursive(entry.path().string().c_str());
 		}
 		else 
 		{
-			const auto Extension = entry.path().extension().string();//  filename().string();
+			const Str Extension = entry.path().extension().string().c_str();//  filename().string();
 			if (entry.is_regular_file() && Extension == AssetExtension)
 			{
 				//auto Desc = ParseFile(entry.path().string());

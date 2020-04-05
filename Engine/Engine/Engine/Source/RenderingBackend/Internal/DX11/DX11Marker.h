@@ -21,7 +21,7 @@ namespace Funky::Rendering
 	class DX11Marker final : public IGPUMarker
 	{
 	public:
-		DX11Marker(ID3DUserDefinedAnnotation* InpMarkersInterface, str MarkerName)
+		DX11Marker(ID3DUserDefinedAnnotation* InpMarkersInterface, Str MarkerName)
 			: Name(MarkerName)
 			, pMarkersInterface(InpMarkersInterface)
 		{ 
@@ -37,7 +37,7 @@ namespace Funky::Rendering
 
 		virtual void Set() override
 		{
-			pMarkersInterface->BeginEvent(utf8_decode(Name).c_str());
+			pMarkersInterface->BeginEvent(utf8_decode(Name.GetBuffer()).c_str());
 		}
 
 		virtual void Free() override
@@ -47,7 +47,7 @@ namespace Funky::Rendering
 		}
 
 	private:
-		str Name;
+		Str Name;
 		ID3DUserDefinedAnnotation* pMarkersInterface = nullptr;
 	};
 }

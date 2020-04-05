@@ -77,7 +77,7 @@ int main()
 class TestTask : public Funky::Core::Task::ITask
 {
 public:
-	TestTask() : ITask(Funky::Core::Thread::Group::Any) {}
+	TestTask() : ITask(Funky::Core::Thread::EGroup::Any) {}
 	void Process()
 	{
 		using namespace std::chrono_literals;
@@ -89,7 +89,7 @@ public:
 
 int main()
 {
-	Funky::Core::Thread::ThreadPool ThreadPool({ {Funky::Core::Thread::Group::Worker, (u16)5u} });
+	Funky::Core::Thread::ThreadPool ThreadPool({ {Funky::Core::Thread::EGroup::Worker, (u16)5u} });
 	Funky::Core::Task::TaskManager TaskManager(&ThreadPool);
 	
 	TaskManager.EnqueueTaskSafe((Funky::Core::Task::ITask*)new TestTask());
@@ -121,8 +121,47 @@ int main()
 
 	return 0;
 }
-#elif defined(ENGINE)
 
+#elif defined(STRING_TEST)
+#include "Core/String.h"
+#include "Templates.h"
+#include "DebugMacros.h"
+
+int main()//(i32 argc, char** argv)
+{
+	INIT_LOG();
+	
+	Str s1 = "warsadasf";
+	Str s2 = s1;
+	ASSERT(s1 == s2, TEXT("Strings are not the same"));
+	CHECK(s1.Length() == s2.Length());
+
+
+	decltype(s1) s3 = Funky::Move(s1);
+	ASSERT(s1 == s3, TEXT("Strings are not the same"));
+
+	s1 = "123jfbiudsknfoidsniufnodsifnmoig";
+	ASSERT(s1 != s3, TEXT("Strings are the same!"));
+
+	decltype(s1) s4(s1.Length());
+	s4 = Funky::Move(s1);
+	CHECK(s1.Capacity() == 0);
+	CHECK(s1.Length() == 0);
+	CHECK(s4.Length() == StrLen(s4.GetBuffer()));
+
+
+	Str s5 = "Control_Module_rough.jpg";
+	CHECK(s5.EndsWith(".jpg"));
+	CHECK(!s5.EndsWith(".jg2"));
+	CHECK(!s5.EndsWith(".jpg2"));
+	CHECK(s5.StartsWith("Control_"));
+	CHECK(!s5.StartsWith("Control_2"));
+	CHECK(!s5.StartsWith("Control_Control_Control_Control_Control_"));
+
+
+	return 0;
+}
+#elif defined(ENGINE)
 int main(i32 argc, char** argv)
 {
 	INIT_LOG();

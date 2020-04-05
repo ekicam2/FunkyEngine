@@ -9,7 +9,7 @@ namespace Funky
 	{
 		struct ITexture : public IAsset
 		{
-			enum class TextureType
+			enum class ETextureType
 			{
 				UNKNOWN, // !< Not supported
 				Tex_1D,
@@ -17,7 +17,7 @@ namespace Funky
 				Tex_6D
 			} Type;
 
-			ITexture(str const& Path, TextureType Type);
+			ITexture(Str const& Path, ETextureType Type);
 
 			Math::Vec2u Size = Math::Vec2u(0u, 0u);
 		
