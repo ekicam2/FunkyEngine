@@ -16,7 +16,7 @@ VSOutPSIn VSMain(VertexInput Input)
 	Out.vPos = float4(Input.vPosition, 1.0);
 	Out.uv = Input.vPosition.xy;
 	Out.uv = Out.uv * 0.5 +  0.5;
-	Out.uv.y = 1.0 - Out.uv.y;
+	//Out.uv.y = 1.0 - Out.uv.y;
 
 	return Out;
 }

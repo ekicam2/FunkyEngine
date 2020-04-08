@@ -47,8 +47,8 @@ struct Light
 
 };
 
-#define TOON_SHADING 0
-#define COLOR 0
+#define TOON_SHADING 1
+#define COLOR 1
 
 float4 PSMain(VSOutPSIn Input) : SV_TARGET0
 {

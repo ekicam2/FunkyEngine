@@ -30,27 +30,28 @@ bool Funky::Rendering::Renderer::Init()
 	
 	OffscreenRT = RenderingBackend.CreateRenderTarget(RenderingBackend.GetResourceManager()->GetSwapchainRenderTarget()->Size);
 
+	auto VSSource = Platform::ReadFile("RealData/Shaders/Source/PPVS.hlsl");
+	auto PSSource = Platform::ReadFile("RealData/Shaders/Source/ToonPP.hlsl");
 
-	auto Source = Platform::ReadFile("RealData/Shaders/Source/ToonPP.hlsl");
-	auto Shader = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Pixel, Source);
-	PPMaterial.Reset(Asset::Material::CreateMaterial(Shader, Shader));
+	auto VS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Vertex, VSSource);
+	auto PS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Pixel, PSSource);
+	PPMaterial.Reset(Asset::Material::CreateMaterial(VS, PS));
 
 	ShaderCompiler::ShaderDesc Desc;
 	Desc.Api = RenderingBackend.GetBackendAPI();
 	Desc.EntryPoint = "VSMain";
-	Desc.ShaderAsset = nullptr;
-
+	Desc.ShaderAsset = VS;
 	ShaderCompiler::CompileShader(Desc);
 
 	Desc.EntryPoint = "PSMain";
+	Desc.ShaderAsset = PS;
+	ShaderCompiler::CompileShader(Desc);
 
-
-
-	/*PPMaterial->Linkage.VS = [&]() -> Rendering::RShader* {
+	PPMaterial->Linkage.VS = [&]() -> Rendering::RShader* {
 
 		RenderingBackend::ShaderInputDesc ShaderDesc;
-		ShaderDesc.ShaderData = PPMaterial->GetVSBuffer();
-		ShaderDesc.DataSize = PPMaterial->GetVSBufferSize();
+		ShaderDesc.ShaderData = PPMaterial->GetVS()->GetBuffer();
+		ShaderDesc.DataSize = PPMaterial->GetVS()->GetBufferSize();
 
 		return RenderingBackend.CreateVertexShader(&ShaderDesc);
 	}();
@@ -59,11 +60,13 @@ bool Funky::Rendering::Renderer::Init()
 
 
 		RenderingBackend::ShaderInputDesc ShaderDesc;
-		ShaderDesc.ShaderData = PPMaterial->GetPSBuffer();
-		ShaderDesc.DataSize = PPMaterial->GetPSBufferSize();
+		ShaderDesc.ShaderData = PPMaterial->GetPS()->GetBuffer();
+		ShaderDesc.DataSize = PPMaterial->GetPS()->GetBufferSize();
 
 		return RenderingBackend.CreatePixelShader(&ShaderDesc);
-	}();*/
+	}();
+
+	PostProcess::InitPostProcessSurface(&RenderingBackend);
 
 
 	return true;
@@ -107,27 +110,46 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene(ISce
 
 		if (!SceneObject->Material->Linkage.VS)
 		{
-		/*	SceneObject->Material->Linkage.VS = [&]() -> Rendering::RShader* {
+			SceneObject->Material->Linkage.VS = [&]() -> Rendering::RShader* {
+
+				auto VS = SceneObject->Material->GetVS();
+
+				if (!VS->IsValid())
+				{
+					ShaderCompiler::ShaderDesc Desc;
+					Desc.Api = Rendering::RenderingBackend::EAPI::DX11;
+					Desc.EntryPoint = "VSMain";
+					Desc.ShaderAsset = VS;
+					ShaderCompiler::CompileShader(Desc);
+				}
 
 				RenderingBackend::ShaderInputDesc ShaderDesc;
-				ShaderDesc.ShaderData = SceneObject->Material->GetVSBuffer();
-				ShaderDesc.DataSize = SceneObject->Material->GetVSBufferSize();
+				ShaderDesc.ShaderData = VS->GetBuffer();
+				ShaderDesc.DataSize = SceneObject->Material->GetVS()->GetBufferSize();
 
 				return RenderingBackend.CreateVertexShader(&ShaderDesc);
-			}();*/
+			}();
 		}
 		
 		if (!SceneObject->Material->Linkage.PS)
 		{
-			/*SceneObject->Material->Linkage.PS = [&]() -> Rendering::RShader* {
+			SceneObject->Material->Linkage.PS = [&]() -> Rendering::RShader* {
 
+				auto PS = SceneObject->Material->GetPS();
+				if (!PS->IsValid())
+				{
+					ShaderCompiler::ShaderDesc Desc;
+					Desc.EntryPoint = "PSMain";
+					Desc.ShaderAsset = PS;
+					ShaderCompiler::CompileShader(Desc);
+				}
 
 				RenderingBackend::ShaderInputDesc ShaderDesc;
-				ShaderDesc.ShaderData = SceneObject->Material->GetPSBuffer();
-				ShaderDesc.DataSize = SceneObject->Material->GetPSBufferSize();
+				ShaderDesc.ShaderData = PS->GetBuffer();
+				ShaderDesc.DataSize = PS->GetBufferSize();
 
  				return RenderingBackend.CreatePixelShader(&ShaderDesc);
-			}();*/
+			}();
 		}
 
 		CHECK(SceneObject->Material->Linkage.VS);
@@ -233,7 +255,7 @@ void Funky::Rendering::Renderer::DrawScene(RenderView* SceneToRender)
 
 		RenderingBackend.BindVertexShader(PPMaterial->Linkage.VS);
 		RenderingBackend.BindPixelShader(PPMaterial->Linkage.PS);
-		RenderingBackend.Draw(PostProcessSurfaceBuffer);
+		RenderingBackend.Draw(PostProcess::GetPostProcessSurface());
 
 	
 		RenderingBackend.Present();

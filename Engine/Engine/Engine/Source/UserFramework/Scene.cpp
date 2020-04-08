@@ -13,11 +13,13 @@ void Funky::Scene::Init()
 	Objects.Mesh = MeshAsset.Get();
 
 	auto ShadersSource = Platform::ReadFile("RealData/Shaders/Source/ubershader.hlsl");
-	auto Shader = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Vertex ,ShadersSource);
+	auto ShaderVS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Vertex, ShadersSource);
+	auto ShaderPS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Pixel, ShadersSource);
 
-	MaterialAsset.Reset(Asset::Material::CreateMaterial(Shader, Shader));
+	MaterialAsset.Reset(Asset::Material::CreateMaterial(ShaderVS, ShaderPS));
 
 	Objects.Material = MaterialAsset.Get();
+
 
 	Funky::OnViewportResized.RegisterLambda([this](Math::Vec2u NewSize) { 
 		Camera.MakePerspective((float)(NewSize.X) / NewSize.Y, 48.0f); 
@@ -65,7 +67,12 @@ void Funky::Scene::Tick(f32 Delta)
 		auto ShadersSource = Platform::ReadFile("RealData/Shaders/Source/ubershader.hlsl");
 		if (!ShadersSource.IsEmpty())
 		{
-			//MaterialAsset.Reset(Asset::Material::CreateMaterial());
+			auto ShaderVS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Vertex, ShadersSource);
+			auto ShaderPS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Pixel, ShadersSource);
+
+			MaterialAsset.Reset(Asset::Material::CreateMaterial(ShaderVS, ShaderPS));
+
+			Objects.Material = MaterialAsset.Get();
 			Objects.Material = MaterialAsset.Get();
 		}
 	}

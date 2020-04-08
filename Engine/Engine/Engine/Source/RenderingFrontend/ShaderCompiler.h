@@ -9,6 +9,14 @@
 #pragma comment(lib,"d3dcompiler.lib")
 #include <wrl/client.h>
 
+
+//TODO: Assets in a template manner
+
+namespace
+{
+	const Str ShadersDefaultPath = "";
+}
+
 namespace Funky
 {
 	class ShaderCompiler
@@ -29,6 +37,7 @@ namespace Funky
 			size MacrosCount = 0;
 			Core::Memory::UniquePtr<ShaderMacro[]> Macros;
 
+			Str IncludePath = "G:\\Engine\\Engine\\Engine\\Engine\\Work\\RealData\\Shaders\\Source\\";
 			Str EntryPoint;
 		};
 
@@ -57,19 +66,20 @@ namespace Funky
 
 		}(Input);*/
 
-
 		D3D_SHADER_MACRO Macros[] = { nullptr };
 		Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
 		Microsoft::WRL::ComPtr <ID3DBlob> Errors;
 
+		Str Desc = Input.ShaderAsset->GetType() == Asset::Shader::EShaderType::Pixel ? "ps_5_0" : "vs_5_0";
+
 		HRESULT hr = D3DCompile(
 			Input.ShaderAsset->GetSource(),
 			Input.ShaderAsset->GetSourceLength(),
-			Input.ShaderAsset->GetPath().GetBuffer(),
+			Input.IncludePath.GetBuffer(),
 			Macros,
-			NULL,
-			"VSMain",
-			"vs_5_0",
+			D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			Input.EntryPoint.GetBuffer(),
+			Desc.GetBuffer(),
 			0,
 			0,
 			CodeBlob.GetAddressOf(),

@@ -208,7 +208,7 @@ private:
 
 	size StringLength = 0u;
 
-	T SmallValue[SMALL_STRING];
+	T SmallValue[SMALL_STRING] = { 0 };
 
 	size BufferCapacity = 0u;
 	Funky::Core::Memory::UniquePtr<T[]> Value;

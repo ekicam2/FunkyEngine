@@ -81,7 +81,6 @@ namespace Funky
 
 
 			Rendering::RRenderTarget* OffscreenRT;
-			Rendering::RBuffer* PostProcessSurfaceBuffer;
 			Rendering::ShaderLink PostProcessShaders;
 		};
 	}

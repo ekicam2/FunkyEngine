@@ -29,12 +29,13 @@ namespace Funky
 				Pixel
 			};
 
+			[[nodiscard]] static Shader* CreateFromFile(EShaderType InType, Str const& InPath);
 			[[nodiscard]] static Shader* CreateShaderFromSource(EShaderType InType, Str const& InSource);
 
 			FORCEINLINE EShaderType GetType() const { return Type; }
 
-			FORCEINLINE char const* GetSource() const { return Source.Get(); }
-			FORCEINLINE size GetSourceLength() const { return SourceLength; }
+			FORCEINLINE char const* GetSource() const { return Source.GetBuffer(); }
+			FORCEINLINE size GetSourceLength() const { return Source.Length(); }
 
 			FORCEINLINE byte* GetBuffer() const { return CompiledBuffer.Get(); }
 			FORCEINLINE size GetBufferSize() const { return BufferSizeInBytes; }
@@ -43,12 +44,11 @@ namespace Funky
 		private:
 			EShaderType Type;
 
-			size SourceLength;
-			Core::Memory::UniquePtr<char[]> Source;
+			Str Source;
 
 			size BufferSizeInBytes;
 			Core::Memory::UniquePtr<byte[]> CompiledBuffer;
-			bool bIsCompiled;
+			bool bIsCompiled = false;
 
 			DECLARE_IASSET(Shader, Asset::EAssetType::Shader);
 		};
