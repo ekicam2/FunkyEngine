@@ -13,6 +13,7 @@ namespace Funky
 		class ICallable<Ret(Args...)>
 		{
 		public:
+			virtual ~ICallable() {}
 			virtual Ret operator()(Args...args) = 0;
 		};
 

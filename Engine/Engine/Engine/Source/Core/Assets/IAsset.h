@@ -23,7 +23,7 @@ namespace Funky
 		};
 
 		Str const TypeToString(Asset::EAssetType EnumType);
-		Asset::EAssetType const StringToType(Str const & StrType);
+		Asset::EAssetType StringToType(Str const & StrType);
 
 		class IAsset
 		{

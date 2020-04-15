@@ -25,7 +25,7 @@ namespace
 		return false;
 	}
 
-	bool ShowAssertionBox(wchar_t const * const pCond, wchar_t const * const pFile, int iLine, wchar_t const * pMsg = nullptr)
+	[[maybe_unused]] bool ShowAssertionBox(wchar_t const * const pCond, wchar_t const * const pFile, int iLine, wchar_t const * pMsg = nullptr)
 	{
 		wchar_t pRealMsg[512];
 		wcscpy_s(pRealMsg, L"Assertion failed: ");
@@ -60,7 +60,7 @@ namespace
 		}
 	}
 
-	bool ShowAssertionBox(char const* const pCond, char const* const pFile, int iLine, char const* pMsg = nullptr)
+	[[maybe_unused]] bool ShowAssertionBox(char const* const pCond, char const* const pFile, int iLine, char const* pMsg = nullptr)
 	{
 		char pRealMsg[512];
 		

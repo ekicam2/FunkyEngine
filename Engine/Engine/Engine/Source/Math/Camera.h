@@ -14,13 +14,13 @@ namespace Math
 	{
 	public:
 		Camera()
-			: Projection(DirectX::XMMatrixIdentity())
-			, View(DirectX::XMMatrixIdentity())
-			, Position(0.0f, 0.0f, 0.0f)
+			: Position(0.0f, 0.0f, 0.0f)
 			, Rotation(0.0f, 0.0f, 0.0f)
 			, Up(0.0f, 1.0f, 0.0f)
 			, Right(1.0f, 0.0f, 0.0f)
 			, Forward(0.0f, 0.0f, 1.0f)
+			, Projection(DirectX::XMMatrixIdentity())
+			, View(DirectX::XMMatrixIdentity())
 		{
 		}
 
@@ -57,7 +57,7 @@ namespace Math
 
 		void Translate(Math::Vec3f const & vTranslation)
 		{
-			Math::Vec3f Temp = vTranslation;
+			//Math::Vec3f Temp = vTranslation;
 			//Temp = Temp.RotateX(Rotation.X);
 			//Temp = Temp.RotateY(Rotation.Y);
 			//Temp = Temp.RotateZ(Rotation.Z);

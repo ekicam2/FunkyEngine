@@ -16,6 +16,10 @@ Funky::Core::Thread::IThread* Funky::Core::Thread::IThread::CreateThread(Str con
 	case EGroup::Rendering:
 		SetThreadDescription(NewThread->GetHandle(), L"RenderingThread");
 		break;
+	case EGroup::Any:
+	case EGroup::Main:
+		// do nothing
+		break;
 	}
 	return NewThread;
 }

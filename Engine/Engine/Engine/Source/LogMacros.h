@@ -52,7 +52,7 @@ enum class ELogType
 namespace
 {
 	template<typename T>
-	void IDELOG(T msg)
+	[[maybe_unused]] void IDELOG(T msg)
 	{
 		//auto m2 = std::to_string(2).c_str();
 
@@ -62,7 +62,7 @@ namespace
 	}
 
 	template<>
-	void IDELOG<float>(float msg)
+	[[maybe_unused]] void IDELOG<float>(float msg)
 	{
 		charx m[1024];
 		sprintf_s(m, TEXT("%f"), msg);
@@ -70,7 +70,7 @@ namespace
 	}
 
 	template<>
-	void IDELOG<long>(long msg)
+	[[maybe_unused]] void IDELOG<long>(long msg)
 	{
 		charx m[1024];
 		sprintf_s(m, TEXT("%ld"), msg);
@@ -78,7 +78,7 @@ namespace
 	}
 
 	template<>
-	void IDELOG<int>(int msg)
+	[[maybe_unused]] void IDELOG<int>(int msg)
 	{
 		charx m[1024];
 		sprintf_s(m, TEXT("%d"), msg);
@@ -86,19 +86,19 @@ namespace
 	}
 
 	template<>
-	void IDELOG<Str const &>(Str const & msg)
+	[[maybe_unused]] void IDELOG<Str const &>(Str const & msg)
 	{
 		OutputDebugStringA(msg.GetBuffer());
 	}
 
 	template<>
-	void IDELOG<char const *>(char const * msg)
+	[[maybe_unused]] void IDELOG<char const *>(char const * msg)
 	{
 		OutputDebugStringA(msg);
 	}
 
 	template<>
-	void IDELOG<wchar_t const *>(wchar_t const * msg)
+	[[maybe_unused]] void IDELOG<wchar_t const *>(wchar_t const * msg)
 	{
 		OutputDebugStringW(msg);
 	}
@@ -107,43 +107,43 @@ namespace
 namespace
 {
 	template<typename T>
-	void CONSOLELOG(T msg)
+	[[maybe_unused]] void CONSOLELOG(T msg)
 	{
 		std::clog << msg;
 	}
 
 	template<>
-	void CONSOLELOG<Str>(Str msg)
+	[[maybe_unused]] void CONSOLELOG<Str>(Str msg)
 	{
 		std::clog << msg.GetBuffer();
 	}
 
 	template<>
-	void CONSOLELOG<Str const&>(Str const& msg)
+	[[maybe_unused]] void CONSOLELOG<Str const&>(Str const& msg)
 	{
 		std::clog << msg.GetBuffer();
 	}
 
 	template<>
-	void CONSOLELOG<char const*>(char const* msg)
+	[[maybe_unused]] void CONSOLELOG<char const*>(char const* msg)
 	{
 		std::clog << msg;
 	}
 
 	template<>
-	void CONSOLELOG<char*>(char* msg)
+	[[maybe_unused]] void CONSOLELOG<char*>(char* msg)
 	{
 		std::clog << msg;
 	}
 
 	template<>
-	void CONSOLELOG<wchar_t const*>(wchar_t const* msg)
+	[[maybe_unused]] void CONSOLELOG<wchar_t const*>(wchar_t const* msg)
 	{
 		std::wclog << msg;
 	}
 
 	template<>
-	void CONSOLELOG<wchar_t*>(wchar_t* msg)
+	[[maybe_unused]] void CONSOLELOG<wchar_t*>(wchar_t* msg)
 	{
 		std::wclog << msg;
 	}
@@ -152,31 +152,31 @@ namespace
 namespace
 {
 	template<typename T>
-	void CONSOLEERROR(T msg)
+	[[maybe_unused]] void CONSOLEERROR(T msg)
 	{
 		std::cerr << msg;
 	}
 
 	template<>
-	void CONSOLEERROR<std::string const&>(std::string const& msg)
+	[[maybe_unused]] void CONSOLEERROR<std::string const&>(std::string const& msg)
 	{
 		std::cerr << msg.c_str();
 	}
 
 	template<>
-	void CONSOLEERROR<std::wstring const&>(std::wstring const& msg)
+	[[maybe_unused]] void CONSOLEERROR<std::wstring const&>(std::wstring const& msg)
 	{
 		std::wcerr << msg;
 	}
 
 	template<>
-	void CONSOLEERROR<char const*>(char const* msg)
+	[[maybe_unused]] void CONSOLEERROR<char const*>(char const* msg)
 	{
 		std::cerr << msg;
 	}
 
 	template<>
-	void CONSOLEERROR<wchar_t const*>(wchar_t const* msg)
+	[[maybe_unused]] void CONSOLEERROR<wchar_t const*>(wchar_t const* msg)
 	{
 		std::wcerr << msg;
 	}

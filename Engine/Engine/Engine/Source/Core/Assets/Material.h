@@ -21,7 +21,7 @@ namespace Funky
 	{
 		struct Shader : public IAsset
 		{
-			friend class ShaderCompiler;
+			friend class Funky::ShaderCompiler;
 
 			enum EShaderType
 			{

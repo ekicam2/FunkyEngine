@@ -15,6 +15,7 @@ namespace Funky
 			{
 			public:
 				ITask();
+				virtual ~ITask() {}
 				virtual void Process() = 0;
 				virtual void PostProcess() {}
 

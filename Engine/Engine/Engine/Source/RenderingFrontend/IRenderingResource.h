@@ -77,11 +77,11 @@ namespace Funky
 
 		class RTexture : public IRenderingResource
 		{
-			enum Type
+			/*enum Type
 			{
 				Texture2D,
 				Texture3D
-			} TextureType;
+			} TextureType;*/
 
 		};
 

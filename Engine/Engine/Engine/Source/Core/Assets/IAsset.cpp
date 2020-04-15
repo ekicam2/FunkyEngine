@@ -15,7 +15,7 @@ Str const Funky::Asset::TypeToString(Asset::EAssetType Type)
 	}
 }
 
-Funky::Asset::EAssetType const Funky::Asset::StringToType(Str const& StrType)
+Funky::Asset::EAssetType Funky::Asset::StringToType(Str const & StrType)
 {
 	if (StrType == "Texture")
 		return Asset::EAssetType::Texture;
