@@ -52,6 +52,7 @@ namespace Funky
 			class IIOSystem
 			{
 			public:
+				virtual ~IIOSystem() {}
 				/* Remember to always call Frame() at the beginning of overloaded Update()! */
 				virtual void Update() = 0;
 

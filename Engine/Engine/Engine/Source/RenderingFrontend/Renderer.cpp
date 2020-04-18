@@ -181,8 +181,10 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene(ISce
 
 void Funky::Rendering::Renderer::DrawScene(RenderView* SceneToRender)
 {
+
+#define test(s,v) s##v
 #define GPU_MARKER(Name) \
-	GPUScopeMarker CONCAT(CONCAT(Marker, __LINE__),(&RenderingBackend, Name))
+	GPUScopeMarker CONCAT(Marker,__LINE__)(&RenderingBackend, Name)
 
 	auto DefaultDS = RenderingBackend.GetResourceManager()->GetSwapchainDepthStencil();
 	{

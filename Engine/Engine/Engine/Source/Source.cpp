@@ -1,10 +1,22 @@
 #include "Macros.h"
-#include "FunkyEngine.h"
+#include "Engine.h"
 #include "LogMacros.h"
 
 #include "Core/Utils.h"
 
-#define ENGINE
+/**
+ *	Valid defines
+ * ENGINE
+ *  THREADED_RENDERING (unusable)
+ * MEMORY_TEST
+ * THREAD_TEST
+ * STRING_TEST
+ */
+
+
+#if !(defined(MEMORY_TEST) || defined(THREAD_TEST) || defined(STRING_TEST))
+	#define ENGINE
+#endif
 
 #ifdef MEMORY_TEST
 #include <fstream>
@@ -64,7 +76,8 @@ int main()
 	return 0;
 	
 }
-#elif defined(THREAD_TEST)
+#endif 
+#ifdef THREAD_TEST
 
 #include <chrono>
 #include <thread>
@@ -122,7 +135,8 @@ int main()
 	return 0;
 }
 
-#elif defined(STRING_TEST)
+#endif
+#ifdef STRING_TEST
 #include "Core/String.h"
 #include "Templates.h"
 #include "DebugMacros.h"
@@ -161,48 +175,23 @@ int main()//(i32 argc, char** argv)
 
 	return 0;
 }
-#elif defined(ENGINE)
+#endif
+#ifdef ENGINE
 int main(i32 argc, char** argv)
 {
 	INIT_LOG();
 
-	LOG("Begin cvars");
-	for (i32 i = 0; i < argc; ++i)
-	{
-		std::string ar = argv[i];
-		LOG(i, ": ", ar);
-	}
-	LOG("End cvars");
+	SetCurrentDirectory(
+		TEXT("G:\\Engine\\Engine\\Engine\\Engine\\Work")
+	);
 
-	{
-		const i32 len = 1024;
-		charx pBuf[len];
-		i32 bytes = GetModuleFileName(NULL, pBuf, len);
-		if (bytes > 0)
-		{
-			LOG(pBuf);
-		}
-		bytes = 0;
-		charx pBuff2[len];
-		bytes = GetCurrentDirectory(len, pBuff2);
-		if (bytes > 0)
-		{
-			LOG(pBuff2);
-		}
-	}
-
-	Funky::FunkyEngine Engine;
-	if (Engine.Init())
+	Funky::Engine Engine;
+	if (Engine.Init(argc, argv))
 		Engine.Run();
 
 	if (!Engine.Shutdown())
 		LOG_ERROR("Error while cleaning up.");
 	
-
-	LOG("Waiting for input after close.");
-	// wait with console
-	getchar();
-
 	return 0;
 }
 #endif

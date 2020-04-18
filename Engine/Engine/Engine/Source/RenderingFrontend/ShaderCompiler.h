@@ -66,7 +66,7 @@ namespace Funky
 
 		}(Input);*/
 
-		D3D_SHADER_MACRO Macros[] = { nullptr };
+		D3D_SHADER_MACRO Macros[] = { {nullptr, nullptr} };
 		Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
 		Microsoft::WRL::ComPtr <ID3DBlob> Errors;
 

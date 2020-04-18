@@ -10,6 +10,7 @@ namespace Funky
 		{
 			class WindowsIOSystem final : public IIOSystem
 			{
+				virtual ~WindowsIOSystem() {}
 				virtual void Update();
 			};
 		}

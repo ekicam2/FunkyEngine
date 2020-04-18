@@ -1,7 +1,5 @@
 #pragma once
 
-//#define FUNKY_EDITOR
-
 #ifdef _DEBUG
 #define FORCEINLINE_DEBUGGABLE
 #else

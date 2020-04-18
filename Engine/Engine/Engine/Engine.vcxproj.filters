@@ -21,9 +21,6 @@
     <ClInclude Include="Source\LogMacros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\FunkyEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Macros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -37,9 +34,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Core\String.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Core\Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Math\LinearColor.h">
@@ -225,12 +219,15 @@
     <ClInclude Include="Source\Core\Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Core\Timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Source.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\FunkyEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\3rd\TinyObjectLoader.cpp">
@@ -333,6 +330,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\3rd\MurmurHash3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

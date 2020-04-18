@@ -21,7 +21,7 @@ namespace Funky
 			static RBuffer* PostProcessPlaneData;
 			static RShader* UnifiedVertexShader;
 
-			RShader* PostProcessImplementation = nullptr;
+			[[maybe_unused]]RShader* PostProcessImplementation = nullptr;
 		};
 
 	}

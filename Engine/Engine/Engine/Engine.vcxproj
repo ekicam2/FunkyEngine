@@ -77,6 +77,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>-Wno-pragma-once-outside-header %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d11.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -92,7 +93,6 @@
       <AdditionalIncludeDirectories>Source\FunkyMath;Source\3rd\sdl;Source\;Source\3rd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <PreprocessorDefinitions>FUNKY_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>-Wno-pragma-once-outside-header %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -167,7 +167,7 @@
     <ClInclude Include="Source\RenderingFrontend\Renderer.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\DX11\DirectUtils.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\DX11\DX11Core.h" />
-    <ClInclude Include="Source\FunkyEngine.h" />
+    <ClInclude Include="Source\Engine.h" />
     <ClInclude Include="Source\LogMacros.h" />
     <ClInclude Include="Source\Macros.h" />
     <ClInclude Include="Source\Math\Math.h" />
@@ -216,7 +216,7 @@
     <ClCompile Include="Source\Core\Timer.cpp" />
     <ClCompile Include="Source\Math\Camera.cpp" />
     <ClCompile Include="Source\RenderingBackend\Internal\DX11\DX11Core.cpp" />
-    <ClCompile Include="Source\FunkyEngine.cpp" />
+    <ClCompile Include="Source\Engine.cpp" />
     <ClCompile Include="Source\Core\Assets\Material.cpp" />
     <ClCompile Include="Source\RenderingBackend\Internal\DX11\DX11RenderingResources.cpp" />
     <ClCompile Include="Source\RenderingBackend\Internal\RenderingBackend.cpp" />

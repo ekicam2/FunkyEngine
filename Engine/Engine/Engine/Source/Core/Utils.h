@@ -21,3 +21,24 @@ namespace Funky
 		return Ret;
 	}
 }
+
+namespace std {
+
+	template <>
+	struct hash<Funky::Hash128>
+	{
+		std::size_t operator()(const Funky::Hash128& k) const
+		{
+			using std::size_t;
+			using std::hash;
+			using std::string;
+
+			// Compute individual hash values for first,
+			// second and third and combine them using XOR
+			// and bit shifting:
+
+			return ((hash<u64>()(k.v[0])) ^ (hash<u64>()(k.v[1]) << 1));
+		}
+	};
+
+}

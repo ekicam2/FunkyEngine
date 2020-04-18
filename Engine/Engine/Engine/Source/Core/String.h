@@ -79,7 +79,6 @@ public:
 
 	void operator=(T const* const InCStr)
 	{
-		const size PrevLength = StringLength;
 		StringLength = StrLen(InCStr);
 
 		if (StringLength < SMALL_STRING)
@@ -99,7 +98,6 @@ public:
 
 	void operator=(String const & Other)
 	{
-		const size PrevLength = StringLength;
 		StringLength = Other.StringLength;
 
 		if (StringLength < SMALL_STRING)
@@ -118,7 +116,6 @@ public:
 
 	void operator=(String&& Other)
 	{
-		const size PrevLength = StringLength;
 		StringLength = Other.StringLength;
 
 		if (StringLength < SMALL_STRING)
@@ -127,6 +124,8 @@ public:
 		}
 		else
 		{
+			BufferCapacity = Other.BufferCapacity;
+
 			Value = Funky::Move(Other.Value);
 			Other.BufferCapacity = 0u;
 			Other.StringLength = 0u;

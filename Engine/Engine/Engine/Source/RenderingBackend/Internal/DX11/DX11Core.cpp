@@ -193,7 +193,7 @@ namespace Funky
 			if (!SUCCEEDED(hr))
 			{
 				LOG_ERROR(TEXT("Couldn't create depth stencil buffer"));
-				return false;
+				return nullptr;
 			}
 			
 			D3D11_DEPTH_STENCIL_VIEW_DESC DepthViewDesc;
@@ -276,10 +276,11 @@ namespace Funky
 			return Ret;
 		}
 
-		RTexture* DX11::CreateTexture2D(byte const * const Data, Math::Vec2u const & Size)
+		RTexture* DX11::CreateTexture2D([[maybe_unused]]byte const * const Data, [[maybe_unused]] Math::Vec2u const & Size)
 		{
+		/*	
 			Data; Size;
-		/*	Textures.push_back(Move(
+			Textures.push_back(Move(
 				[Size]()
 				{
 					DX11GPUTexture Returner;
@@ -319,10 +320,11 @@ namespace Funky
 			return nullptr;
 		}
 
-		RTexture* DX11::CreateCubemap(byte const * const Data, Math::Vec2u const & Size)
+		RTexture* DX11::CreateCubemap([[maybe_unused]] byte const * const Data, [[maybe_unused]] Math::Vec2u const & Size)
 		{
+			/*
 			Data, Size;
-			/*constexpr unsigned TexCount = 6u;
+			constexpr unsigned TexCount = 6u;
 
 			Textures.push_back(Move(
 				[Size, TexCount]()
@@ -404,7 +406,7 @@ namespace Funky
 		{
 			CHECK(bClearDepth || bClearStencil);
 			
-			UINT ClearFlags;
+			UINT ClearFlags = 0x0L;
 
 			if (bClearDepth)
 				ClearFlags |= D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH;

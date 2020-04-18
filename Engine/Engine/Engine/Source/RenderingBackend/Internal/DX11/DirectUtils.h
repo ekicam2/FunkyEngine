@@ -15,7 +15,7 @@ namespace Funky
 {
 	namespace DirectUtils
 	{
-		FORCEINLINE charx const * const FeatureNameToString(D3D_FEATURE_LEVEL const & fl) {
+		FORCEINLINE charx const * FeatureNameToString(D3D_FEATURE_LEVEL const & fl) {
 			switch (fl) {
 			case D3D_FEATURE_LEVEL_9_1:  return TEXT("D3D_FEATURE_LEVEL_9_1");
 			case D3D_FEATURE_LEVEL_9_2:  return TEXT("D3D_FEATURE_LEVEL_9_2");

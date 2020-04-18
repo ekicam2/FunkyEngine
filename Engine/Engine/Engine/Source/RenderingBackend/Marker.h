@@ -10,11 +10,12 @@ namespace Funky::Rendering
 	class IGPUMarker
 	{
 	public:
+		virtual ~IGPUMarker() {}
 		virtual void Set() = 0;
 		virtual void Free() = 0;
 	};
 
-	class GPUScopeMarker
+	class GPUScopeMarker final
 	{
 	public:
 		GPUScopeMarker(Rendering::RenderingBackend* pRenderingBackend, Str MarkerName)

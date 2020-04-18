@@ -19,6 +19,7 @@ namespace Funky
 
 	struct IScene
 	{
+		virtual ~IScene() {}
 		virtual void Init() = 0;
 		virtual void Shutdown() = 0;
 		virtual void Tick(f32 Delta) = 0;

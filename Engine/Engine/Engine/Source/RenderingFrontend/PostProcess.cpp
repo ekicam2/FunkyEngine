@@ -16,7 +16,7 @@ Funky::Rendering::RShader* Funky::Rendering::PostProcess::GetVSShader()
 	return UnifiedVertexShader;
 }
 
-Funky::Rendering::PostProcess* Funky::Rendering::PostProcess::CreateFromSource(Str FilePath)
+Funky::Rendering::PostProcess* Funky::Rendering::PostProcess::CreateFromSource([[maybe_unused]]Str FilePath)
 {
 	return nullptr;
 }

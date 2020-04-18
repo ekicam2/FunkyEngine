@@ -130,7 +130,7 @@ Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadOBJFromFile(char const
 	VertexIndexBuffer Ret;
 	auto& [Vertices, Indices] = Ret;
 	{
-		DEF_DEBUG_SCOPE_TIMER(TEXT("Creating mesh"));
+		DEBUG_SCOPE_TIMER(TEXT("Creating mesh"));
 
 		std::unordered_map<Vertex, unsigned> UniqueVerts = {};
 

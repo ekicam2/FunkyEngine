@@ -53,6 +53,10 @@ namespace Funky
 				delete Impl;
 				Impl = new Funky::Rendering::DX11();
 				break;
+			case EAPI::UNKNOWN:
+				delete Impl;
+				Impl = nullptr;
+				break;
 			}
 
 			Funky::OnViewportResized.RegisterLambda([this](Math::Vec2u NewSize) { 

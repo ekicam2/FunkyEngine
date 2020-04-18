@@ -35,6 +35,10 @@ namespace Funky::Rendering
 			Other.pMarkersInterface = nullptr;
 		}
 
+		~DX11Marker()
+		{
+		}
+
 		virtual void Set() override
 		{
 			pMarkersInterface->BeginEvent(utf8_decode(Name.GetBuffer()).c_str());

@@ -1,6 +1,6 @@
 #include "Scene.h"
 
-#include "FunkyEngine.h"
+#include "Engine.h"
 #include "Utils/MeshUtils.h"
 
 void Funky::Scene::Init()
@@ -38,31 +38,31 @@ void Funky::Scene::Tick(f32 Delta)
 	float Speed				= 0.025f * Delta;
 	float RotationSpeed		= 0.2f * Delta;
 
-	Speed *= FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::SHIFT) ? 0.25f : 1.0f;
+	Speed *= Engine::GetIO()->IsKeyPressed(Core::IO::EKey::SHIFT) ? 0.25f : 1.0f;
 
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::W))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::W))
 		Camera.Translate(Camera.GetForward() * Speed);
 
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::S))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::S))
 		Camera.Translate(-Camera.GetForward() * Speed);
 
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::A))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::A))
 		Camera.Translate(-Camera.GetRight() * Speed);
 
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::D))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::D))
 		Camera.Translate(Camera.GetRight() * Speed);
 
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::E))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::E))
 		Camera.Translate(Math::Vec::UP * Speed);
 
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::Q))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::Q))
 		Camera.Translate(-Math::Vec::UP * Speed);
 
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::SPACE))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::SPACE))
 		Objects.Rotation.Y += RotationSpeed;
 
 
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::R))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::R))
 	{
 		auto ShadersSource = Platform::ReadFile("RealData/Shaders/Source/ubershader.hlsl");
 		if (!ShadersSource.IsEmpty())
@@ -78,16 +78,16 @@ void Funky::Scene::Tick(f32 Delta)
 	}
 
 	 //Rotations 
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_UP))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_UP))
 		Camera.Rotate(Math::Vec::RIGHT * Delta * 0.05f);
 	
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_DOWN))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_DOWN))
 		Camera.Rotate(-Math::Vec::RIGHT * Delta * 0.05f);
 	
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_LEFT))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_LEFT))
 		Camera.Rotate(Math::Vec::UP * RotationSpeed);
 	
-	if (FunkyEngine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_RIGHT))
+	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_RIGHT))
 		Camera.Rotate(-Math::Vec::UP * RotationSpeed);
 }
 

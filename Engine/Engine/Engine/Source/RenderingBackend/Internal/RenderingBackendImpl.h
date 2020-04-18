@@ -16,6 +16,7 @@ namespace Funky
 		class RenderingBackendImpl
 		{
 		public:
+			virtual ~RenderingBackendImpl() {}
 			virtual RenderingBackend::EAPI GetBackendAPI() const = 0;
 			virtual bool Init(RenderingBackend::RenderingBackendInitDesc* InitDesc) = 0;
 			virtual void OnViewportResized(Math::Vec2u const & NewSize) = 0;
