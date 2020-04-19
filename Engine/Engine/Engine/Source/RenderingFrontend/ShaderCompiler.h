@@ -25,8 +25,9 @@ namespace Funky
 		struct ShaderDesc
 		{
 			Rendering::RenderingBackend::EAPI Api;
-
-			Asset::Shader* ShaderAsset;
+			Asset::Shader::EShaderType Type;
+			Str Name = "Unknown";
+			Str Source;
 
 			struct ShaderMacro
 			{
@@ -41,10 +42,18 @@ namespace Funky
 			Str EntryPoint;
 		};
 
-		static bool CompileShader(ShaderDesc const & Input);
+		struct CompiledData
+		{
+			Core::Memory::UniquePtr<byte[]> Buffer;
+			size BufferSize;
+
+		};
+
+		static CompiledData CompileShader(ShaderDesc const& Input);
+		static void CompileShader(Asset::Shader* Input);
 	};
 
-	bool ShaderCompiler::CompileShader(ShaderDesc const & Input)
+	inline ShaderCompiler::CompiledData ShaderCompiler::CompileShader(ShaderDesc const & Input)
 	{
 		/*Core::Memory::UniquePtr<D3D_SHADER_MACRO[]> Macros = [](ShaderDesc const& MacrosInput) -> Core::Memory::UniquePtr<D3D_SHADER_MACRO[]>
 		{
@@ -70,12 +79,12 @@ namespace Funky
 		Microsoft::WRL::ComPtr <ID3DBlob> CodeBlob;
 		Microsoft::WRL::ComPtr <ID3DBlob> Errors;
 
-		Str Desc = Input.ShaderAsset->GetType() == Asset::Shader::EShaderType::Pixel ? "ps_5_0" : "vs_5_0";
+		const Str Desc = Input.Type == Asset::Shader::EShaderType::Fragment ? "ps_5_0" : "vs_5_0";
 
 		HRESULT hr = D3DCompile(
-			Input.ShaderAsset->GetSource(),
-			Input.ShaderAsset->GetSourceLength(),
-			Input.IncludePath.GetBuffer(),
+			Input.Source.GetBuffer(),
+			Input.Source.Length(),
+			(Input.IncludePath + Input.Name).GetBuffer(),
 			Macros,
 			D3D_COMPILE_STANDARD_FILE_INCLUDE,
 			Input.EntryPoint.GetBuffer(),
@@ -88,18 +97,36 @@ namespace Funky
 
 		if (SUCCEEDED(hr))
 		{
-			Input.ShaderAsset->BufferSizeInBytes = CodeBlob->GetBufferSize();
-			Input.ShaderAsset->CompiledBuffer.Reset(new byte[Input.ShaderAsset->BufferSizeInBytes]);
-			MemCpy(CodeBlob->GetBufferPointer(), Input.ShaderAsset->CompiledBuffer.Get(), Input.ShaderAsset->BufferSizeInBytes);
+			ShaderCompiler::CompiledData Output;
 
-			return true;
+			Output.BufferSize = CodeBlob->GetBufferSize();
+			Output.Buffer.Reset(new byte[Output.BufferSize]);
+			MemCpy(CodeBlob->GetBufferPointer(), Output.Buffer.Get(), Output.BufferSize);
+
+			return Output;
 		}
 
 		const char* ErrorStr = (const char*)Errors->GetBufferPointer();
 		LOG_ERROR(ErrorStr);
 		BREAK();
 
-		return false;
+		return {};
+	}
+
+	inline void ShaderCompiler::CompileShader(Asset::Shader* Input)
+	{
+		ShaderCompiler::ShaderDesc Desc;
+		Desc.Api = Rendering::RenderingBackend::EAPI::DX11;
+		Desc.Source = Input->GetSource();
+		Desc.EntryPoint = Input->GetType() == Asset::Shader::EShaderType::Fragment ? "PSMain" : "VSMain";
+		Desc.Type = Input->GetType();
+		
+		auto [CompiledBuffer, BufferSize] = CompileShader(Desc);
+
+		Input->BufferSizeInBytes = BufferSize;
+		Input->CompiledBuffer.Reset(new byte[Input->BufferSizeInBytes]);
+		MemCpy(CompiledBuffer, Input->CompiledBuffer.Get(), Input->BufferSizeInBytes);
+		Input->bIsCompiled = true;
 	}
 
 }

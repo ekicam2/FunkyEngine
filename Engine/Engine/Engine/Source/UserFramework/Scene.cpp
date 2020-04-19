@@ -2,6 +2,7 @@
 
 #include "Engine.h"
 #include "Utils/MeshUtils.h"
+#include "RenderingFrontend\ShaderCompiler.h"
 
 void Funky::Scene::Init()
 {
@@ -14,8 +15,11 @@ void Funky::Scene::Init()
 
 	auto ShadersSource = Platform::ReadFile("RealData/Shaders/Source/ubershader.hlsl");
 	auto ShaderVS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Vertex, ShadersSource);
-	auto ShaderPS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Pixel, ShadersSource);
-
+	auto ShaderPS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Fragment, ShadersSource);
+	
+	ShaderCompiler::CompileShader(ShaderVS);
+	ShaderCompiler::CompileShader(ShaderPS);
+	
 	MaterialAsset.Reset(Asset::Material::CreateMaterial(ShaderVS, ShaderPS));
 
 	Objects.Material = MaterialAsset.Get();
@@ -68,7 +72,7 @@ void Funky::Scene::Tick(f32 Delta)
 		if (!ShadersSource.IsEmpty())
 		{
 			auto ShaderVS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Vertex, ShadersSource);
-			auto ShaderPS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Pixel, ShadersSource);
+			auto ShaderPS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Fragment, ShadersSource);
 
 			MaterialAsset.Reset(Asset::Material::CreateMaterial(ShaderVS, ShaderPS));
 

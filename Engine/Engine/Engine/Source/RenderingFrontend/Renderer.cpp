@@ -1,3 +1,5 @@
+#include "Core/Events/EngineEvents.h"
+
 #include "Renderer.h"
 #include "RenderingResourceManager.h"
 #include "UserFramework/Scene.h"
@@ -29,45 +31,15 @@ bool Funky::Rendering::Renderer::Init()
 	
 	
 	OffscreenRT = RenderingBackend.CreateRenderTarget(RenderingBackend.GetResourceManager()->GetSwapchainRenderTarget()->Size);
-
-	auto VSSource = Platform::ReadFile("RealData/Shaders/Source/PPVS.hlsl");
-	auto PSSource = Platform::ReadFile("RealData/Shaders/Source/ToonPP.hlsl");
-
-	auto VS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Vertex, VSSource);
-	auto PS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Pixel, PSSource);
-	PPMaterial.Reset(Asset::Material::CreateMaterial(VS, PS));
-
-	ShaderCompiler::ShaderDesc Desc;
-	Desc.Api = RenderingBackend.GetBackendAPI();
-	Desc.EntryPoint = "VSMain";
-	Desc.ShaderAsset = VS;
-	ShaderCompiler::CompileShader(Desc);
-
-	Desc.EntryPoint = "PSMain";
-	Desc.ShaderAsset = PS;
-	ShaderCompiler::CompileShader(Desc);
-
-	PPMaterial->Linkage.VS = [&]() -> Rendering::RShader* {
-
-		RenderingBackend::ShaderInputDesc ShaderDesc;
-		ShaderDesc.ShaderData = PPMaterial->GetVS()->GetBuffer();
-		ShaderDesc.DataSize = PPMaterial->GetVS()->GetBufferSize();
-
-		return RenderingBackend.CreateVertexShader(&ShaderDesc);
-	}();
-
-	PPMaterial->Linkage.PS = [&]() -> Rendering::RShader* {
-
-
-		RenderingBackend::ShaderInputDesc ShaderDesc;
-		ShaderDesc.ShaderData = PPMaterial->GetPS()->GetBuffer();
-		ShaderDesc.DataSize = PPMaterial->GetPS()->GetBufferSize();
-
-		return RenderingBackend.CreatePixelShader(&ShaderDesc);
-	}();
+	
+	Funky::OnViewportResized.RegisterLambda([this] (Math::Vec2u NewSize){
+		OffscreenRT = RenderingBackend.CreateRenderTarget(NewSize);
+	});
 
 	PostProcess::InitPostProcessSurface(&RenderingBackend);
+	PostProcess::InitVS(&RenderingBackend);
 
+	PP.Reset(PostProcess::CreateFromSource("RealData/Shaders/Source/ToonPP.hlsl", &RenderingBackend));
 
 	return true;
 }
@@ -119,8 +91,9 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene(ISce
 					ShaderCompiler::ShaderDesc Desc;
 					Desc.Api = Rendering::RenderingBackend::EAPI::DX11;
 					Desc.EntryPoint = "VSMain";
-					Desc.ShaderAsset = VS;
-					ShaderCompiler::CompileShader(Desc);
+					Desc.Source = VS->GetSource();
+					auto [CompiledBuffer, BufferSize] = ShaderCompiler::CompileShader(Desc);
+					//SceneObject->Material->VS
 				}
 
 				RenderingBackend::ShaderInputDesc ShaderDesc;
@@ -140,7 +113,7 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene(ISce
 				{
 					ShaderCompiler::ShaderDesc Desc;
 					Desc.EntryPoint = "PSMain";
-					Desc.ShaderAsset = PS;
+					Desc.Source = PS->GetSource();
 					ShaderCompiler::CompileShader(Desc);
 				}
 
@@ -182,11 +155,11 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene(ISce
 void Funky::Rendering::Renderer::DrawScene(RenderView* SceneToRender)
 {
 
-#define test(s,v) s##v
 #define GPU_MARKER(Name) \
 	GPUScopeMarker CONCAT(Marker,__LINE__)(&RenderingBackend, Name)
 
 	auto DefaultDS = RenderingBackend.GetResourceManager()->GetSwapchainDepthStencil();
+	auto DefaultRT = RenderingBackend.GetResourceManager()->GetSwapchainRenderTarget();
 	{
 		GPU_MARKER("Begin Scene");
 		RenderingBackend.BindRenderTarget(OffscreenRT, DefaultDS);
@@ -249,14 +222,14 @@ void Funky::Rendering::Renderer::DrawScene(RenderView* SceneToRender)
 	{
 		GPU_MARKER("Post Process");
 
-		auto DefaultRT = RenderingBackend.GetResourceManager()->GetSwapchainRenderTarget();
+		//auto DefaultRT = RenderingBackend.GetResourceManager()->GetSwapchainRenderTarget();
 		RenderingBackend.BindRenderTarget(DefaultRT);
 
 		RenderingBackend.BindTexture(RenderingBackend::ShaderResourceStage::Fragment, OffscreenRT, 0);
 		RenderingBackend.BindTexture(RenderingBackend::ShaderResourceStage::Fragment, DefaultDS,   1);
 
-		RenderingBackend.BindVertexShader(PPMaterial->Linkage.VS);
-		RenderingBackend.BindPixelShader(PPMaterial->Linkage.PS);
+		RenderingBackend.BindVertexShader(PP->GetShaderLinkage().VS);
+		RenderingBackend.BindPixelShader(PP->GetShaderLinkage().PS);
 		RenderingBackend.Draw(PostProcess::GetPostProcessSurface());
 
 	

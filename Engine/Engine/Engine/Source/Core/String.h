@@ -132,6 +132,25 @@ public:
 		}
 	}
 
+	String operator+(String const& Other) const
+	{
+		String Ret(Length() + Other.Length());
+		Ret.StringLength = Length() + Other.Length();
+
+		if (Ret.StringLength < SMALL_STRING)
+		{
+			MemCpy(GetBuffer(), Ret.SmallValue, Length());
+			MemCpy(Other.GetBuffer(), Ret.SmallValue + Length(), Other.Length());
+		}
+		else
+		{
+			MemCpy(GetBuffer(), Ret.Value, Length());
+			MemCpy(Other.GetBuffer(), Ret.Value + Length(), Other.Length());
+		}
+
+		return Ret;
+	}
+
 	bool operator==(String const & Other) const
 	{
 		if (Other.StringLength != StringLength) 

@@ -75,13 +75,9 @@ namespace Funky
 			DEFINE_CONSTANT_BUFFER(PerViewConstantBuffer);
 			DEFINE_CONSTANT_BUFFER(PerObjectConstantBuffer);
 
-			Core::Memory::UniquePtr<Asset::Material> PPMaterial;
-			Core::Memory::UniquePtr<Asset::Shader> PPVS;
-			Core::Memory::UniquePtr<Asset::Shader> PPPS;
-
+			Core::Memory::UniquePtr<PostProcess> PP;
 
 			Rendering::RRenderTarget* OffscreenRT;
-			Rendering::ShaderLink PostProcessShaders;
 		};
 	}
 }

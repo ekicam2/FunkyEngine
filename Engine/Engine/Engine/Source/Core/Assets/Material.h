@@ -25,8 +25,9 @@ namespace Funky
 
 			enum EShaderType
 			{
+				None,
 				Vertex,
-				Pixel
+				Fragment
 			};
 
 			[[nodiscard]] static Shader* CreateFromFile(EShaderType InType, Str const& InPath);
@@ -39,7 +40,7 @@ namespace Funky
 
 			FORCEINLINE byte* GetBuffer() const { return CompiledBuffer.Get(); }
 			FORCEINLINE size GetBufferSize() const { return BufferSizeInBytes; }
-			FORCEINLINE bool IsValid() const { return bIsCompiled; }
+			FORCEINLINE bool IsValid(EShaderType ExpectedShader = None) const { return (ExpectedShader == EShaderType::None) ? Type != EShaderType::None : Type == ExpectedShader; }
 
 		private:
 			EShaderType Type;
@@ -64,10 +65,15 @@ namespace Funky
 			} Technique;
 
 
-			FORCEINLINE Shader* GetPS() const { CHECK(PS != nullptr && PS->GetType() == Shader::EShaderType::Pixel); return PS; }
+			FORCEINLINE Shader* GetPS() const { CHECK(PS != nullptr && PS->GetType() == Shader::EShaderType::Fragment); return PS; }
 			FORCEINLINE Shader* GetVS() const { CHECK(VS != nullptr && VS->GetType() == Shader::EShaderType::Vertex); return VS; }
 
-			FORCEINLINE bool IsValid() const { return PS != nullptr && VS != nullptr && PS->GetType() == Shader::EShaderType::Pixel && VS->GetType() == Shader::EShaderType::Vertex; }
+			FORCEINLINE bool IsValid() const 
+			{ 
+				return PS != nullptr && VS != nullptr
+					&& PS->IsValid(Shader::EShaderType::Fragment)
+					&& VS->IsValid(Shader::EShaderType::Vertex);
+			}
 
 		private:
 			DECLARE_IASSET(Material, Asset::EAssetType::Material);

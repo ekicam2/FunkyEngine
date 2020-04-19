@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RenderingBackend/RenderingBackend.h"
+#include "RenderingFrontend/RenderPrimitive.h"
 
 namespace Funky
 {
@@ -12,16 +13,18 @@ namespace Funky
 			static void InitPostProcessSurface(RenderingBackend* RB);
 			static RBuffer* GetPostProcessSurface();
 
-			static void InitVS();
+			static void InitVS(RenderingBackend* RB);
 			static RShader* GetVSShader();
 
-			static PostProcess* CreateFromSource(Str FilePath);
+			static PostProcess* CreateFromSource(Str FilePath, RenderingBackend* RB);
+
+			ShaderLink GetShaderLinkage() const;
 
 		private:
-			static RBuffer* PostProcessPlaneData;
+			static RBuffer*	PostProcessPlaneData;
 			static RShader* UnifiedVertexShader;
 
-			[[maybe_unused]]RShader* PostProcessImplementation = nullptr;
+			RShader* PostProcessImplementation;
 		};
 
 	}

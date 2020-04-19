@@ -9,7 +9,7 @@
 Funky::Asset::Material* Funky::Asset::Material::CreateMaterial(Funky::Asset::Shader* VS, Funky::Asset::Shader* PS)
 {
 	CHECK(VS != nullptr && VS->GetType() == Shader::EShaderType::Vertex);
-	CHECK(PS != nullptr && PS->GetType() == Shader::EShaderType::Pixel);
+	CHECK(PS != nullptr && PS->GetType() == Shader::EShaderType::Fragment);
 
 	Material* Ret = new Material();
 	Ret->VS = VS;
