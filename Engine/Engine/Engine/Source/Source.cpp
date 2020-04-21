@@ -180,17 +180,19 @@ int main()//(i32 argc, char** argv)
 int main(i32 argc, char** argv)
 {
 	INIT_LOG();
-
+	
 	SetCurrentDirectory(
 		TEXT("G:\\Engine\\Engine\\Engine\\Engine\\Work")
 	);
-
-	Funky::Engine Engine;
-	if (Engine.Init(argc, argv))
-		Engine.Run();
-
-	if (!Engine.Shutdown())
-		LOG_ERROR("Error while cleaning up.");
+	
+	{
+		Funky::Engine Engine;
+		if (Engine.Init(argc, argv))
+			Engine.Run();
+	
+		if (!Engine.Shutdown())
+			LOG_ERROR("Error while cleaning up.");
+	}
 	
 	return 0;
 }

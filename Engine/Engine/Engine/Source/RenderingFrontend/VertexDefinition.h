@@ -26,6 +26,8 @@ namespace Funky
 				Other.m_vTexcoords.x == m_vTexcoords.x && Other.m_vTexcoords.y == m_vTexcoords.y;
 		}*/
 
+		Vertex() = default;
+
 		Vertex(
 			Math::Vec3f const& InPosition,
 			Math::Vec3f const& InColor,
@@ -44,10 +46,10 @@ namespace Funky
 			return Position == Other.Position && Color == Other.Color && Normal == Other.Normal;
 		}
 
-		Math::Vec3f Position;
-		Math::Vec3f Color;
-		Math::Vec3f Normal;
-		Math::Vec2f Texcoords;
+		Math::Vec3f Position = Math::Vec3f::Zero;
+		Math::Vec3f Color = Math::Vec3f::Zero;
+		Math::Vec3f Normal = Math::Vec3f::Zero;
+		Math::Vec2f Texcoords = Math::Vec2f::Zero;
 	};
 }
 

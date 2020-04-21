@@ -94,10 +94,9 @@
     <ClInclude Include="Source\3rd\TinyGLTFLoader.h" />
     <ClInclude Include="Source\3rd\TinyObjectLoader.h" />
     <ClInclude Include="Source\BasicTypes.h" />
+    <ClInclude Include="Source\Core\Assets\Asset.h" />
     <ClInclude Include="Source\Core\Assets\AssetRegistry.h" />
-    <ClInclude Include="Source\Core\Assets\Cubemap.h" />
-    <ClInclude Include="Source\Core\Assets\IAsset.h" />
-    <ClInclude Include="Source\Core\Assets\Texture.h" />
+    <ClInclude Include="Source\Core\Assets\Shader.h" />
     <ClInclude Include="Source\Core\Containers.h" />
     <ClInclude Include="Source\Core\Events\EngineEvents.h" />
     <ClInclude Include="Source\Core\Events\ICallable.h" />
@@ -155,7 +154,6 @@
     <ClInclude Include="Source\Core\Assets\StaticMesh.h" />
     <ClInclude Include="Source\RenderingBackend\RenderingBackend.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\RenderingBackendImpl.h" />
-    <ClInclude Include="Source\Core\Assets\ITexture.h" />
     <ClInclude Include="Source\Templates.h" />
     <ClInclude Include="Source\Utils\NoiseGenerator.h" />
   </ItemGroup>
@@ -164,11 +162,8 @@
     <ClCompile Include="Source\3rd\TinyGLTFLoader.cpp" />
     <ClCompile Include="Source\3rd\TinyObjectLoader.cpp" />
     <ClCompile Include="Source\Core\Assets\AssetRegistry.cpp" />
-    <ClCompile Include="Source\Core\Assets\Cubemap.cpp" />
-    <ClCompile Include="Source\Core\Assets\IAsset.cpp" />
-    <ClCompile Include="Source\Core\Assets\ITexture.cpp" />
+    <ClCompile Include="Source\Core\Assets\Shader.cpp" />
     <ClCompile Include="Source\Core\Assets\StaticMesh.cpp" />
-    <ClCompile Include="Source\Core\Assets\Texture.cpp" />
     <ClCompile Include="Source\Core\Events\EngineEvents.cpp" />
     <ClCompile Include="Source\Core\Events\Event.h" />
     <ClCompile Include="Source\Core\IIOSystem.cpp" />

@@ -10,6 +10,8 @@ namespace Math
 	{
 		T X, Y;
 
+		static const Vector2D Zero;
+
 		Vector2D(T X, T Y) : X(X), Y(Y) { }
 
 		Vector2D operator+(Vector2D const & Rhs)
@@ -67,6 +69,9 @@ namespace Math
 			return Sqrt(X * X + Y * Y);
 		}
 	};
+
+	template <typename T>
+	__declspec(selectany) const Math::Vector2D<T> Math::Vector2D<T>::Zero = Math::Vector2D<T>(T(0), T(0));
 
 	using Vec2f = Vector2D<f32>; //!< Template instance for 2 dimensional float vector 
 	using Vec2d = Vector2D<f64>; //!< Template instance for 2 dimensional double vector 

@@ -8,21 +8,35 @@ void Funky::Scene::Init()
 {
 	LOG("Init Scene");
 
-	bool bReverseIndices = true;
-	auto [Vertrices, Indices] = MeshUtils::LoadOBJFromFile("RealData/Meshes/robot/robot.obj", bReverseIndices);
-	MeshAsset.Reset(Asset::StaticMesh::CreateMeshFromRawData(Vertrices, Indices));
-	Objects.Mesh = MeshAsset.Get();
+	auto& AR = Funky::AssetRegistry::GetInstance();
 
-	auto ShadersSource = Platform::ReadFile("RealData/Shaders/Source/ubershader.hlsl");
-	auto ShaderVS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Vertex, ShadersSource);
-	auto ShaderPS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Fragment, ShadersSource);
-	
-	ShaderCompiler::CompileShader(ShaderVS);
-	ShaderCompiler::CompileShader(ShaderPS);
-	
-	MaterialAsset.Reset(Asset::Material::CreateMaterial(ShaderVS, ShaderPS));
+	Asset::StaticMesh::Desc MeshDesc;
+	MeshDesc.bReverseIndices = true;
+	MeshDesc.CreationType = Asset::StaticMesh::Desc::ECreationType::FromSource;
+	MeshDesc.Path = "RealData/Meshes/robot/robot.obj";
+	Objects.Mesh = AR.CreateAsset<Asset::StaticMesh>(MeshDesc);
 
-	Objects.Material = MaterialAsset.Get();
+
+	Asset::Shader::Desc ShaderDesc;
+	ShaderDesc.Path = "RealData/Shaders/Source/ubershader.hlsl";
+
+	ShaderDesc.Type = Asset::Shader::EShaderType::Vertex;
+	auto VS = AR.CreateAsset<Asset::Shader>(ShaderDesc);
+
+	ShaderDesc.Type = Asset::Shader::EShaderType::Fragment;
+	auto PS = AR.CreateAsset<Asset::Shader>(ShaderDesc);
+	
+	ShaderCompiler::CompileShader(Funky::AssetRegistry::GetInstance().GetAsset<Asset::Shader>(VS));
+	ShaderCompiler::CompileShader(Funky::AssetRegistry::GetInstance().GetAsset<Asset::Shader>(PS));
+	
+
+	Asset::Material::Desc MaterialDesc;
+	MaterialDesc.Technique = Asset::Material::ERenderingTechnique::Toon;
+	MaterialDesc.Name = "SmiesznyToon";
+	MaterialDesc.VS = VS;
+	MaterialDesc.PS = PS;
+
+	Objects.Material = AR.CreateAsset<Asset::Material>(MaterialDesc);
 
 
 	Funky::OnViewportResized.RegisterLambda([this](Math::Vec2u NewSize) { 
@@ -71,13 +85,13 @@ void Funky::Scene::Tick(f32 Delta)
 		auto ShadersSource = Platform::ReadFile("RealData/Shaders/Source/ubershader.hlsl");
 		if (!ShadersSource.IsEmpty())
 		{
-			auto ShaderVS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Vertex, ShadersSource);
-			auto ShaderPS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Fragment, ShadersSource);
+			//auto ShaderVS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Vertex, ShadersSource);
+			//auto ShaderPS = Asset::Shader::CreateShaderFromSource(Asset::Shader::EShaderType::Fragment, ShadersSource);
 
-			MaterialAsset.Reset(Asset::Material::CreateMaterial(ShaderVS, ShaderPS));
+			//MaterialAsset.Reset(Asset::Material::CreateMaterial(ShaderVS, ShaderPS));
 
-			Objects.Material = MaterialAsset.Get();
-			Objects.Material = MaterialAsset.Get();
+			//Objects.Material = MaterialAsset.Get();
+			//Objects.Material = MaterialAsset.Get();
 		}
 	}
 

@@ -2,8 +2,11 @@
 
 #include "RenderingBackend/RenderingBackend.h"
 #include "Core/Assets/Material.h"
+#include "Core/Assets/Shader.h"
 #include "Core/Memory/Memory.h"
 
+#include "DebugMacros.h"
+#include "LogMacros.h"
 
 #include <d3dcompiler.h>
 #pragma comment(lib,"d3dcompiler.lib")
@@ -22,8 +25,12 @@ namespace Funky
 	class ShaderCompiler
 	{
 	public:
+		static void CompileShader(Asset::Shader* Input);
+
+	private:
 		struct ShaderDesc
 		{
+
 			Rendering::RenderingBackend::EAPI Api;
 			Asset::Shader::EShaderType Type;
 			Str Name = "Unknown";
@@ -50,8 +57,23 @@ namespace Funky
 		};
 
 		static CompiledData CompileShader(ShaderDesc const& Input);
-		static void CompileShader(Asset::Shader* Input);
 	};
+
+	inline void ShaderCompiler::CompileShader(Asset::Shader* Input)
+	{
+		ShaderCompiler::ShaderDesc Desc;
+		Desc.Api = Rendering::RenderingBackend::EAPI::DX11;
+		Desc.Source = Input->GetSource();
+		Desc.EntryPoint = Input->GetType() == Asset::Shader::EShaderType::Fragment ? "PSMain" : "VSMain";
+		Desc.Type = Input->GetType();
+
+		auto [CompiledBuffer, BufferSize] = CompileShader(Desc);
+
+		Input->BufferSizeInBytes = BufferSize;
+		Input->CompiledBuffer.Reset(new byte[Input->BufferSizeInBytes]);
+		MemCpy(CompiledBuffer, Input->CompiledBuffer.Get(), Input->BufferSizeInBytes);
+		Input->bIsCompiled = true;
+	}
 
 	inline ShaderCompiler::CompiledData ShaderCompiler::CompileShader(ShaderDesc const & Input)
 	{
@@ -111,22 +133,6 @@ namespace Funky
 		BREAK();
 
 		return {};
-	}
-
-	inline void ShaderCompiler::CompileShader(Asset::Shader* Input)
-	{
-		ShaderCompiler::ShaderDesc Desc;
-		Desc.Api = Rendering::RenderingBackend::EAPI::DX11;
-		Desc.Source = Input->GetSource();
-		Desc.EntryPoint = Input->GetType() == Asset::Shader::EShaderType::Fragment ? "PSMain" : "VSMain";
-		Desc.Type = Input->GetType();
-		
-		auto [CompiledBuffer, BufferSize] = CompileShader(Desc);
-
-		Input->BufferSizeInBytes = BufferSize;
-		Input->CompiledBuffer.Reset(new byte[Input->BufferSizeInBytes]);
-		MemCpy(CompiledBuffer, Input->CompiledBuffer.Get(), Input->BufferSizeInBytes);
-		Input->bIsCompiled = true;
 	}
 
 }

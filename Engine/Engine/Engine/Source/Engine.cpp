@@ -153,9 +153,9 @@ bool Engine::Init(i32 Argc, char** Argv)
 		TaskManager->EnqueueTask(new RenderTask(Renderer));
 #else
 		/* sync point*/
-		Core::Memory::UniquePtr<Rendering::RenderView> Scene(Renderer->CreateRenderScene(MainSceneManager->GetCurrentScene()));
+		//Core::Memory::UniquePtr<Rendering::RenderView> Scene(Renderer->CreateRenderScene(MainSceneManager->GetCurrentScene()));
 		/* sync point end */
-		Renderer->DrawScene(Scene);
+		Renderer->DrawScene(nullptr);
 #endif
 
 	}
@@ -185,6 +185,7 @@ bool Engine::Init(i32 Argc, char** Argv)
 		if (Expected & SubsystemBitmask::AssetManagement)
 		{
 			AssetManager.Reset(new Funky::AssetRegistry());
+			Result |= SubsystemBitmask::AssetManagement;
 		}
 
 		// Window subsystem
@@ -210,11 +211,11 @@ bool Engine::Init(i32 Argc, char** Argv)
 			const auto RenderingBackendAPI = static_cast<Rendering::RenderingBackend::EAPI>(EngineArguments::GetInstance().Find("-dx11", 1));
 			if (RenderingBackendAPI == Rendering::RenderingBackend::EAPI::DX11)
 			{
-
+		
 				Rendering::DX11RenderingInitDesc InitDesc;
 				InitDesc.Api = Rendering::RenderingBackend::EAPI::DX11;
 				InitDesc.hWnd = hWnd;
-
+		
 				RenderingBackend.Reset(new Rendering::RenderingBackend());
 				if (RenderingBackend->Init(&InitDesc))
 					Result |= SubsystemBitmask::Rendering;
@@ -254,7 +255,7 @@ bool Engine::Init(i32 Argc, char** Argv)
 
 		}
 
-		return Result & Expected;
+		return Result == Expected;
 	}
 
 	bool Engine::CreateAndShowWindow(Math::Vec2u const& windowSize)
@@ -318,5 +319,4 @@ bool Engine::Init(i32 Argc, char** Argv)
 	{
 		return static_cast<u8>(Lhs) & static_cast<u8>(Rhs);
 	}
-
 }

@@ -9,8 +9,8 @@ namespace Funky
 {
 	struct VisibleObject
 	{
-		Asset::StaticMesh* Mesh;
-		Asset::Material* Material;
+		Asset::ID Mesh;
+		Asset::ID Material;
 
 		Math::Vec3f Position = Math::Vec3f(0.0f, 0.0f, 0.0f);
 		Math::Vec3f Rotation = Math::Vec3f(0.0f, 0.0f, 0.0f);

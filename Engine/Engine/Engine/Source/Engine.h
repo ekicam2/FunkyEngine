@@ -48,7 +48,7 @@ namespace Funky
 		Renderer		= (1 << 2),
 		SceneManagement = (1 << 3),
 		AssetManagement = (1 << 4),
-		All				= 0xFF
+		All				= Window | Rendering | Renderer | SceneManagement | AssetManagement
 	};
 
 	SubsystemBitmask& operator|=(SubsystemBitmask& Lhs, SubsystemBitmask Rhs);

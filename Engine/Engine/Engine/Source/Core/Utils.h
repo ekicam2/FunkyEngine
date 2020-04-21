@@ -3,14 +3,20 @@
 #include "String.h"
 #include "BasicTypes.h"
 #include "3rd/MurmurHash3.h"
+#include "Core/Containers.h"
 
 namespace Funky
 {
 	struct Hash128
 	{
 		u64 v[2];
+		Hash128() { v[0] = 0; v[1] = 0; }
+		Hash128(u64 v1, u64 v2) { v[0] = v1; v[1] = v2; }
 		FORCEINLINE bool operator==(Hash128 const& Other) const { return v[0] == Other.v[0] && v[1] == Other.v[1]; }
+
+		static const Hash128 None;
 	};
+	inline const Hash128 Hash128::None = Hash128(0, 0);
 
 	/* It's best to use prime numbers. */
 	template <u32 Seed = 17>
@@ -27,12 +33,10 @@ namespace std {
 	template <>
 	struct hash<Funky::Hash128>
 	{
-		std::size_t operator()(const Funky::Hash128& k) const
+		std::size_t operator()(Funky::Hash128 const & k) const
 		{
 			using std::size_t;
 			using std::hash;
-			using std::string;
-
 			// Compute individual hash values for first,
 			// second and third and combine them using XOR
 			// and bit shifting:

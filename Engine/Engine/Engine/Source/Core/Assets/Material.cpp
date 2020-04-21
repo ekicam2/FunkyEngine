@@ -1,36 +1,12 @@
 #include "Material.h"
-#include "Engine.h"
-#include "LogMacros.h"
 
-#include "Core/Memory/Memory.h"
-
-
-
-Funky::Asset::Material* Funky::Asset::Material::CreateMaterial(Funky::Asset::Shader* VS, Funky::Asset::Shader* PS)
+Funky::Asset::Material* Funky::Asset::Material::CreateFromDesc(Desc const& desc)
 {
-	CHECK(VS != nullptr && VS->GetType() == Shader::EShaderType::Vertex);
-	CHECK(PS != nullptr && PS->GetType() == Shader::EShaderType::Fragment);
+	auto ret = new Funky::Asset::Material();
+	
+	ret->PS = desc.PS;
+	ret->VS = desc.VS;
+	ret->Technique = desc.Technique;
 
-	Material* Ret = new Material();
-	Ret->VS = VS;
-	Ret->PS = PS;
-	return Ret;
-}
-
-Funky::Asset::Shader* Funky::Asset::Shader::CreateFromFile(EShaderType InType, Str const& InPath)
-{
-	auto Ret = new Shader();
-	Ret->Type = InType;
-	Ret->Source = Move(Platform::ReadFile(InPath));
-
-	return Ret;
-}
-
-Funky::Asset::Shader* Funky::Asset::Shader::CreateShaderFromSource(EShaderType InType, Str const& InSource)
-{
-	auto Ret = new Shader();
-	Ret->Type = InType;
-	Ret->Source = InSource;
-
-	return Ret;
+	return ret;
 }

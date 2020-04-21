@@ -1,55 +1,97 @@
 #pragma once
 
+#include "Core/Utils.h"
 #include "Core/String.h"
 #include "Core/Containers.h"
 
-#include "Core/Assets/IAsset.h"
+#include "Asset.h"
 
-#include "3rd/json.hpp"
-#include <iostream>
+#include "Material.h"
+#include "Shader.h"
+#include "StaticMesh.h"
+
 
 namespace Funky
 {
 	class AssetRegistry
 	{
 	public:
-		using AssetID = i64;
+		template<typename T>
+		using AssetMap = map<Asset::ID, Core::Memory::UniquePtr<T>>;
 
-		inline static const Str BaseAssetsPath = "RealData\\";
 		inline static const Str AssetExtension = ".fkasset";
 
-		struct AssetDesc
-		{
-			Str Path;
-			Asset::EAssetType Type = Asset::EAssetType::Unknown;
-			class Asset::IAsset* AssetPtr = nullptr;
-
-			//void ToJson() const
-			//{
-			//	nlohmann::json assetParsed;
-			//	assetParsed["path"] = Path;
-			//	assetParsed["type"] = Type;
-			//	std::cout << assetParsed;
-			//}
-			//static AssetDesc FromJson(Str const& InJson)
-			//{
-			//	auto assetParsed = nlohmann::json::parse(InJson.GetBuffer());
-
-			//	AssetDesc Ret;
-			//	Ret.Path = assetParsed["path"];
-			//	Ret.Type = assetParsed["type"];
-			//	return Ret;
-			//}
-
-		};
+#ifdef _DEBUG
+		inline static const Str BaseAssetsPath = "RealData\\";
+#else
+		inline static const Str BaseAssetsPath = "";
+#endif
+		inline static const Str MeshAssetsPath		= "Meshes\\";
+		inline static const Str MaterialAssetsPath	= "Materials\\";
+		inline static const Str ShaderAssetsPath	= "Shaders\\";
 
 		AssetRegistry();
 
-	private:
-		/* Lookup for all .fkassets in the given Path and fill @AllAssets list. */
-		void ParseRecursive(Str const& Path);
+		bool IsMeshLoaded(Asset::ID const& MeshID) { return (MeshAssets.find(MeshID) != MeshAssets.end()); }
+		bool LoadMesh(Asset::ID const& MeshID) { return MeshID.v[0] > 0; }
 
-		darray<AssetDesc> AllAssets;
+		static AssetRegistry& GetInstance()
+		{
+			static AssetRegistry AR;
+			return AR;
+		}
+
+		// Do I need such a simple creator?
+		//template <typename T>
+		//Asset::ID CreateAsset(Str const& Path)
+		//{
+		//	const Asset::ID id = HashString(Path);
+		//	GetBuffer<T>()[id] = T::CreateFromFile(Path);
+		//	return id;
+		//}
+
+		template <typename T>
+		Asset::ID CreateAsset(typename T::Desc const& desc)
+		{
+			if (auto newAsset = T::CreateFromDesc(desc); newAsset != nullptr)
+			{
+				const Asset::ID id = desc.GetHash();
+				GetBuffer<T>()[id] = newAsset;
+				return id;
+			}
+
+			return Asset::ID::None;
+		}
+
+		template <typename T>
+		T* GetAsset(Asset::ID const& assetID)
+		{
+			auto& map = GetBuffer<T>();
+			if (auto found = map.find(assetID); found != map.end())
+			{
+				return (*found).second.Get();
+			}
+
+			return nullptr;
+		}
+
+	protected:
+		template<typename T>
+		AssetMap<T>& GetBuffer() 
+		{ 
+			static_assert(false, "Implement GetBuffer() method specialization for yout new type.");
+		}
+
+		template<>
+		AssetMap<Asset::StaticMesh>& GetBuffer() { return MeshAssets; }
+		template<>
+		AssetMap<Asset::Material>& GetBuffer() { return MaterialAssets; }
+		template<>
+		AssetMap<Asset::Shader>& GetBuffer() { return ShadersAssets; }
+	private:
+		AssetMap<Asset::StaticMesh> MeshAssets;
+		AssetMap<Asset::Material>	MaterialAssets;
+		AssetMap<Asset::Shader>		ShadersAssets;
 	};
 
 }

@@ -1,88 +1,46 @@
 #pragma once
 
-#include "Core/Containers.h"
-#include "Core/String.h"
-
-#include "Core/Assets/IAsset.h"
-#include "RenderingBackend/RenderingBackend.h"
-#include "RenderingFrontend/RenderView.h"
-
-#include <optional>
-#include <fstream>
-
-#include "Macros.h"
-#include "DebugMacros.h"
+#include "Asset.h"
 
 namespace Funky
 {
-	class ShaderCompiler;
+	class AssetRegistry;
 
 	namespace Asset
 	{
-		struct Shader : public IAsset
+		struct Material
 		{
-			friend class Funky::ShaderCompiler;
+			friend class Funky::AssetRegistry;
 
-			enum EShaderType
-			{
-				None,
-				Vertex,
-				Fragment
-			};
-
-			[[nodiscard]] static Shader* CreateFromFile(EShaderType InType, Str const& InPath);
-			[[nodiscard]] static Shader* CreateShaderFromSource(EShaderType InType, Str const& InSource);
-
-			FORCEINLINE EShaderType GetType() const { return Type; }
-
-			FORCEINLINE char const* GetSource() const { return Source.GetBuffer(); }
-			FORCEINLINE size GetSourceLength() const { return Source.Length(); }
-
-			FORCEINLINE byte* GetBuffer() const { return CompiledBuffer.Get(); }
-			FORCEINLINE size GetBufferSize() const { return BufferSizeInBytes; }
-			FORCEINLINE bool IsValid(EShaderType ExpectedShader = None) const { return (ExpectedShader == EShaderType::None) ? Type != EShaderType::None : Type == ExpectedShader; }
-
-		private:
-			EShaderType Type;
-
-			Str Source;
-
-			size BufferSizeInBytes;
-			Core::Memory::UniquePtr<byte[]> CompiledBuffer;
-			bool bIsCompiled = false;
-
-			DECLARE_IASSET(Shader, Asset::EAssetType::Shader);
-		};
-
-		struct Material : public IAsset
-		{
-			[[nodiscard]] static Material* CreateMaterial(Funky::Asset::Shader* VS, Funky::Asset::Shader* PS);
-
-			enum class ERenderingTechnique
+			enum class ERenderingTechnique : u8
 			{
 				Toon,
-				DefaultLit
+				DefaultLit,
+				Unlit
 			} Technique;
+			const static Str MaterialTechniqueToString[];
 
+			struct Desc
+			{
+				/** Required */
+				FORCEINLINE Hash128 GetHash() const { return HashString(Name + MaterialTechniqueToString[static_cast<u8>(Technique)]); }
+				/** Required END */
 
-			FORCEINLINE Shader* GetPS() const { CHECK(PS != nullptr && PS->GetType() == Shader::EShaderType::Fragment); return PS; }
-			FORCEINLINE Shader* GetVS() const { CHECK(VS != nullptr && VS->GetType() == Shader::EShaderType::Vertex); return VS; }
+				Str Name;
+				ERenderingTechnique Technique;
 
-			FORCEINLINE bool IsValid() const 
-			{ 
-				return PS != nullptr && VS != nullptr
-					&& PS->IsValid(Shader::EShaderType::Fragment)
-					&& VS->IsValid(Shader::EShaderType::Vertex);
-			}
+				Asset::ID PS;
+				Asset::ID VS;
+			};
+
+			Asset::ID PS;
+			Asset::ID VS;
 
 		private:
-			DECLARE_IASSET(Material, Asset::EAssetType::Material);
-
-			Shader* VS = nullptr;
-			Shader* PS = nullptr;
-
-		public:
-			Rendering::ShaderLink Linkage;
+			[[nodiscard]]
+			static Material* CreateFromDesc(Desc const& desc);
 		};
+		inline const Str Material::MaterialTechniqueToString[] = { "Toon", "DefaultLit", "Unlit" };
+
 	}
 }

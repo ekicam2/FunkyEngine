@@ -10,6 +10,8 @@ namespace Math
 	{
 		T X, Y, Z;
 
+		static const Vector3D Zero;
+
 		Vector3D(T const& X, T const& Y, T const& Z) : X(X), Y(Y), Z(Z) {
 		}
 
@@ -124,6 +126,9 @@ namespace Math
 			return Vector3D(X / Len, Y / Len, Z / Len);
 		}
 	};
+
+	template <typename T>
+	__declspec(selectany) const Math::Vector3D<T> Math::Vector3D<T>::Zero = Vector3D(T(0), T(0), T(0));
 
 	using Vec3f = Vector3D<f32>; //!< Template instance for 3 dimensional float vector 
 	using Vec3d = Vector3D<f64>; //!< Template instance for 3 dimensional double vector

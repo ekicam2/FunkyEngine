@@ -18,7 +18,7 @@ class String final
 public:
 	String(size RequiredSize = 0u)
 	{
-		if (RequiredSize > SMALL_STRING)
+		if (RequiredSize >= SMALL_STRING)
 		{
 			Allocate(RequiredSize + 1);
 		}
@@ -141,11 +141,13 @@ public:
 		{
 			MemCpy(GetBuffer(), Ret.SmallValue, Length());
 			MemCpy(Other.GetBuffer(), Ret.SmallValue + Length(), Other.Length());
+			Ret.SmallValue[Ret.StringLength] = '\0';
 		}
 		else
 		{
 			MemCpy(GetBuffer(), Ret.Value, Length());
 			MemCpy(Other.GetBuffer(), Ret.Value + Length(), Other.Length());
+			Ret.Value.Get()[Ret.StringLength] = '\0';
 		}
 
 		return Ret;
