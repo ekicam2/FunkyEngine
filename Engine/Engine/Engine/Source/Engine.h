@@ -125,6 +125,8 @@ namespace Funky
 		static Core::IO::IIOSystem* GetIO();
 		static Engine* GetEngine();
 		
+		FORCEINLINE Math::Vec2u GetWindowSize() const { return WindowSize; }
+
 		// move to subsystem
 		LRESULT __stdcall ProcessInput(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -164,6 +166,7 @@ namespace Funky
 				Core::Memory::UniquePtr<Rendering::RenderingBackend> RenderingBackend;
 		// subsystems END
 
+		Math::Vec2u WindowSize = Math::Vec2u::Zero;
 		HWND hWnd;
 		HINSTANCE hInstance = GetModuleHandle(NULL);
 	};

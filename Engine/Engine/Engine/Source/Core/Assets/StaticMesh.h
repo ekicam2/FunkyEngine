@@ -100,8 +100,8 @@ namespace Funky
 			static StaticMesh* CreateFromDesc(Desc const& desc);
 			//todo rethink
 		public:
-			Rendering::RBuffer * VertexBuffer = nullptr;
-			Rendering::RBuffer * IndexBuffer  = nullptr;
+			Rendering::Resource::ID VertexBuffer = Rendering::Resource::ID::Zero;
+			Rendering::Resource::ID IndexBuffer  = Rendering::Resource::ID::Zero;
 		};
 	}
 }

@@ -18,7 +18,7 @@ namespace Funky
 		public:
 			virtual ~RenderingBackendImpl() {}
 			virtual RenderingBackend::EAPI GetBackendAPI() const = 0;
-			virtual bool Init(RenderingBackend::RenderingBackendInitDesc* InitDesc) = 0;
+			virtual bool Init(RenderingBackend::RenderingBackendInitDesc* InitDesc, RenderingBackend::RenderingBackendInitResult* Result) = 0;
 			virtual void OnViewportResized(Math::Vec2u const & NewSize) = 0;
 
 			virtual RRenderTarget* CreateRenderTarget(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/) = 0;
@@ -55,7 +55,5 @@ namespace Funky
 			virtual void Present() = 0;
 
 			virtual Rendering::IGPUMarker* MarkScope(Str MarkerName) = 0;
-
-			Core::Memory::UniquePtr<RenderingResourcesManager> ResourceManager;
 		};}
 }

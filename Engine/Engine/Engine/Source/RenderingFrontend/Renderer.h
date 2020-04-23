@@ -9,6 +9,7 @@
 
 
 #include "Core/Assets/Material.h"
+#include "RenderingFrontend/RenderingResourceManager.h"
 
 
 #define DEFINE_CONSTANT_BUFFER_STRUCT_BEGIN(BufferName) \
@@ -63,21 +64,21 @@ namespace Funky
 		public:
 			FUNKY_DEFINE_RENDERER_CONSTRUCTOR(Renderer)
 
-			virtual bool Init() override;
+			virtual bool Init(Rendering::RenderingBackend::RenderingBackendInitResult* renderingBackendInitResult) override;
 			virtual void Shutdown() override;
 
 
 			virtual RenderView* CreateRenderScene(IScene* Scene) override;
-			virtual void DrawScene(RenderView* SceneToRender) override;
+			virtual void DrawScene(IScene* InScene) override;
 
 		private:
-
 			DEFINE_CONSTANT_BUFFER(PerViewConstantBuffer);
 			DEFINE_CONSTANT_BUFFER(PerObjectConstantBuffer);
 
-			Core::Memory::UniquePtr<PostProcess> PP;
+			Core::Memory::UniquePtr<RenderingResourcesManager> RRManager;
 
-			Rendering::RRenderTarget* OffscreenRT;
+			Resource::ID OffscreenRT = Rendering::Resource::ID::Zero;
+			Core::Memory::UniquePtr<PostProcess> PP;
 		};
 	}
 }

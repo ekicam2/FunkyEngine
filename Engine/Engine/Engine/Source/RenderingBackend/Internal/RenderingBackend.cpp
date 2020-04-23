@@ -45,7 +45,7 @@ namespace Funky
 			return Impl->CreateBuffer(SizeOfBuffer, BufferType, Usage, Data, Stride);
 		}
 
-		bool RenderingBackend::Init(RenderingBackendInitDesc* InitDesc) 
+		bool RenderingBackend::Init(RenderingBackendInitDesc* InitDesc, RenderingBackendInitResult* Result) 
 		{ 
 			switch (InitDesc->Api)
 			{
@@ -63,7 +63,7 @@ namespace Funky
 				OnViewportResized(NewSize);
 			});
 			
-			return Impl->Init(InitDesc); 
+			return Impl->Init(InitDesc, Result);
 		}
 
 		void RenderingBackend::OnViewportResized(Math::Vec2u const & NewSize)
@@ -168,11 +168,5 @@ namespace Funky
 		{
 			return Impl->MarkScope(MarkerName);
 		}
-
-		RenderingResourcesManager* RenderingBackend::GetResourceManager()
-		{
-			return Impl->ResourceManager;
-		}
-
 	}
 }

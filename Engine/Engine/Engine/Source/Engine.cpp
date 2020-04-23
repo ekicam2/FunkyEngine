@@ -155,7 +155,7 @@ bool Engine::Init(i32 Argc, char** Argv)
 		/* sync point*/
 		//Core::Memory::UniquePtr<Rendering::RenderView> Scene(Renderer->CreateRenderScene(MainSceneManager->GetCurrentScene()));
 		/* sync point end */
-		Renderer->DrawScene(nullptr);
+		Renderer->DrawScene(MainSceneManager->GetCurrentScene());
 #endif
 
 	}
@@ -205,40 +205,44 @@ bool Engine::Init(i32 Argc, char** Argv)
 		}
 
 		// Rendering API
-		if (Expected & SubsystemBitmask::Rendering)
 		{
-			LOG("Init Rendering");
-			const auto RenderingBackendAPI = static_cast<Rendering::RenderingBackend::EAPI>(EngineArguments::GetInstance().Find("-dx11", 1));
-			if (RenderingBackendAPI == Rendering::RenderingBackend::EAPI::DX11)
-			{
-		
-				Rendering::DX11RenderingInitDesc InitDesc;
-				InitDesc.Api = Rendering::RenderingBackend::EAPI::DX11;
-				InitDesc.hWnd = hWnd;
-		
-				RenderingBackend.Reset(new Rendering::RenderingBackend());
-				if (RenderingBackend->Init(&InitDesc))
-					Result |= SubsystemBitmask::Rendering;
-			}
-			else
-			{
-				LOG_ERROR("Couldn't create rendering backend");
-			}
-		}
+			Rendering::RenderingBackend::RenderingBackendInitResult CreationResult;
 
-		// Renderer
-		if (Expected & SubsystemBitmask::Renderer)
-		{
-			LOG("Create Renderer");
-			Renderer.Reset(new Rendering::Renderer(*RenderingBackend));
-			LOG("Init Renderer");
-			if (!Renderer->Init())
+			if (Expected & SubsystemBitmask::Rendering)
 			{
-				LOG_ERROR("Couldn't initialize renderer!");
+				LOG("Init Rendering");
+				const auto RenderingBackendAPI = static_cast<Rendering::RenderingBackend::EAPI>(EngineArguments::GetInstance().Find("-dx11", 1));
+				if (RenderingBackendAPI == Rendering::RenderingBackend::EAPI::DX11)
+				{
+		
+					Rendering::DX11RenderingInitDesc InitDesc;
+					InitDesc.Api = Rendering::RenderingBackend::EAPI::DX11;
+					InitDesc.hWnd = hWnd;
+		
+					RenderingBackend.Reset(new Rendering::RenderingBackend());
+					if (RenderingBackend->Init(&InitDesc, &CreationResult))
+						Result |= SubsystemBitmask::Rendering;
+				}
+				else
+				{
+					LOG_ERROR("Couldn't create rendering backend");
+				}
 			}
-			else
+
+			// Renderer
+			if (Expected & SubsystemBitmask::Renderer)
 			{
-				Result |= SubsystemBitmask::Renderer;
+				LOG("Create Renderer");
+				Renderer.Reset(new Rendering::Renderer(*RenderingBackend));
+				LOG("Init Renderer");
+				if (!Renderer->Init(&CreationResult))
+				{
+					LOG_ERROR("Couldn't initialize renderer!");
+				}
+				else
+				{
+					Result |= SubsystemBitmask::Renderer;
+				}
 			}
 		}
 
@@ -260,6 +264,8 @@ bool Engine::Init(i32 Argc, char** Argv)
 
 	bool Engine::CreateAndShowWindow(Math::Vec2u const& windowSize)
 	{
+		WindowSize = windowSize;
+
 		LOG("Creating widnow with size: ", windowSize.X, "x", windowSize.Y);
 
 		constexpr charx const * const WND_CLASS_NAME = TEXT("MainWindowClass");

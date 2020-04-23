@@ -4,12 +4,12 @@
 
 Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::CreateFromFile(Str const& Path, bool bReverseIndices /*= false*/)
 {
-	if (!Path.EndsWith(".obj"))
+	if (Path.EndsWith(".obj"))
 	{
 		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadOBJFromFile(Path.GetBuffer(), bReverseIndices);
 		return CreateMeshFromRawData(VI.Vertices, VI.Indices);
 	}
-	else if (!Path.EndsWith(".gltf"))
+	else if (Path.EndsWith(".gltf"))
 	{
 		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadGLTFFromFile(Path.GetBuffer());
 		return CreateMeshFromRawData(VI.Vertices, VI.Indices);

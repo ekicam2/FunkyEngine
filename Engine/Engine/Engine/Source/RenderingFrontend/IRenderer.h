@@ -16,11 +16,11 @@ namespace Funky
 			IRenderer(Rendering::RenderingBackend& RenderingBackend) : RenderingBackend(RenderingBackend) {}
 			virtual ~IRenderer() = default;
 
-			virtual bool Init() = 0;
+			virtual bool Init(Rendering::RenderingBackend::RenderingBackendInitResult *renderingBackendInitResult) = 0;
 			virtual void Shutdown() = 0;
 
 			virtual RenderView* CreateRenderScene(IScene* Scene) = 0;
-			virtual void DrawScene(RenderView* SceneToRender) = 0;
+			virtual void DrawScene(IScene* InScene) = 0;
 
 		protected:
 			Rendering::RenderingBackend& RenderingBackend;

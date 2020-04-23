@@ -71,6 +71,12 @@ namespace Funky
 				EAPI Api;
 			};
 
+			struct RenderingBackendInitResult
+			{
+				RRenderTarget* SwapchainRT;
+				RDepthStencil* SwapchainDS;
+			};
+
 			struct ShaderInputDesc
 			{
 				byte* ShaderData;
@@ -82,7 +88,7 @@ namespace Funky
 
 			FORCEINLINE bool IsInitialized() const { return Impl != nullptr; }
 
-			bool Init(RenderingBackendInitDesc* InitDesc);
+			bool Init(RenderingBackendInitDesc* InitDesc, RenderingBackendInitResult* Result);
 			void OnViewportResized(Math::Vec2u const & NewSize);
 
 			RenderingBackend::EAPI GetBackendAPI() const;
@@ -119,9 +125,6 @@ namespace Funky
 			void Present();
 
 			Rendering::IGPUMarker* MarkScope(Str MarkerName);
-
-			class RenderingResourcesManager* GetResourceManager();
-
 
 		private:
 			class RenderingBackendImpl* Impl = nullptr;

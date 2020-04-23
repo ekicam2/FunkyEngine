@@ -2,6 +2,7 @@
 
 #include "Core/Utils.h"
 #include "Core/String.h"
+#include "RenderingFrontend/IRenderingResource.h"
 
 namespace Funky
 {
@@ -44,6 +45,9 @@ namespace Funky
 			FORCEINLINE byte* GetBuffer() const { return CompiledBuffer.Get(); }
 			FORCEINLINE size GetBufferSize() const { return BufferSizeInBytes; }
 			FORCEINLINE bool IsValid(EShaderType expectedShader = EShaderType::None) const { return (expectedShader == EShaderType::None) ? Type != EShaderType::None : Type == expectedShader; }
+			FORCEINLINE bool IsCompiled() const { return bIsCompiled; }
+
+			Rendering::Resource::ID ShaderHandle = Rendering::Resource::ID::Zero;
 
 		private:
 			EShaderType Type;

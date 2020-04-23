@@ -16,17 +16,15 @@ namespace Funky
 {
 	namespace Rendering
 	{
-		bool DX11::Init(RenderingBackend::RenderingBackendInitDesc* InInitDesc)
+		bool DX11::Init(RenderingBackend::RenderingBackendInitDesc* initDesc, RenderingBackend::RenderingBackendInitResult* result)
 		{
-			CHECK(InInitDesc->Api == RenderingBackend::EAPI::DX11);
+			CHECK(initDesc->Api == RenderingBackend::EAPI::DX11);
 
-			DX11RenderingInitDesc* InitDesc = static_cast<DX11RenderingInitDesc*>(InInitDesc);
-
-			ResourceManager.Reset(new RenderingResourcesManager());
+			DX11RenderingInitDesc* InitDesc = static_cast<DX11RenderingInitDesc*>(initDesc);
 
 			if (CreateDeviceAndSwapchain(InitDesc->hWnd))
 			{
-				return InitSwapchain();
+				return InitSwapchain(result);
 			}
 
 			return false;
@@ -42,9 +40,6 @@ namespace Funky
 			
 			// ID3D11RenderTargetView* RTs[] = { nullptr };
 			// pDeviceContext->OMSetRenderTargets(0, RTs, nullptr);
-
-			ResourceManager->ReleaseSwapchain();
-
 			pSwapChain->ResizeBuffers(0, NewSize.X, NewSize.Y, DXGI_FORMAT::DXGI_FORMAT_UNKNOWN, 0);
 
 			DX11RenderTarget* RT = new DX11RenderTarget();
@@ -125,13 +120,11 @@ namespace Funky
 
 			pDevice->CreateDepthStencilView(DS->pTexture.Get(), &DepthViewDesc, DS->pDepthStencilView.GetAddressOf());
 
-			ResourceManager->AssociateSwapchain(RT, DS);
-			
 		}
 
 		RRenderTarget* DX11::CreateRenderTarget(Math::Vec2u const & Size /* TODO(ekicam2): I woild like to specify format*/)
 		{
-			DX11RenderTarget* RT = ResourceManager->RegisterResource<DX11RenderTarget>();
+			DX11RenderTarget* RT = new DX11RenderTarget();
 			RT->Size = Size;
 
 			D3D11_TEXTURE2D_DESC RenderTargetTextureDesc;
@@ -172,7 +165,7 @@ namespace Funky
 
 		RDepthStencil* DX11::CreateDepthStencil(Math::Vec2u const& Size /* TODO(ekicam2): I woild like to specify format*/)
 		{
-			DX11DepthStencil* DS = ResourceManager->RegisterResource<DX11DepthStencil>();
+			DX11DepthStencil* DS = new DX11DepthStencil();
 
 			 //D3D11_DEPTH_STENCIL_DESC DepthStencilDesc;
 			 //ZeroMemory(&DepthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
@@ -208,7 +201,7 @@ namespace Funky
 
 		RShader* DX11::CreateVertexShader(RenderingBackend::ShaderInputDesc* ShaderDesc)
 		{
-			DX11VertexShader* Shader = ResourceManager->RegisterResource<DX11VertexShader>();
+			DX11VertexShader* Shader = new DX11VertexShader();
 
 			HRESULT hr = pDevice->CreateVertexShader(ShaderDesc->ShaderData, ShaderDesc->DataSize, nullptr, Shader->pVs.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create simple vertex shader");
@@ -229,7 +222,7 @@ namespace Funky
 
 		RShader* DX11::CreatePixelShader(RenderingBackend::ShaderInputDesc* ShaderDesc)
 		{
-			DX11PixelShader* Shader = ResourceManager->RegisterResource<DX11PixelShader>();
+			DX11PixelShader* Shader = new DX11PixelShader();
 
 			HRESULT hr = pDevice->CreatePixelShader(ShaderDesc->ShaderData, ShaderDesc->DataSize, nullptr, Shader->pPs.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create simple pixel shader");
@@ -253,7 +246,7 @@ namespace Funky
 			ZeroMemory(&BufferInitData, sizeof(D3D11_SUBRESOURCE_DATA));
 			BufferInitData.pSysMem = Data;
 
-			DX11Buffer* Ret = ResourceManager->RegisterResource<DX11Buffer>(BufferType, Usage);
+			DX11Buffer* Ret = new DX11Buffer(BufferType, Usage);
 			Ret->SizeInBytes = SizeOfBuffer;
 			Ret->Stride = [&BufferType, &Data, &Stride]() -> u32 
 			{
@@ -553,7 +546,7 @@ namespace Funky
 			return true;
 		}
 
-		bool DX11::InitSwapchain()
+		bool DX11::InitSwapchain(RenderingBackend::RenderingBackendInitResult* Result)
 		{
 			Microsoft::WRL::ComPtr<IDXGIDevice> Device;
 			pDevice.As(&Device);
@@ -673,7 +666,7 @@ namespace Funky
 				return false;
 			}
 
-			ResourceManager->AssociateSwapchain(RT, DS);
+			//ResourceManager->AssociateSwapchain(RT, DS);
 
 			D3D11_VIEWPORT Viewport;
 			ZeroMemory(&Viewport, sizeof(D3D11_VIEWPORT));
@@ -684,13 +677,16 @@ namespace Funky
 
 			pDeviceContext->RSSetViewports(1, &Viewport);
 
+			Result->SwapchainDS = DS;
+			Result->SwapchainRT = RT;
+
 			return true;
 		}
 
 		void DX11::FreeSwapchain()
 		{
 			// BindRenderTarget(nullptr);
-			ResourceManager->FreeAll();
+			//ResourceManager->FreeAll();
 		}
 
 		void DX11::BindTexture(RenderingBackend::ShaderResourceStage Stage, RTexture* InTexture, u32 StartIndex /*= 0u*/)

@@ -19,6 +19,19 @@ namespace Funky
 
 			every IRenderingAsset should be registered in RenderingResourcesManager so we can track all of items from one place.
 		*/
+
+		namespace Resource
+		{
+			struct ID {
+				size value;
+				ID(size inValue) : value(inValue) {}
+				operator size() { return value; }
+				static const size Zero = (size)-1;
+			};
+			
+		}
+
+
 		class IRenderingResource
 		{
 		public:

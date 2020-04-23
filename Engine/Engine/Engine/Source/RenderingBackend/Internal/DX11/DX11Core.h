@@ -19,7 +19,7 @@ namespace Funky
 	{
 		struct DX11 final : public RenderingBackendImpl
 		{
-			virtual bool Init(RenderingBackend::RenderingBackendInitDesc* InitDesc) override;
+			virtual bool Init(RenderingBackend::RenderingBackendInitDesc* InitDesc, RenderingBackend::RenderingBackendInitResult* Result) override;
 			virtual RenderingBackend::EAPI GetBackendAPI() const override;
 			virtual void OnViewportResized(Math::Vec2u const & NewSize) override;
 
@@ -58,7 +58,7 @@ namespace Funky
 			virtual Rendering::IGPUMarker* MarkScope(Str MarkerName) override;
 
 			bool CreateDeviceAndSwapchain(HWND hwnd);
-			bool InitSwapchain();
+			bool InitSwapchain(RenderingBackend::RenderingBackendInitResult* Result);
 			void FreeSwapchain();
 
 
