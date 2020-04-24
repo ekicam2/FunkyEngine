@@ -56,6 +56,6 @@ Str Funky::Platform::ReadFile(Str const& FilePath)
 	//((char*)Buffer)
 
 	CloseHandle(hFile);
-	return Read == 0 ? "" : Str(Buffer, Read);
+	return (Read == 0 ? "" : Str(Buffer, Read));
 }
 

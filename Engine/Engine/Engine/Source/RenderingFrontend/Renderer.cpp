@@ -12,8 +12,7 @@
 #include <DirectXMath.h>
 
 
-#define GPU_MARKER(Name) \
-	GPUScopeMarker CONCAT(Marker,__LINE__)(&RenderingBackend, Name)
+#define GPU_MARKER(Name) GPUScopeMarker CONCAT(Marker,__LINE__)(&RenderingBackend, Name)
 
 Math::Vec3f cmapos = Math::Vec::FORWARD * 14.0f;
 
@@ -35,7 +34,6 @@ bool Funky::Rendering::Renderer::Init(Rendering::RenderingBackend::RenderingBack
 		Rendering::RBuffer::EUsageType::Dynamic,
 		&PerObjectConstantBufferData
 	);
-	
 	
 	OffscreenRT = RRManager->CreateResource<Rendering::RRenderTarget>(RenderingBackend.CreateRenderTarget(Funky::Engine::GetEngine()->GetWindowSize()));
 	
@@ -137,57 +135,57 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene([[ma
 		Ret->Objects[i].Position = SceneObject->Position;
 		Ret->Objects[i].Rotation = SceneObject->Rotation;
 
-		//
-		//CHECK(Mesh->Material->IsValid());
+		
+		/*CHECK(Mesh->Material->IsValid());
+		
+		if (!SceneObject->Material->Linkage.VS)
+		{
+			SceneObject->Material->Linkage.VS = [&]() -> Rendering::RShader* {
+		
+				auto VS = SceneObject->Material->GetVS();
+		
+				if (!VS->IsValid())
+				{
+					ShaderCompiler::ShaderDesc Desc;
+					Desc.Api = Rendering::RenderingBackend::EAPI::DX11;
+					Desc.EntryPoint = "VSMain";
+					Desc.Source = VS->GetSource();
+					auto [CompiledBuffer, BufferSize] = ShaderCompiler::CompileShader(Desc);
+					//SceneObject->Material->VS
+				}
+		
+				RenderingBackend::ShaderInputDesc ShaderDesc;
+				ShaderDesc.ShaderData = VS->GetBuffer();
+				ShaderDesc.DataSize = SceneObject->Material->GetVS()->GetBufferSize();
+		
+				return RenderingBackend.CreateVertexShader(&ShaderDesc);
+			}();
+		}
+		
+		if (!SceneObject->Material->Linkage.PS)
+		{
+			SceneObject->Material->Linkage.PS = [&]() -> Rendering::RShader* {
+		
+				auto PS = SceneObject->Material->GetPS();
+				if (!PS->IsValid())
+				{
+					ShaderCompiler::ShaderDesc Desc;
+					Desc.EntryPoint = "PSMain";
+					Desc.Source = PS->GetSource();
+					ShaderCompiler::CompileShader(Desc);
+				}
+		
+				RenderingBackend::ShaderInputDesc ShaderDesc;
+				ShaderDesc.ShaderData = PS->GetBuffer();
+				ShaderDesc.DataSize = PS->GetBufferSize();
+		
+ 				return RenderingBackend.CreatePixelShader(&ShaderDesc);
+			}();
+		}
 
-		//if (!SceneObject->Material->Linkage.VS)
-		//{
-		//	SceneObject->Material->Linkage.VS = [&]() -> Rendering::RShader* {
-
-		//		auto VS = SceneObject->Material->GetVS();
-
-		//		if (!VS->IsValid())
-		//		{
-		//			ShaderCompiler::ShaderDesc Desc;
-		//			Desc.Api = Rendering::RenderingBackend::EAPI::DX11;
-		//			Desc.EntryPoint = "VSMain";
-		//			Desc.Source = VS->GetSource();
-		//			auto [CompiledBuffer, BufferSize] = ShaderCompiler::CompileShader(Desc);
-		//			//SceneObject->Material->VS
-		//		}
-
-		//		RenderingBackend::ShaderInputDesc ShaderDesc;
-		//		ShaderDesc.ShaderData = VS->GetBuffer();
-		//		ShaderDesc.DataSize = SceneObject->Material->GetVS()->GetBufferSize();
-
-		//		return RenderingBackend.CreateVertexShader(&ShaderDesc);
-		//	}();
-		//}
-		//
-		//if (!SceneObject->Material->Linkage.PS)
-		//{
-		//	SceneObject->Material->Linkage.PS = [&]() -> Rendering::RShader* {
-
-		//		auto PS = SceneObject->Material->GetPS();
-		//		if (!PS->IsValid())
-		//		{
-		//			ShaderCompiler::ShaderDesc Desc;
-		//			Desc.EntryPoint = "PSMain";
-		//			Desc.Source = PS->GetSource();
-		//			ShaderCompiler::CompileShader(Desc);
-		//		}
-
-		//		RenderingBackend::ShaderInputDesc ShaderDesc;
-		//		ShaderDesc.ShaderData = PS->GetBuffer();
-		//		ShaderDesc.DataSize = PS->GetBufferSize();
-
- 	//			return RenderingBackend.CreatePixelShader(&ShaderDesc);
-		//	}();
-		//}
-
-		//CHECK(SceneObject->Material->Linkage.VS);
-		//CHECK(SceneObject->Material->Linkage.PS);
-
+		CHECK(SceneObject->Material->Linkage.VS);
+		CHECK(SceneObject->Material->Linkage.PS);
+		*/
 	}
 
 	return Ret;

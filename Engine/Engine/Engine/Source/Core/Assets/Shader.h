@@ -32,8 +32,9 @@ namespace Funky
 				/** Required END */
 
 				Str Path;
-				EShaderType Type;
 				Str Source;
+
+				EShaderType Type;
 
 			};
 
@@ -49,9 +50,9 @@ namespace Funky
 
 			Rendering::Resource::ID ShaderHandle = Rendering::Resource::ID::Zero;
 
-		private:
+		protected:
 			EShaderType Type;
-
+			Str Path;
 			Str Source;
 
 			size BufferSizeInBytes;

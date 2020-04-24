@@ -29,6 +29,40 @@ namespace Funky
 
 	};
 
+	struct Tilemap
+	{
+		struct Tile
+		{
+			Asset::ID Mesh;
+			Asset::ID Material;
+
+			Math::Vec2u Position;
+		};
+
+		Math::Vec2u Size = Math::Vec2u::Zero;
+		Math::Vec2u Position;
+
+
+		template <typename LAMBDA>
+		void Foreach(LAMBDA&& F)
+		{
+			const auto width = Size.x;
+			for (size i = 0; i < width; ++i)
+			{
+				auto [x_ws, y_ws] = ()[i, Size] -> Math::Vec2u {
+					return { i % 4, i / 4 };
+				}();
+
+				CHECK(Data[i].Position == Math::Vec2u(x_ws, y_ws));
+				F(x_ws, y_ws);
+			}
+		}
+
+
+
+		darray<Tile> Data;
+	};
+
 	struct Scene : public IScene
 	{
 		Scene() = default;
@@ -36,13 +70,11 @@ namespace Funky
 		Math::Camera Camera;
 		VisibleObject Objects;
 
-		Core::Memory::UniquePtr<Asset::StaticMesh> MeshAsset;
-		Core::Memory::UniquePtr<Asset::Material> MaterialAsset;
-
 		virtual void Init() override;
 		virtual void Shutdown() override {}
 		virtual void Tick([[maybe_unused]] f32 Delta) override;
 		virtual i32 GetVisibleObjects(VisibleObject*& Objects) override;
 		virtual Math::Camera* GetCamera() override;
+
 	};
 }

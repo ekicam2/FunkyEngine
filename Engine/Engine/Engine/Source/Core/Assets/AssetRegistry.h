@@ -63,6 +63,19 @@ namespace Funky
 			return Asset::ID::None;
 		}
 
+		template<typename T, typename... Args>
+		Asset::ID CreateAsset(Args... args)
+		{
+			if (auto newAsset = T::Create(args); newAsset != nullptr)
+			{
+				const Asset::ID id = T::GetHash(Args);
+				GetBuffer<T>()[id] = newAsset;
+				return id;
+			}
+
+			return Asset::ID::None;
+		}
+
 		template <typename T>
 		T* GetAsset(Asset::ID const& assetID)
 		{

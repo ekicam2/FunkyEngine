@@ -21,7 +21,6 @@ namespace Funky
 
 			virtual RenderView* CreateRenderScene(IScene* Scene) = 0;
 			virtual void DrawScene(IScene* InScene) = 0;
-
 		protected:
 			Rendering::RenderingBackend& RenderingBackend;
 		};

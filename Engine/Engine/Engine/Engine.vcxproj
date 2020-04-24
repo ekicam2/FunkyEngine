@@ -147,6 +147,7 @@
     <ClInclude Include="Source\RenderingFrontend\RenderPrimitive.h" />
     <ClInclude Include="Source\RenderingFrontend\RenderView.h" />
     <ClInclude Include="Source\RenderingFrontend\ShaderCompiler.h" />
+    <ClInclude Include="Source\RenderingFrontend\TextRenderer.h" />
     <ClInclude Include="Source\RenderingFrontend\VertexDefinition.h" />
     <ClInclude Include="Source\UserFramework\Scene.h" />
     <ClInclude Include="Source\UserFramework\SceneManager.h" />
