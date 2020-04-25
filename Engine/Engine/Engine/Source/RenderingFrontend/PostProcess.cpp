@@ -8,8 +8,8 @@
 #include "Core/Assets/AssetRegistry.h"
 
 
-Funky::Asset::ID Funky::Rendering::PostProcess::UnifiedVertexShader  = Asset::ID::None;
-Funky::Asset::ID Funky::Rendering::PostProcess::PostProcessPlaneData = Asset::ID::None;
+Funky::Asset::ID Funky::Rendering::PostProcess::UnifiedVertexShader  = Asset::ID::Zero;
+Funky::Asset::ID Funky::Rendering::PostProcess::PostProcessPlaneData = Asset::ID::Zero;
 
 
 void Funky::Rendering::PostProcess::InitVS([[maybe_unused]]RenderingBackend* RB)

@@ -38,7 +38,7 @@ bool Funky::Rendering::Renderer::Init(Rendering::RenderingBackend::RenderingBack
 	OffscreenRT = RRManager->CreateResource<Rendering::RRenderTarget>(RenderingBackend.CreateRenderTarget(Funky::Engine::GetEngine()->GetWindowSize()));
 	
 	Funky::OnViewportResized.RegisterLambda([this] (Math::Vec2u NewSize){
-		RRManager->FreeResource<Rendering::RDepthStencil>(OffscreenRT);
+		RRManager->FreeResource<Rendering::RRenderTarget>(OffscreenRT);
 		OffscreenRT = RRManager->CreateResource<Rendering::RRenderTarget>(RenderingBackend.CreateRenderTarget(NewSize));
 	});
 
@@ -57,156 +57,100 @@ void Funky::Rendering::Renderer::Shutdown()
 
 Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene([[maybe_unused]]IScene* InScene)
 {
-	VisibleObject* SceneObjects;
-	
-	const i32 SceneObjectsNum = InScene->GetVisibleObjects(SceneObjects);
+	auto SceneObjects = InScene->GetVisibleObjects();
+	size SceneObjectsNum = SceneObjects.size();
 
 	RenderView* Ret = new RenderView();
 	Ret->Camera = InScene->GetCamera();
 
-	for (u8 i = 0; (i < SceneObjectsNum); ++i)
+	for (size i = 0; (i < SceneObjectsNum && i < MAX_RENDER_PRIMITIVES); ++i)
 	{
-		VisibleObject * const SceneObject = &SceneObjects[i];
+		VisibleObject * const sceneObject = &SceneObjects[i];
 
-		auto Mesh = AssetRegistry::GetInstance().GetAsset<Asset::StaticMesh>(SceneObjects->Mesh);
+		auto PrepareMeshFor = [=](VisibleObject* const sceneObject) -> Asset::StaticMesh*
 		{
-			if (Mesh->VertexBuffer == Rendering::Resource::ID::Zero)
-				Mesh->VertexBuffer = RRManager->CreateResource<Rendering::RBuffer>(
-					RenderingBackend.CreateBuffer(
-						Mesh->GetVertexBufferSizeInBytes(),
-						RBuffer::EType::Vertex,
-						RBuffer::EUsageType::Static,
-						Mesh->GetVertices()
-					)
+			auto& ar = AssetRegistry::GetInstance();
+			auto mesh = ar.GetAsset<Asset::StaticMesh>(sceneObject->Mesh);
+			{
+				if (mesh->VertexBuffer == Rendering::Resource::ID::Zero)
+					mesh->VertexBuffer = RRManager->CreateResource<Rendering::RBuffer>(
+						RenderingBackend.CreateBuffer(
+							mesh->GetVertexBufferSizeInBytes(),
+							RBuffer::EType::Vertex,
+							RBuffer::EUsageType::Static,
+							mesh->GetVertices()
+						)
+						);
+
+
+				if (mesh->GetIndicesCount() > 0 && mesh->IndexBuffer == Rendering::Resource::ID::Zero)
+					mesh->IndexBuffer = RRManager->CreateResource<Rendering::RBuffer>(
+						RenderingBackend.CreateBuffer(
+							mesh->GetIndexBufferSizeInBytes(),
+							RBuffer::EType::Index,
+							RBuffer::EUsageType::Static,
+							mesh->GetIndices()
+						)
+						);
+			}
+			CHECK(mesh->VertexBuffer != Rendering::Resource::ID::Zero);
+			CHECK(mesh->GetIndicesCount() == 0 || (mesh->GetIndicesCount() > 0 && mesh->IndexBuffer != Rendering::Resource::ID::Zero));
+			
+			return mesh;
+		};
+		auto mesh = PrepareMeshFor(sceneObject);
+
+		struct ShadersRef { Asset::Shader* vs; Asset::Shader* ps; };
+		auto PrepareMaterial = [=](VisibleObject* const sceneObject) -> ShadersRef
+		{
+			auto& ar = AssetRegistry::GetInstance();
+			auto material = ar.GetAsset<Asset::Material>(sceneObject->Material);
+			auto vs = ar.GetAsset<Asset::Shader>(material->VS);
+			auto ps = ar.GetAsset<Asset::Shader>(material->PS);
+
+			CHECK(vs->IsValid() && vs->IsCompiled());
+			CHECK(ps->IsValid() && ps->IsCompiled());
+
+
+			if (vs->ShaderHandle == Rendering::Resource::ID::Zero)
+			{
+				RenderingBackend::ShaderInputDesc ShaderCreationInfo;
+				ShaderCreationInfo.ShaderData = vs->GetBuffer();
+				ShaderCreationInfo.DataSize = vs->GetBufferSize();
+
+				vs->ShaderHandle = RRManager->CreateResource<Rendering::RShader>(
+					RenderingBackend.CreateVertexShader(&ShaderCreationInfo)
+					);
+			}
+
+			if (ps->ShaderHandle == Rendering::Resource::ID::Zero)
+			{
+				RenderingBackend::ShaderInputDesc ShaderCreationInfo;
+				ShaderCreationInfo.ShaderData = ps->GetBuffer();
+				ShaderCreationInfo.DataSize = ps->GetBufferSize();
+
+				ps->ShaderHandle = RRManager->CreateResource<Rendering::RShader>(
+					RenderingBackend.CreatePixelShader(&ShaderCreationInfo)
 				);
+			}
 
-
-			if (Mesh->GetIndicesCount() > 0 && Mesh->IndexBuffer == Rendering::Resource::ID::Zero)
-				Mesh->IndexBuffer = RRManager->CreateResource<Rendering::RBuffer>(
-					RenderingBackend.CreateBuffer(
-						Mesh->GetIndexBufferSizeInBytes(),
-						RBuffer::EType::Index,
-						RBuffer::EUsageType::Static,
-						Mesh->GetIndices()
-					)
-				);
-		}
-		CHECK(Mesh->VertexBuffer != Rendering::Resource::ID::Zero);
-		CHECK(Mesh->GetIndicesCount() == 0 || (Mesh->GetIndicesCount() > 0 && Mesh->IndexBuffer != Rendering::Resource::ID::Zero));
-
-		auto Material = AssetRegistry::GetInstance().GetAsset<Asset::Material>(SceneObjects->Material);
-		auto VS = AssetRegistry::GetInstance().GetAsset<Asset::Shader>(Material->VS);
-		auto PS = AssetRegistry::GetInstance().GetAsset<Asset::Shader>(Material->PS);
-		
-		CHECK(VS->IsValid() && VS->IsCompiled());
-		CHECK(PS->IsValid() && PS->IsCompiled());
-
-
-		if (VS->ShaderHandle == Rendering::Resource::ID::Zero)
-		{
-			RenderingBackend::ShaderInputDesc ShaderCreationInfo;
-			ShaderCreationInfo.ShaderData = VS->GetBuffer();
-			ShaderCreationInfo.DataSize = VS->GetBufferSize();
-
-			VS->ShaderHandle = RRManager->CreateResource<Rendering::RShader>(
-				RenderingBackend.CreateVertexShader(&ShaderCreationInfo)
-			);
-		}
-
-		if (PS->ShaderHandle == Rendering::Resource::ID::Zero)
-		{
-			RenderingBackend::ShaderInputDesc ShaderCreationInfo;
-			ShaderCreationInfo.ShaderData = PS->GetBuffer();
-			ShaderCreationInfo.DataSize = PS->GetBufferSize();
-
-			PS->ShaderHandle = RRManager->CreateResource<Rendering::RShader>(
-				RenderingBackend.CreatePixelShader(&ShaderCreationInfo)
-			);
-		}
+			return ShadersRef{ vs, ps };
+		};
+		auto [vs, ps] = PrepareMaterial(sceneObject);
 
 		Ret->Objects[i].bIsValid = true;
 
-		Ret->Objects[i].Mesh.VertexBuffer = RRManager->GetResource<Rendering::RBuffer>(Mesh->VertexBuffer);
-		Ret->Objects[i].Mesh.IndexBuffer  = RRManager->GetResource<Rendering::RBuffer>(Mesh->IndexBuffer);
+		Ret->Objects[i].Mesh.VertexBuffer = RRManager->GetResource<Rendering::RBuffer>(mesh->VertexBuffer);
+		Ret->Objects[i].Mesh.IndexBuffer  = mesh->GetIndicesCount() > 0u ? RRManager->GetResource<Rendering::RBuffer>(mesh->IndexBuffer) : nullptr;
 
-		Ret->Objects[i].Shaders.VS = RRManager->GetResource<Rendering::RShader>(VS->ShaderHandle);
-		Ret->Objects[i].Shaders.PS = RRManager->GetResource<Rendering::RShader>(PS->ShaderHandle);
+		Ret->Objects[i].Shaders.VS = RRManager->GetResource<Rendering::RShader>(vs->ShaderHandle);
+		Ret->Objects[i].Shaders.PS = RRManager->GetResource<Rendering::RShader>(ps->ShaderHandle);
 
-		Ret->Objects[i].Position = SceneObject->Position;
-		Ret->Objects[i].Rotation = SceneObject->Rotation;
-
-		
-		/*CHECK(Mesh->Material->IsValid());
-		
-		if (!SceneObject->Material->Linkage.VS)
-		{
-			SceneObject->Material->Linkage.VS = [&]() -> Rendering::RShader* {
-		
-				auto VS = SceneObject->Material->GetVS();
-		
-				if (!VS->IsValid())
-				{
-					ShaderCompiler::ShaderDesc Desc;
-					Desc.Api = Rendering::RenderingBackend::EAPI::DX11;
-					Desc.EntryPoint = "VSMain";
-					Desc.Source = VS->GetSource();
-					auto [CompiledBuffer, BufferSize] = ShaderCompiler::CompileShader(Desc);
-					//SceneObject->Material->VS
-				}
-		
-				RenderingBackend::ShaderInputDesc ShaderDesc;
-				ShaderDesc.ShaderData = VS->GetBuffer();
-				ShaderDesc.DataSize = SceneObject->Material->GetVS()->GetBufferSize();
-		
-				return RenderingBackend.CreateVertexShader(&ShaderDesc);
-			}();
-		}
-		
-		if (!SceneObject->Material->Linkage.PS)
-		{
-			SceneObject->Material->Linkage.PS = [&]() -> Rendering::RShader* {
-		
-				auto PS = SceneObject->Material->GetPS();
-				if (!PS->IsValid())
-				{
-					ShaderCompiler::ShaderDesc Desc;
-					Desc.EntryPoint = "PSMain";
-					Desc.Source = PS->GetSource();
-					ShaderCompiler::CompileShader(Desc);
-				}
-		
-				RenderingBackend::ShaderInputDesc ShaderDesc;
-				ShaderDesc.ShaderData = PS->GetBuffer();
-				ShaderDesc.DataSize = PS->GetBufferSize();
-		
- 				return RenderingBackend.CreatePixelShader(&ShaderDesc);
-			}();
-		}
-
-		CHECK(SceneObject->Material->Linkage.VS);
-		CHECK(SceneObject->Material->Linkage.PS);
-		*/
+		Ret->Objects[i].Position = sceneObject->Position;
+		Ret->Objects[i].Rotation = sceneObject->Rotation;
 	}
 
 	return Ret;
-
-	
-
-	//for (u8 i = 0; i < SceneObjectsNum && i < MAX_RENDER_PRIMITIVES; ++i)
-	//{
-	//	VisibleObject* const SceneObject = &SceneObjects[i];
-
-	//	Ret->Objects[i].bIsValid = true;
-
-	//	Ret->Objects[i].Mesh.VertexBuffer = SceneObject->Mesh->VertexBuffer;
-	//	Ret->Objects[i].Mesh.IndexBuffer  = SceneObject->Mesh->IndexBuffer;
-
-	//	Ret->Objects[i].Shaders = SceneObject->Material->Linkage;
-
-	//	Ret->Objects[i].Position = SceneObject->Position;
-	//	Ret->Objects[i].Rotation = SceneObject->Rotation;
-	//}
-
 }
 
 void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
@@ -226,14 +170,13 @@ void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
 	
 	{
 		GPU_MARKER("MainPass");
-		for (u8 i = 0; i < MAX_RENDER_PRIMITIVES; ++i)
+		for (size i = 0; i < MAX_RENDER_PRIMITIVES; ++i)
 		{
-			if(!SceneToRender->Objects[i].bIsValid) continue;
+			RenderPrimitive * const CurrentObject = &SceneToRender->Objects[i];
 	
-			RenderPrimitive* CurrentObject = &SceneToRender->Objects[0];
+			if(!CurrentObject->bIsValid) continue;
 	
 			CHECK(nullptr != CurrentObject->Mesh.VertexBuffer);
-			CHECK(nullptr != CurrentObject->Mesh.IndexBuffer);
 	
 			//Math::Mat4f Model = Math::Mat4f::Identity;
 			DirectX::XMMATRIX Model = DirectX::XMMatrixRotationRollPitchYaw(
@@ -260,7 +203,7 @@ void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
 			RenderingBackend.BindPixelShader(CurrentObject->Shaders.PS);
 	
 			auto& Mesh = CurrentObject->Mesh;
-			if (Mesh.IndexBuffer->ElementCount)
+			if (Mesh.IndexBuffer != nullptr)
 				RenderingBackend.DrawIndexed(
 					Mesh.VertexBuffer,
 					Mesh.IndexBuffer
@@ -290,4 +233,3 @@ void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
 	
 	RenderingBackend.Present();
 }
-

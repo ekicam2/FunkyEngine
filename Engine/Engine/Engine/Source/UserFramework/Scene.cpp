@@ -1,42 +1,58 @@
 #include "Scene.h"
+#include "Core/Timer.h"
+
+#include "Core/Assets/StaticMesh.h"
+#include "Core/Assets/Material.h"
 
 #include "Engine.h"
 #include "Utils/MeshUtils.h"
 #include "RenderingFrontend\ShaderCompiler.h"
 
+
+const static Str terrainMeshPath = "RealData/Meshes/Cube/gltf/Cube.gltf";
+const static Str robotMeshPath = "RealData/Meshes/robot/robot.obj";
+const static Str uberShaderPath = "RealData/Shaders/Source/ubershader.hlsl";
+
+//#define MESH_PATH 
+
 void Funky::Scene::Init()
 {
-	LOG("Init Scene");
-
+	Asset::ID terrainMesh = Asset::ID::Zero;
+	Asset::ID terrainMaterial = Asset::ID::Zero;
+	
 	auto& AR = Funky::AssetRegistry::GetInstance();
+	Asset::ID sceneObjectMesh		= Asset::ID::Zero;
+	Asset::ID sceneObjectMaterial	= Asset::ID::Zero;
+	LOG("Load Scene Assets");
+	{
+		DEBUG_SCOPE_TIMER(TEXT("Loading assets"));
 
-	Asset::StaticMesh::Desc MeshDesc;
-	MeshDesc.bReverseIndices = true;
-	MeshDesc.CreationType = Asset::StaticMesh::Desc::ECreationType::FromSource;
-	MeshDesc.Path = "RealData/Meshes/robot/robot.obj";
-	Objects.Mesh = AR.CreateAsset<Asset::StaticMesh>(MeshDesc);
+		terrainMesh			= AR.CreateAsset<Asset::StaticMesh>(terrainMeshPath);
+		sceneObjectMesh		= AR.CreateAsset<Asset::StaticMesh>(robotMeshPath, true);
 
+		sceneObjectMaterial = terrainMaterial = AR.CreateAsset<Asset::Material>(Asset::Material::ERenderingTechnique::Ubershader);
+	}
 
-	Asset::Shader::Desc ShaderDesc;
-	ShaderDesc.Path = "RealData/Shaders/Source/ubershader.hlsl";
+	LOG("Init Scene");
+	{
+		DEBUG_SCOPE_TIMER(TEXT("Init scene"));
 
-	ShaderDesc.Type = Asset::Shader::EShaderType::Vertex;
-	auto VS = AR.CreateAsset<Asset::Shader>(ShaderDesc);
+		InitTerrain({ 100, 100 }, terrainMesh, terrainMaterial);
+		Terrain->Foreach([]([[maybe_unused]]size i, Tilemap::Tile& tile)
+			{
+				tile.Position += Math::Vec3f(0.0f, -1.0f, 0.0f);
+			}
+		);
 
-	ShaderDesc.Type = Asset::Shader::EShaderType::Fragment;
-	auto PS = AR.CreateAsset<Asset::Shader>(ShaderDesc);
-	
-	ShaderCompiler::CompileShader(Funky::AssetRegistry::GetInstance().GetAsset<Asset::Shader>(VS));
-	ShaderCompiler::CompileShader(Funky::AssetRegistry::GetInstance().GetAsset<Asset::Shader>(PS));
-	
-
-	Asset::Material::Desc MaterialDesc;
-	MaterialDesc.Technique = Asset::Material::ERenderingTechnique::Toon;
-	MaterialDesc.Name = "SmiesznyToon";
-	MaterialDesc.VS = VS;
-	MaterialDesc.PS = PS;
-
-	Objects.Material = AR.CreateAsset<Asset::Material>(MaterialDesc);
+		for (u8 i = 0; i < 9; ++i)
+		{
+			VisibleObject temp;
+			temp.Mesh = sceneObjectMesh;
+			temp.Material = sceneObjectMaterial;
+			temp.Position = Math::Vec3f(rand() % Terrain->Size.X, 0.0f, rand() % Terrain->Size.Y);
+			Objects.push_back(temp);
+		}
+	}
 
 
 	Funky::OnViewportResized.RegisterLambda([this](Math::Vec2u NewSize) { 
@@ -44,8 +60,6 @@ void Funky::Scene::Init()
 	});
 
 	Camera.MakePerspective((float)(2048u) / 1024u, 48.0f);
-
-	Objects.Position += Math::Vec::FORWARD * 10.0f;
 	Camera.Translate(Math::Vec::FORWARD * -10.0f);
 }
 
@@ -76,8 +90,8 @@ void Funky::Scene::Tick(f32 Delta)
 	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::Q))
 		Camera.Translate(-Math::Vec::UP * Speed);
 
-	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::SPACE))
-		Objects.Rotation.Y += RotationSpeed;
+	//if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::SPACE))
+	//	Objects.Rotation.Y += RotationSpeed;
 
 
 	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::R))
@@ -109,13 +123,45 @@ void Funky::Scene::Tick(f32 Delta)
 		Camera.Rotate(-Math::Vec::UP * RotationSpeed);
 }
 
-i32 Funky::Scene::GetVisibleObjects(VisibleObject*& InOutObjects)
+darray<Funky::VisibleObject> Funky::Scene::GetVisibleObjects()
 {
-	InOutObjects = &Objects;
-	return 1;
+	darray<Funky::VisibleObject> visibleObjects = Objects;
+
+	const size terrainObjectsNum = Terrain->Data.size();
+	for (size i = 0; i < terrainObjectsNum; ++i)
+	{
+		visibleObjects.push_back(Terrain->Data[i]);
+	}
+
+
+	return visibleObjects;
 }
 
 Math::Camera* Funky::Scene::GetCamera()
 {
 	return &Camera;
+}
+
+void Funky::Scene::InitTerrain(Math::Vec2u const& Size, Asset::ID mesh, Asset::ID material)
+{
+	Terrain.Reset(new Tilemap());
+	Terrain->Size = Size;
+
+	for (size i = 0; i < Size.X * Size.Y; ++i)
+	{
+		Tilemap::Tile newTile;
+		const size width = Terrain->Size.X;
+		const Math::Vec2u pos((u32)i % (u32)width, (u32)i / (u32)width);
+
+		newTile.Material	= material;
+		newTile.Mesh		= mesh;
+		newTile.Position	= Math::Vec3f((f32)pos.X, 0.0f, (f32)pos.Y);
+
+		Terrain->Data.push_back(newTile);
+	}
+
+	//Terrain->Foreach([=](size i, Tilemap::Tile& Tile)
+	//	{
+	//
+	//	});
 }

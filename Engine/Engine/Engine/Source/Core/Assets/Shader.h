@@ -22,21 +22,7 @@ namespace Funky
 				Vertex,
 				Fragment
 			};
-
 			const static Str ShaderTypeToString[]; 
-
-			struct Desc
-			{
-				/** Required */
-				FORCEINLINE Hash128 GetHash() const { return HashString(Path + ShaderTypeToString[static_cast<u8>(Type)]); }
-				/** Required END */
-
-				Str Path;
-				Str Source;
-
-				EShaderType Type;
-
-			};
 
 			FORCEINLINE EShaderType GetType() const { return Type; }
 
@@ -49,6 +35,7 @@ namespace Funky
 			FORCEINLINE bool IsCompiled() const { return bIsCompiled; }
 
 			Rendering::Resource::ID ShaderHandle = Rendering::Resource::ID::Zero;
+			FORCEINLINE Hash128 GetHash() const { return HashString(Path + ShaderTypeToString[static_cast<u8>(Type)]); }
 
 		protected:
 			EShaderType Type;
@@ -60,7 +47,7 @@ namespace Funky
 			bool bIsCompiled = false;
 
 			[[nodiscard]]
-			static Shader* CreateFromDesc(Desc const& desc);
+			static Shader* Create(Str const& path, EShaderType type);
 		};
 
 		inline const Str Shader::ShaderTypeToString[] = { "None", "Vertex", "Fragment" };

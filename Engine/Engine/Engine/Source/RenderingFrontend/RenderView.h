@@ -7,7 +7,7 @@
 
 #include "PostProcess.h"
 
-#define MAX_RENDER_PRIMITIVES 10
+#define MAX_RENDER_PRIMITIVES 10000
 #define MAX_POSTPROCESSES 10
 
 namespace Math

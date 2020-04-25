@@ -14,9 +14,9 @@ namespace Funky
 		Hash128(u64 v1, u64 v2) { v[0] = v1; v[1] = v2; }
 		FORCEINLINE bool operator==(Hash128 const& Other) const { return v[0] == Other.v[0] && v[1] == Other.v[1]; }
 
-		static const Hash128 None;
+		static const Hash128 Zero;
 	};
-	inline const Hash128 Hash128::None = Hash128(0, 0);
+	inline const Hash128 Hash128::Zero = Hash128(0, 0);
 
 	/* It's best to use prime numbers. */
 	template <u32 Seed = 17>

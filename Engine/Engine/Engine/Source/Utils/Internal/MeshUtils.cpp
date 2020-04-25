@@ -253,6 +253,7 @@ Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadGLTFFromFile(char cons
 			}
 		}
 
+		if(false)
 		{
 			const tinygltf::Accessor& indAccessor = model.accessors[primitive.indices];
 			const tinygltf::BufferView& indBufferView = model.bufferViews[indAccessor.bufferView];

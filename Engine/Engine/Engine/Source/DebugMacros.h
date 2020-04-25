@@ -8,7 +8,6 @@
 #include <stdio.h>
 
 #ifdef _DEBUG
-
 //TODO(ekicam2): abstract strcpy and play with more templates for charx deduction
 
 #define __STRINGIFY(x) TEXT(#x)

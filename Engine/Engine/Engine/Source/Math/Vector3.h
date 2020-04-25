@@ -27,6 +27,13 @@ namespace Math
 			Z += Rhs.Z;
 		}
 
+		void operator*=(T Scalar)
+		{
+			X *= Scalar;
+			Y *= Scalar;
+			Z *= Scalar;
+		}
+
 		Vector3D operator-(Vector3D const & Rhs) const
 		{
 			return { X - Rhs.X, Y - Rhs.Y, Z - Rhs.Z };

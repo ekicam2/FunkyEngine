@@ -2,19 +2,15 @@
 
 #include "Core/Platform/Platform.h"
 
-Funky::Asset::Shader* Funky::Asset::Shader::CreateFromDesc(Desc const& desc)
+#include "RenderingFrontend\ShaderCompiler.h"
+
+Funky::Asset::Shader* Funky::Asset::Shader::Create(Str const& path, EShaderType type)
 {
 	Funky::Asset::Shader* ret = new Funky::Asset::Shader();
-	ret->Type = desc.Type;
+	ret->Type = type;
+	ret->Source = Platform::ReadFile(path);
 
-	if (!desc.Source.IsEmpty())
-	{
-		ret->Source = desc.Source;
-	}
-	else
-	{
-		ret->Source = Platform::ReadFile(desc.Path);
-	}
+	Funky::ShaderCompiler::CompileShader(ret);
 
 	return ret;
 }

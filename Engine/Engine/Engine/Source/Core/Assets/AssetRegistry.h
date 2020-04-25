@@ -51,29 +51,30 @@ namespace Funky
 		//}
 
 		template <typename T>
+		[[deprecated("Use variadic CreateAsset instead.")]]
 		Asset::ID CreateAsset(typename T::Desc const& desc)
 		{
 			if (auto newAsset = T::CreateFromDesc(desc); newAsset != nullptr)
 			{
 				const Asset::ID id = desc.GetHash();
-				GetBuffer<T>()[id] = newAsset;
+				GetBuffer<T>()[id].Reset(newAsset);
 				return id;
 			}
 
-			return Asset::ID::None;
+			return Asset::ID::Zero;
 		}
 
 		template<typename T, typename... Args>
 		Asset::ID CreateAsset(Args... args)
 		{
-			if (auto newAsset = T::Create(args); newAsset != nullptr)
+			if (auto newAsset = T::Create(Forward<Args>(args)...); newAsset != nullptr)
 			{
-				const Asset::ID id = T::GetHash(Args);
-				GetBuffer<T>()[id] = newAsset;
+				const Asset::ID id = newAsset->GetHash();
+				GetBuffer<T>()[id].Reset(newAsset);
 				return id;
 			}
 
-			return Asset::ID::None;
+			return Asset::ID::Zero;
 		}
 
 		template <typename T>

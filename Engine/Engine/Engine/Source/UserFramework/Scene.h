@@ -1,16 +1,17 @@
 #pragma once
 
-#include "Core/Assets/StaticMesh.h"
-#include "Core/Assets/Material.h"
-
+#include "Math/Math.h"
+#include "Core/Containers.h"
 #include "Core/Memory/UniquePtr.h"
+
+#include "Core/Assets/Asset.h"
 
 namespace Funky
 {
 	struct VisibleObject
 	{
-		Asset::ID Mesh;
-		Asset::ID Material;
+		Asset::ID Mesh = Asset::ID::Zero;
+		Asset::ID Material = Asset::ID::Zero;
 
 		Math::Vec3f Position = Math::Vec3f(0.0f, 0.0f, 0.0f);
 		Math::Vec3f Rotation = Math::Vec3f(0.0f, 0.0f, 0.0f);
@@ -24,41 +25,27 @@ namespace Funky
 		virtual void Shutdown() = 0;
 		virtual void Tick(f32 Delta) = 0;
 
-		virtual i32 GetVisibleObjects(VisibleObject*& Objects) = 0;
+		virtual darray<VisibleObject> GetVisibleObjects() = 0;
 		virtual Math::Camera* GetCamera() = 0;
 
 	};
 
 	struct Tilemap
 	{
-		struct Tile
-		{
-			Asset::ID Mesh;
-			Asset::ID Material;
-
-			Math::Vec2u Position;
-		};
+		using  Tile = VisibleObject;
 
 		Math::Vec2u Size = Math::Vec2u::Zero;
-		Math::Vec2u Position;
-
+		Math::Vec3f Origin = Math::Vec3f::Zero;
 
 		template <typename LAMBDA>
 		void Foreach(LAMBDA&& F)
 		{
-			const auto width = Size.x;
+			const auto width = Data.size();
 			for (size i = 0; i < width; ++i)
 			{
-				auto [x_ws, y_ws] = ()[i, Size] -> Math::Vec2u {
-					return { i % 4, i / 4 };
-				}();
-
-				CHECK(Data[i].Position == Math::Vec2u(x_ws, y_ws));
-				F(x_ws, y_ws);
+				F(i, Data[i]);
 			}
 		}
-
-
 
 		darray<Tile> Data;
 	};
@@ -68,13 +55,15 @@ namespace Funky
 		Scene() = default;
 
 		Math::Camera Camera;
-		VisibleObject Objects;
+		darray<VisibleObject> Objects;
 
 		virtual void Init() override;
 		virtual void Shutdown() override {}
 		virtual void Tick([[maybe_unused]] f32 Delta) override;
-		virtual i32 GetVisibleObjects(VisibleObject*& Objects) override;
+		virtual darray<VisibleObject> GetVisibleObjects() override;
 		virtual Math::Camera* GetCamera() override;
 
+		Core::Memory::UniquePtr<Tilemap> Terrain;
+		void InitTerrain(Math::Vec2u const& Size, Asset::ID mesh, Asset::ID material);
 	};
 }
