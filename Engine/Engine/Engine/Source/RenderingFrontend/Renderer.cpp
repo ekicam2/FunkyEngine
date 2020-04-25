@@ -5,6 +5,8 @@
 #include "RenderingResourceManager.h"
 #include "UserFramework/Scene.h"
 
+#include "Core/Timer.h"
+
 #include "ShaderCompiler.h"
 #include "Core/Platform/Platform.h"
 #include "RenderingBackend/Marker.h"
@@ -155,6 +157,8 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene([[ma
 
 void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
 {
+	DEBUG_SCOPE_TIMER(TEXT("Renderer::DrawScene"));
+
 	Core::Memory::UniquePtr<RenderView> SceneToRender = CreateRenderScene(InScene);
 
 	auto DefaultDS = RRManager->GetSwapchainDepthStencil();
@@ -196,6 +200,25 @@ void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
 	
 			PerObjectConstantBufferData.MVP	  = Model * VP;
 			PerObjectConstantBufferData.Model = Model;
+
+			//if(false)
+			{
+				DirectX::FXMVECTOR position_ws(PerObjectConstantBufferData.MVP.r[3]);
+				DirectX::FXMVECTOR position_ss(DirectX::XMVector4Transform(position_ws, PerObjectConstantBufferData.MVP));
+
+				DirectX::XMFLOAT4 position;
+				DirectX::XMStoreFloat4(&position, position_ss);
+			
+				const auto x_ndc = position.x / position.w;
+				const auto y_ndc = position.y / position.w;
+				const float occlusion_treshold = 1.15f;
+
+				if (x_ndc > occlusion_treshold || x_ndc < -occlusion_treshold)
+					continue;
+				if (y_ndc > occlusion_treshold || y_ndc < -occlusion_treshold)
+					continue;
+			}
+
 			RenderingBackend.BindConstantBuffer(RenderingBackend::ShaderResourceStage::Vertex, PerObjectConstantBufferHandle, 0);
 			RenderingBackend.UpdateConstantBuffer(PerObjectConstantBufferHandle, &PerObjectConstantBufferData);
 	
