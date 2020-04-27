@@ -115,7 +115,7 @@ bool Engine::Init(i32 Argc, char** Argv)
 
 				IOSystem->Update();
 			}
-			//else
+			else
 #pragma endregion 
 			{
 				MainSceneManager->Tick(DeltaTime);

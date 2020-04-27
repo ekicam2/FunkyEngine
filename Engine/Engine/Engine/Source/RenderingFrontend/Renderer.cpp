@@ -59,97 +59,42 @@ void Funky::Rendering::Renderer::Shutdown()
 
 Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene([[maybe_unused]]IScene* InScene)
 {
-	auto SceneObjects = InScene->GetVisibleObjects();
+	DEBUG_SCOPE_TIMER(TEXT("Renderer::CreateRenderScene"));
+
+	darray<Funky::VisibleObject> SceneObjects; 
+
+	{
+		SceneObjects = Move(InScene->GetVisibleObjects());
+	}
+
 	size SceneObjectsNum = SceneObjects.size();
 
-	RenderView* Ret = new RenderView();
+	RenderView* Ret;
+	{
+		Ret = new RenderView(); 
+	}
 	Ret->Camera = InScene->GetCamera();
 
 	for (size i = 0; (i < SceneObjectsNum && i < MAX_RENDER_PRIMITIVES); ++i)
 	{
-		VisibleObject * const sceneObject = &SceneObjects[i];
+		[[maybe_unused]] VisibleObject* const sceneObject = &SceneObjects[i];
 
-		auto PrepareMeshFor = [=](VisibleObject* const sceneObject) -> Asset::StaticMesh*
-		{
-			auto& ar = AssetRegistry::GetInstance();
-			auto mesh = ar.GetAsset<Asset::StaticMesh>(sceneObject->Mesh);
-			{
-				if (mesh->VertexBuffer == Rendering::Resource::ID::Zero)
-					mesh->VertexBuffer = RRManager->CreateResource<Rendering::RBuffer>(
-						RenderingBackend.CreateBuffer(
-							mesh->GetVertexBufferSizeInBytes(),
-							RBuffer::EType::Vertex,
-							RBuffer::EUsageType::Static,
-							mesh->GetVertices()
-						)
-						);
-
-
-				if (mesh->GetIndicesCount() > 0 && mesh->IndexBuffer == Rendering::Resource::ID::Zero)
-					mesh->IndexBuffer = RRManager->CreateResource<Rendering::RBuffer>(
-						RenderingBackend.CreateBuffer(
-							mesh->GetIndexBufferSizeInBytes(),
-							RBuffer::EType::Index,
-							RBuffer::EUsageType::Static,
-							mesh->GetIndices()
-						)
-						);
-			}
-			CHECK(mesh->VertexBuffer != Rendering::Resource::ID::Zero);
-			CHECK(mesh->GetIndicesCount() == 0 || (mesh->GetIndicesCount() > 0 && mesh->IndexBuffer != Rendering::Resource::ID::Zero));
-			
-			return mesh;
-		};
 		auto mesh = PrepareMeshFor(sceneObject);
+		auto [vs, ps] = PrepareMaterialFor(sceneObject);
 
-		struct ShadersRef { Asset::Shader* vs; Asset::Shader* ps; };
-		auto PrepareMaterial = [=](VisibleObject* const sceneObject) -> ShadersRef
 		{
-			auto& ar = AssetRegistry::GetInstance();
-			auto material = ar.GetAsset<Asset::Material>(sceneObject->Material);
-			auto vs = ar.GetAsset<Asset::Shader>(material->VS);
-			auto ps = ar.GetAsset<Asset::Shader>(material->PS);
 
-			CHECK(vs->IsValid() && vs->IsCompiled());
-			CHECK(ps->IsValid() && ps->IsCompiled());
+			Ret->Objects[i].bIsValid = true;
 
+			Ret->Objects[i].Mesh.VertexBuffer = RRManager->GetResource<Rendering::RBuffer>(mesh->VertexBuffer);
+			Ret->Objects[i].Mesh.IndexBuffer = mesh->GetIndicesCount() > 0u ? RRManager->GetResource<Rendering::RBuffer>(mesh->IndexBuffer) : nullptr;
 
-			if (vs->ShaderHandle == Rendering::Resource::ID::Zero)
-			{
-				RenderingBackend::ShaderInputDesc ShaderCreationInfo;
-				ShaderCreationInfo.ShaderData = vs->GetBuffer();
-				ShaderCreationInfo.DataSize = vs->GetBufferSize();
+			Ret->Objects[i].Shaders.VS = RRManager->GetResource<Rendering::RShader>(vs->ShaderHandle);
+			Ret->Objects[i].Shaders.PS = RRManager->GetResource<Rendering::RShader>(ps->ShaderHandle);
 
-				vs->ShaderHandle = RRManager->CreateResource<Rendering::RShader>(
-					RenderingBackend.CreateVertexShader(&ShaderCreationInfo)
-					);
-			}
-
-			if (ps->ShaderHandle == Rendering::Resource::ID::Zero)
-			{
-				RenderingBackend::ShaderInputDesc ShaderCreationInfo;
-				ShaderCreationInfo.ShaderData = ps->GetBuffer();
-				ShaderCreationInfo.DataSize = ps->GetBufferSize();
-
-				ps->ShaderHandle = RRManager->CreateResource<Rendering::RShader>(
-					RenderingBackend.CreatePixelShader(&ShaderCreationInfo)
-				);
-			}
-
-			return ShadersRef{ vs, ps };
-		};
-		auto [vs, ps] = PrepareMaterial(sceneObject);
-
-		Ret->Objects[i].bIsValid = true;
-
-		Ret->Objects[i].Mesh.VertexBuffer = RRManager->GetResource<Rendering::RBuffer>(mesh->VertexBuffer);
-		Ret->Objects[i].Mesh.IndexBuffer  = mesh->GetIndicesCount() > 0u ? RRManager->GetResource<Rendering::RBuffer>(mesh->IndexBuffer) : nullptr;
-
-		Ret->Objects[i].Shaders.VS = RRManager->GetResource<Rendering::RShader>(vs->ShaderHandle);
-		Ret->Objects[i].Shaders.PS = RRManager->GetResource<Rendering::RShader>(ps->ShaderHandle);
-
-		Ret->Objects[i].Position = sceneObject->Position;
-		Ret->Objects[i].Rotation = sceneObject->Rotation;
+			Ret->Objects[i].Position = sceneObject->Position;
+			Ret->Objects[i].Rotation = sceneObject->Rotation;
+		}
 	}
 
 	return Ret;
@@ -174,51 +119,58 @@ void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
 	
 	{
 		GPU_MARKER("MainPass");
+		DirectX::XMMATRIX vp;
+		{
+			GPU_MARKER("Begin main pass view");
+	
+			vp = SceneToRender->Camera->GetView() * SceneToRender->Camera->GetProjection();
+	
+			PerViewConstantBufferData.VP = vp;
+			PerViewConstantBufferData.CameraPosition = Math::Vec4f(SceneToRender->Camera->GetPosition(), 1.0f);
+			PerViewConstantBufferData.CameraForward = Math::Vec4f(SceneToRender->Camera->GetForward(), 0.0f);
+			RenderingBackend.BindConstantBuffer(RenderingBackend::ShaderResourceStage::Fragment, PerViewConstantBufferHandle, 0);
+			RenderingBackend.UpdateConstantBuffer(PerViewConstantBufferHandle, &PerViewConstantBufferData);
+		}
+	
 		for (size i = 0; i < MAX_RENDER_PRIMITIVES; ++i)
 		{
 			RenderPrimitive * const CurrentObject = &SceneToRender->Objects[i];
 	
-			if(!CurrentObject->bIsValid) continue;
+			if(!CurrentObject->bIsValid) break;
 	
 			CHECK(nullptr != CurrentObject->Mesh.VertexBuffer);
 	
 			//Math::Mat4f Model = Math::Mat4f::Identity;
-			DirectX::XMMATRIX Model = DirectX::XMMatrixRotationRollPitchYaw(
+			DirectX::XMMATRIX model = DirectX::XMMatrixRotationRollPitchYaw(
 				Math::ToRad(CurrentObject->Rotation.X), 
 				Math::ToRad(CurrentObject->Rotation.Y), 
 				Math::ToRad(CurrentObject->Rotation.Z)
 			);
-			Model *= DirectX::XMMatrixTranslation(CurrentObject->Position.X, CurrentObject->Position.Y, CurrentObject->Position.Z);
+			model *= DirectX::XMMatrixTranslation(CurrentObject->Position.X, CurrentObject->Position.Y, CurrentObject->Position.Z);
 	
-			auto VP = SceneToRender->Camera->GetView() * SceneToRender->Camera->GetProjection();
+			PerObjectConstantBufferData.MVP	  = model * vp;
+			PerObjectConstantBufferData.Model = model;
 	
-			PerViewConstantBufferData.VP			 = VP;
-			PerViewConstantBufferData.CameraPosition = Math::Vec4f(SceneToRender->Camera->GetPosition(), 1.0f);
-			PerViewConstantBufferData.CameraForward	 = Math::Vec4f(SceneToRender->Camera->GetForward(), 0.0f);
-			RenderingBackend.BindConstantBuffer(RenderingBackend::ShaderResourceStage::Fragment, PerViewConstantBufferHandle, 0);
-			RenderingBackend.UpdateConstantBuffer(PerViewConstantBufferHandle, &PerViewConstantBufferData);
-	
-			PerObjectConstantBufferData.MVP	  = Model * VP;
-			PerObjectConstantBufferData.Model = Model;
-
-			//if(false)
 			{
 				DirectX::FXMVECTOR position_ws(PerObjectConstantBufferData.MVP.r[3]);
 				DirectX::FXMVECTOR position_ss(DirectX::XMVector4Transform(position_ws, PerObjectConstantBufferData.MVP));
-
+	
 				DirectX::XMFLOAT4 position;
 				DirectX::XMStoreFloat4(&position, position_ss);
 			
 				const auto x_ndc = position.x / position.w;
 				const auto y_ndc = position.y / position.w;
+				[[maybe_unused]]const auto z_ndc = position.z / position.w;
 				const float occlusion_treshold = 1.15f;
-
+	
 				if (x_ndc > occlusion_treshold || x_ndc < -occlusion_treshold)
 					continue;
 				if (y_ndc > occlusion_treshold || y_ndc < -occlusion_treshold)
 					continue;
+				if (z_ndc > 1.0f)
+					continue;
 			}
-
+	
 			RenderingBackend.BindConstantBuffer(RenderingBackend::ShaderResourceStage::Vertex, PerObjectConstantBufferHandle, 0);
 			RenderingBackend.UpdateConstantBuffer(PerObjectConstantBufferHandle, &PerObjectConstantBufferData);
 	
@@ -256,3 +208,71 @@ void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
 	
 	RenderingBackend.Present();
 }
+
+Funky::Asset::StaticMesh* Funky::Rendering::Renderer::PrepareMeshFor(VisibleObject* visibleObj)
+{
+	auto& ar = AssetRegistry::GetInstance();
+	Asset::StaticMesh* mesh = ar.GetAsset<Asset::StaticMesh>(visibleObj->Mesh);
+	{
+		if (mesh->VertexBuffer == Rendering::Resource::ID::Zero)
+			mesh->VertexBuffer = RRManager->CreateResource<Rendering::RBuffer>(
+				RenderingBackend.CreateBuffer(
+					mesh->GetVertexBufferSizeInBytes(),
+					RBuffer::EType::Vertex,
+					RBuffer::EUsageType::Static,
+					mesh->GetVertices()
+				)
+				);
+
+
+		if (mesh->GetIndicesCount() > 0 && mesh->IndexBuffer == Rendering::Resource::ID::Zero)
+			mesh->IndexBuffer = RRManager->CreateResource<Rendering::RBuffer>(
+				RenderingBackend.CreateBuffer(
+					mesh->GetIndexBufferSizeInBytes(),
+					RBuffer::EType::Index,
+					RBuffer::EUsageType::Static,
+					mesh->GetIndices()
+				)
+				);
+	}
+	CHECK(mesh->VertexBuffer != Rendering::Resource::ID::Zero);
+	CHECK(mesh->GetIndicesCount() == 0 || (mesh->GetIndicesCount() > 0 && mesh->IndexBuffer != Rendering::Resource::ID::Zero));
+
+	return mesh;
+};
+
+Funky::Rendering::Renderer::ShadersBundle Funky::Rendering::Renderer::PrepareMaterialFor(VisibleObject* visibleObj)
+{
+	auto& ar = AssetRegistry::GetInstance();
+	auto material = ar.GetAsset<Asset::Material>(visibleObj->Material);
+	auto vs = ar.GetAsset<Asset::Shader>(material->VS);
+	auto ps = ar.GetAsset<Asset::Shader>(material->PS);
+
+	CHECK(vs->IsValid() && vs->IsCompiled());
+	CHECK(ps->IsValid() && ps->IsCompiled());
+
+
+	if (vs->ShaderHandle == Rendering::Resource::ID::Zero)
+	{
+		RenderingBackend::ShaderInputDesc ShaderCreationInfo;
+		ShaderCreationInfo.ShaderData = vs->GetBuffer();
+		ShaderCreationInfo.DataSize = vs->GetBufferSize();
+
+		vs->ShaderHandle = RRManager->CreateResource<Rendering::RShader>(
+			RenderingBackend.CreateVertexShader(&ShaderCreationInfo)
+			);
+	}
+
+	if (ps->ShaderHandle == Rendering::Resource::ID::Zero)
+	{
+		RenderingBackend::ShaderInputDesc ShaderCreationInfo;
+		ShaderCreationInfo.ShaderData = ps->GetBuffer();
+		ShaderCreationInfo.DataSize = ps->GetBufferSize();
+
+		ps->ShaderHandle = RRManager->CreateResource<Rendering::RShader>(
+			RenderingBackend.CreatePixelShader(&ShaderCreationInfo)
+			);
+	}
+
+	return ShadersBundle{ vs, ps };
+};

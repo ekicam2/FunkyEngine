@@ -112,7 +112,7 @@ namespace
 
 #else
 
-#define DEAD_PATH(...) _assume(0)
+#define DEAD_PATH(...) __assume(0)
 #define ASSERT_ONCE(...)
 #define ASSERT(...)
 #define CHECK_ONCE(...) 

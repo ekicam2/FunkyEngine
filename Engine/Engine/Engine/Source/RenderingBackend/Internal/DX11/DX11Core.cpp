@@ -226,6 +226,7 @@ namespace Funky
 
 			HRESULT hr = pDevice->CreatePixelShader(ShaderDesc->ShaderData, ShaderDesc->DataSize, nullptr, Shader->pPs.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create simple pixel shader");
+			(void)(hr);
 
 			return Shader;
 		}
@@ -265,7 +266,7 @@ namespace Funky
 			
 			HRESULT hr = pDevice->CreateBuffer(&ConstantBufferDesc, Data ? &BufferInitData : nullptr, Ret->pBuffer.GetAddressOf());
 			ASSERT(SUCCEEDED(hr), L"Couldn't create buffer");
-
+			(void)(hr);
 			return Ret;
 		}
 

@@ -9,6 +9,18 @@
 
 #include "MurmurHash3.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wimplicit-fallthrough"
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#pragma clang diagnostic ignored "-Wmissing-variable-declarations"
+#pragma clang diagnostic ignored "-Wextra-semi-stmt"
+#pragma clang diagnostic ignored "-Wcast-align"
+
+int number;
+
+
 //-----------------------------------------------------------------------------
 // Platform-specific functions and macros
 
@@ -332,3 +344,4 @@ void MurmurHash3_x64_128(const void* key, const int len,
 }
 
 //-----------------------------------------------------------------------------
+#pragma clang diagnostic pop

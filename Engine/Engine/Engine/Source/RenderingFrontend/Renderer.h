@@ -75,6 +75,13 @@ namespace Funky
 			DEFINE_CONSTANT_BUFFER(PerViewConstantBuffer);
 			DEFINE_CONSTANT_BUFFER(PerObjectConstantBuffer);
 
+			Asset::StaticMesh* PrepareMeshFor(VisibleObject* visibleObj);
+			struct ShadersBundle
+			{
+				Asset::Shader* VS, * PS;
+			};
+			ShadersBundle PrepareMaterialFor(VisibleObject* visibleObj);
+
 			Core::Memory::UniquePtr<RenderingResourcesManager> RRManager;
 
 			Resource::ID OffscreenRT = Rendering::Resource::ID::Zero;

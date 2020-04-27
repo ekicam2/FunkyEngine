@@ -159,9 +159,4 @@ void Funky::Scene::InitTerrain(Math::Vec2u const& Size, Asset::ID mesh, Asset::I
 
 		Terrain->Data.push_back(newTile);
 	}
-
-	//Terrain->Foreach([=](size i, Tilemap::Tile& Tile)
-	//	{
-	//
-	//	});
 }
