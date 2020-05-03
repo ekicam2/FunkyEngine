@@ -27,11 +27,25 @@ namespace Math
 			Z += Rhs.Z;
 		}
 
+		void operator-=(Vector3D const& Rhs)
+		{
+			X -= Rhs.X;
+			Y -= Rhs.Y;
+			Z -= Rhs.Z;
+		}
+
 		void operator*=(T Scalar)
 		{
 			X *= Scalar;
 			Y *= Scalar;
 			Z *= Scalar;
+		}
+
+		void operator*=(Vector3D const& Rhs)
+		{
+			X *= Rhs.X;
+			Y *= Rhs.Y;
+			Z *= Rhs.Z;
 		}
 
 		Vector3D operator-(Vector3D const & Rhs) const
@@ -70,6 +84,21 @@ namespace Math
 		bool operator==(Vector3D const & Other) const
 		{
 			return X == Other.X && Y == Other.Y && Z == Other.Z;
+		}
+
+		bool operator!=(Vector3D const& Other) const
+		{
+			return !((*this) == Other);
+		}
+
+		bool operator>(Vector3D const& Other) const
+		{
+			return X > Other.X && Y > Other.Y && Z > Other.Z;
+		}
+
+		bool operator<(Vector3D const& Other) const
+		{
+			return X < Other.X && Y < Other.Y && Z < Other.Z;
 		}
 
 		Vector3D RotateX(T Theta) const

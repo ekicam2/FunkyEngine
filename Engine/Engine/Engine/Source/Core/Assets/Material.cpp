@@ -16,7 +16,7 @@ Funky::Asset::Material* Funky::Asset::Material::CreateFromDesc(Desc const& desc)
 
 Funky::Asset::Material* Funky::Asset::Material::Create(ERenderingTechnique technique)
 {
-	return Create(Material::MaterialTechniqueToPath[static_cast<u8>(technique)]);
+	return Create(Material::MaterialTechniqueToPath[static_cast<u8>(technique)], technique);
 }
 
 Funky::Asset::Material* Funky::Asset::Material::Create(Str const& path, ERenderingTechnique technique /*= ERenderingTechnique::Custom*/)

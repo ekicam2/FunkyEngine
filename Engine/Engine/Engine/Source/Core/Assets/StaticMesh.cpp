@@ -2,22 +2,7 @@
 #include "Templates.h"
 #include "Utils/MeshUtils.h"
 
-Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::CreateFromDesc(Funky::Asset::StaticMesh::Desc const& desc)
-{
-	CHECK(desc.CreationType != Funky::Asset::StaticMesh::Desc::ECreationType::Undefined);
-
-	switch (desc.CreationType)
-	{
-	case Funky::Asset::StaticMesh::Desc::ECreationType::FromSource:
-		return Create(desc.Path, desc.bReverseIndices);
-	case Funky::Asset::StaticMesh::Desc::ECreationType::FromData:
-		//TODO: bReverseIndices
-		return desc.Indices.size() > 0 ?
-			Create(desc.Path, desc.Vertices, desc.Indices) : Create(desc.Path, desc.Vertices);
-	case Funky::Asset::StaticMesh::Desc::ECreationType::Undefined:
-		return nullptr;
-	}
-}
+#include "Core/Timer.h"
 
 Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::Create(Str const& Path, bool bReverseIndices /*= false*/)
 {
@@ -56,6 +41,26 @@ void Funky::Asset::StaticMesh::InitVertices(darray<Vertex> InVertices)
 {
 	Vertices = InVertices;
 	VerticesSizeInBytes = Vertices.size() * sizeof(Vertex);
+	{
+		DEBUG_SCOPE_TIMER(TEXT("Creating AABB"));
+
+		Math::Vec3f min = Math::Vec3f::Zero;
+		Math::Vec3f max = Math::Vec3f::Zero;
+
+		for (auto& current : Vertices)
+		{
+			min.X = Math::Min(min.X, current.Position.X);
+			min.Y = Math::Min(min.Y, current.Position.Y);
+			min.Z = Math::Min(min.Z, current.Position.Z);
+
+			max.X = Math::Max(max.X, current.Position.X);
+			max.Y = Math::Max(max.Y, current.Position.Y);
+			max.Z = Math::Max(max.Z, current.Position.Z);
+		}
+
+		BoundingBox.Min = min;
+		BoundingBox.Max = max;
+	}
 }
 
 void Funky::Asset::StaticMesh::InitIndices(darray<u16> InIndices)

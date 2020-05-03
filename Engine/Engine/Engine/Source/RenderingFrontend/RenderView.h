@@ -22,6 +22,11 @@ namespace Funky
 		struct RenderView
 		{
 			Math::Camera* Camera = nullptr;
+			DirectX::XMMATRIX View;
+			DirectX::XMMATRIX Projection;
+
+			DirectX::XMMATRIX ViewProjection;
+
 
 			RenderPrimitive Objects[MAX_RENDER_PRIMITIVES];
 			PostProcess PostProcesses[MAX_POSTPROCESSES];

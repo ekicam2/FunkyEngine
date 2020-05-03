@@ -47,13 +47,13 @@ struct Light
 
 };
 
-#define TOON_SHADING 1
-#define COLOR 1
+#define TOON_SHADING 0
+#define COLOR 0
 
 float4 PSMain(VSOutPSIn Input) : SV_TARGET0
 {
 	// lightning from right to left
-	float4 lightDirection = float4(-1.0, 0.0, 0.0, 0.0);
+	float4 lightDirection = normalize(float4(1.0, 1.0, 0.0, 0.0));
 
 	//float4 pixelToCamera = (cameraPos - Input.vPosWS);
 	//float4 pixelToLight = normalize(lightPositionWS - Input.vPosWS);
@@ -64,7 +64,7 @@ float4 PSMain(VSOutPSIn Input) : SV_TARGET0
 	float cosLightNormal = dot(normalize(-lightDirection), normalDecoded);
 
 #if !TOON_SHADING
-	float lightningMethod = cosLightNormal;
+	float lightningMethod = 0.6f + cosLightNormal;
 #else
 	float d = cosLightNormal;
 	float lightningMethod  = 
@@ -78,9 +78,9 @@ float4 PSMain(VSOutPSIn Input) : SV_TARGET0
 #endif
 
 #if COLOR
-	return lerp(float4(1.0, 0.0, 1.0, 0.0), float4(1.0, 1.0, 0.0, 0.0), lightningMethod * max(min((Input.vPosWS.y * 0.35), 1.0), 0.0));
+	return lerp(float4(1.0, 0.0, 1.0, 0.0), float4(1.0, 1.0, 0.0, 0.0), lightningMethod);
 #else
-	return lerp(float4(0.0, 0.0, 0.0, 0.0), float4(1.0, 1.0, 1.0, 0.0), lightningMethod * max(min((Input.vPosWS.y * 0.35), 1.0), 0.0));
+	return lerp(float4(0.0, 0.0, 0.0, 0.0), float4(1.0, 1.0, 1.0, 0.0), lightningMethod);
 #endif
 	//float hf = lightningMethod;//max(min((Input.vPosWS.y * 0.35), 1.0), 0.0);
 	//return float4(hf,hf,hf,hf);

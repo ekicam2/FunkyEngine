@@ -41,29 +41,6 @@ namespace Funky
 			return AR;
 		}
 
-		// Do I need such a simple creator?
-		//template <typename T>
-		//Asset::ID CreateAsset(Str const& Path)
-		//{
-		//	const Asset::ID id = HashString(Path);
-		//	GetBuffer<T>()[id] = T::CreateFromFile(Path);
-		//	return id;
-		//}
-
-		template <typename T>
-		[[deprecated("Use variadic CreateAsset instead.")]]
-		Asset::ID CreateAsset(typename T::Desc const& desc)
-		{
-			if (auto newAsset = T::CreateFromDesc(desc); newAsset != nullptr)
-			{
-				const Asset::ID id = desc.GetHash();
-				GetBuffer<T>()[id].Reset(newAsset);
-				return id;
-			}
-
-			return Asset::ID::Zero;
-		}
-
 		template<typename T, typename... Args>
 		Asset::ID CreateAsset(Args... args)
 		{

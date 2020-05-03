@@ -23,29 +23,10 @@ namespace Funky
 		{
 			friend class Funky::AssetRegistry;
 		public:
-
-			struct Desc
+			struct AABB
 			{
-				/** Required */
-				FORCEINLINE Hash128 GetHash() const { return HashString(Name); }
-				/** Required END */
-
-				Str Name;
-				bool bReverseIndices = false;
-
-				Str	Path;
-				struct
-				{
-					darray<Vertex>  Vertices;
-					darray<u16>		Indices;
-				};
-
-				enum class ECreationType
-				{
-					Undefined,
-					FromSource,
-					FromData
-				} CreationType = ECreationType::Undefined;
+				Math::Vec3f Min = Math::Vec3f::Zero;
+				Math::Vec3f Max = Math::Vec3f::Zero;
 			};
 
 			FORCEINLINE size GetIndicesCount() const
@@ -80,6 +61,7 @@ namespace Funky
 
 			FORCEINLINE Hash128 GetHash() const { return HashString(Name); }
 
+			FORCEINLINE AABB GetAABB() const { return BoundingBox; }
 		protected:
 			void InitVertices(darray<Vertex> InVertices);
 			void InitIndices(darray<u16> InIndices);
@@ -88,6 +70,8 @@ namespace Funky
 			Str Name;
 			darray<Vertex>	Vertices;
 			size VerticesSizeInBytes = 0u;
+
+			AABB BoundingBox;
 
 			darray<u16>		Indices;
 			size IndicesSizeInBytes = 0u;
@@ -101,9 +85,6 @@ namespace Funky
 			static StaticMesh* Create(Str const & Name, darray<Vertex> const& InVertices);
 			[[nodiscard]] 
 			static StaticMesh* Create(Str const & Name, darray<Vertex> const& InVertices, darray<u16> const& InIndices);
-
-			[[nodiscard]]
-			static StaticMesh* CreateFromDesc(Desc const& desc);
 		public:
 			Rendering::Resource::ID VertexBuffer = Rendering::Resource::ID::Zero;
 			Rendering::Resource::ID IndexBuffer  = Rendering::Resource::ID::Zero;

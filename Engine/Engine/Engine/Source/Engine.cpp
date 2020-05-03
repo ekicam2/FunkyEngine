@@ -35,7 +35,7 @@ namespace Funky
 
 	}
 
-	Core::IO::IIOSystem* Engine::GetIO()
+	Core::IO::IIOSystem const * Engine::GetIO()
 	{
 		CHECK(_Engine->IOSystem);
 		return _Engine->IOSystem;
@@ -115,7 +115,7 @@ bool Engine::Init(i32 Argc, char** Argv)
 
 				IOSystem->Update();
 			}
-			else
+			//else
 #pragma endregion 
 			{
 				MainSceneManager->Tick(DeltaTime);

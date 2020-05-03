@@ -46,6 +46,10 @@ namespace Funky
 				TAB,
 				SPACE,
 
+				LMB, 
+				MMB,
+				RMB,
+
 				COUNT
 			};
 

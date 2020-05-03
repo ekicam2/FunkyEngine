@@ -53,7 +53,9 @@ namespace Math
 		FORCEINLINE Math::Vec3f const& GetForward() const { return Forward; }
 		FORCEINLINE Math::Vec3f const& GetRight() const { return Right; }
 
-		FORCEINLINE Math::Vec3f const & GetPosition() const { return Position; }
+		FORCEINLINE Math::Vec3f const& GetPosition() const { return Position; }
+
+		FORCEINLINE Math::Vec3f const& GetRotation() const { return Rotation; }
 
 		void Translate(Math::Vec3f const & vTranslation)
 		{
@@ -63,6 +65,26 @@ namespace Math
 			//Temp = Temp.RotateZ(Rotation.Z);
 
 			Position += vTranslation;
+			bViewDirty = true;
+		}
+
+		void SetPosition(Math::Vec3f const& vPosition, bool bRotate = false)
+		{
+			Math::Vec3f Temp = vPosition;
+			if (bRotate)
+			{
+				Temp = Temp.RotateX(Rotation.X);
+				Temp = Temp.RotateY(Rotation.Y);
+				Temp = Temp.RotateZ(Rotation.Z);
+			}
+
+			Position = vPosition;
+			bViewDirty = true;
+		}
+
+		void SetRotation(Math::Vec3f const& vRotation)
+		{
+			Rotation = vRotation;
 			bViewDirty = true;
 		}
 

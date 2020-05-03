@@ -42,4 +42,8 @@ void Funky::Core::IO::WindowsIOSystem::Update()
 	Keys[(u32)IO::EKey::SHIFT].IsPressed = (PressedMask & GetAsyncKeyState(VK_SHIFT)) != 0;
 	Keys[(u32)IO::EKey::TAB].IsPressed = (PressedMask & GetAsyncKeyState(VK_TAB)) != 0;
 	Keys[(u32)IO::EKey::SPACE].IsPressed = (PressedMask & GetAsyncKeyState(VK_SPACE)) != 0;
+
+	Keys[(u32)IO::EKey::LMB].IsPressed = (PressedMask & GetAsyncKeyState(VK_LBUTTON)) != 0;
+	Keys[(u32)IO::EKey::MMB].IsPressed = (PressedMask & GetAsyncKeyState(VK_MBUTTON)) != 0;
+	Keys[(u32)IO::EKey::RMB].IsPressed = (PressedMask & GetAsyncKeyState(VK_RBUTTON)) != 0;
 }

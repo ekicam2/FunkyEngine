@@ -6,6 +6,9 @@
 #define WINDOWS_LEAN_AND_MEAN
 #include "windows.h"
 
+#undef min
+#undef max
+
 class Timer
 {
 public:
@@ -88,5 +91,9 @@ public:
 
 template <Timer::EResolution Resolution>
 using ScopeTimer = DebugLogScopeTimer<charx, Resolution>;
+
+#define DEBUG_SCOPE_TIMER(TimerName) ScopeTimer<Timer::EResolution::Mills> CONCAT(ScopeTimer, __LINE__)(TimerName)
+#define DEF_DEBUG_SCOPE_TIMER_MICRO(TimerName) ScopeTimer<Timer::EResolution::Micro> CONCAT(ScopeTimer, __LINE__)(TimerName)
+#define DEF_DEBUG_SCOPE_TIMER_SEC(TimerName) ScopeTimer<Timer::EResolution::Sec> CONCAT(ScopeTimer, __LINE__)(TimerName)
 
 #endif

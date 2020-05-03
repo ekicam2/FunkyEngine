@@ -59,50 +59,47 @@ void Funky::Rendering::Renderer::Shutdown()
 
 Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene([[maybe_unused]]IScene* InScene)
 {
-	DEBUG_SCOPE_TIMER(TEXT("Renderer::CreateRenderScene"));
+	//DEBUG_SCOPE_TIMER(TEXT("Renderer::CreateRenderScene"));
 
-	darray<Funky::VisibleObject> SceneObjects; 
+	darray<Funky::VisibleObject> sceneObjects = Move(InScene->GetVisibleObjects());
 
+	RenderView* ret = new RenderView();
+	ret->Camera = InScene->GetCamera();
+
+	ret->View			= ret->Camera->GetView();
+	ret->Projection		= ret->Camera->GetProjection();
+	ret->ViewProjection = ret->View * ret->Projection;
+
+	const size sceneObjectsNum = sceneObjects.size();
+	for (size i = 0; (i < sceneObjectsNum && i < MAX_RENDER_PRIMITIVES); ++i)
 	{
-		SceneObjects = Move(InScene->GetVisibleObjects());
-	}
-
-	size SceneObjectsNum = SceneObjects.size();
-
-	RenderView* Ret;
-	{
-		Ret = new RenderView(); 
-	}
-	Ret->Camera = InScene->GetCamera();
-
-	for (size i = 0; (i < SceneObjectsNum && i < MAX_RENDER_PRIMITIVES); ++i)
-	{
-		[[maybe_unused]] VisibleObject* const sceneObject = &SceneObjects[i];
+		[[maybe_unused]] VisibleObject* const sceneObject = &sceneObjects[i];
 
 		auto mesh = PrepareMeshFor(sceneObject);
 		auto [vs, ps] = PrepareMaterialFor(sceneObject);
 
 		{
 
-			Ret->Objects[i].bIsValid = true;
+			ret->Objects[i].bIsValid = true;
 
-			Ret->Objects[i].Mesh.VertexBuffer = RRManager->GetResource<Rendering::RBuffer>(mesh->VertexBuffer);
-			Ret->Objects[i].Mesh.IndexBuffer = mesh->GetIndicesCount() > 0u ? RRManager->GetResource<Rendering::RBuffer>(mesh->IndexBuffer) : nullptr;
+			ret->Objects[i].Mesh.VertexBuffer = RRManager->GetResource<Rendering::RBuffer>(mesh->VertexBuffer);
+			ret->Objects[i].Mesh.IndexBuffer = mesh->GetIndicesCount() > 0u ? RRManager->GetResource<Rendering::RBuffer>(mesh->IndexBuffer) : nullptr;
 
-			Ret->Objects[i].Shaders.VS = RRManager->GetResource<Rendering::RShader>(vs->ShaderHandle);
-			Ret->Objects[i].Shaders.PS = RRManager->GetResource<Rendering::RShader>(ps->ShaderHandle);
+			ret->Objects[i].Shaders.VS = RRManager->GetResource<Rendering::RShader>(vs->ShaderHandle);
+			ret->Objects[i].Shaders.PS = RRManager->GetResource<Rendering::RShader>(ps->ShaderHandle);
 
-			Ret->Objects[i].Position = sceneObject->Position;
-			Ret->Objects[i].Rotation = sceneObject->Rotation;
+			ret->Objects[i].Position	= sceneObject->Position;
+			ret->Objects[i].Rotation	= sceneObject->Rotation;
+			ret->Objects[i].Scale		= sceneObject->Scale;
 		}
 	}
 
-	return Ret;
+	return ret;
 }
 
 void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
 {
-	DEBUG_SCOPE_TIMER(TEXT("Renderer::DrawScene"));
+	//DEBUG_SCOPE_TIMER(TEXT("Renderer::DrawScene"));
 
 	Core::Memory::UniquePtr<RenderView> SceneToRender = CreateRenderScene(InScene);
 
@@ -141,16 +138,19 @@ void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
 			CHECK(nullptr != CurrentObject->Mesh.VertexBuffer);
 	
 			//Math::Mat4f Model = Math::Mat4f::Identity;
-			DirectX::XMMATRIX model = DirectX::XMMatrixRotationRollPitchYaw(
+			DirectX::XMMATRIX model = DirectX::XMMatrixScaling(CurrentObject->Scale, CurrentObject->Scale, CurrentObject->Scale); 
+			
+			model *= DirectX::XMMatrixRotationRollPitchYaw(
 				Math::ToRad(CurrentObject->Rotation.X), 
 				Math::ToRad(CurrentObject->Rotation.Y), 
 				Math::ToRad(CurrentObject->Rotation.Z)
 			);
 			model *= DirectX::XMMatrixTranslation(CurrentObject->Position.X, CurrentObject->Position.Y, CurrentObject->Position.Z);
-	
+
 			PerObjectConstantBufferData.MVP	  = model * vp;
 			PerObjectConstantBufferData.Model = model;
-	
+			
+#ifdef POOR_CULLING
 			{
 				DirectX::FXMVECTOR position_ws(PerObjectConstantBufferData.MVP.r[3]);
 				DirectX::FXMVECTOR position_ss(DirectX::XMVector4Transform(position_ws, PerObjectConstantBufferData.MVP));
@@ -170,6 +170,7 @@ void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
 				if (z_ndc > 1.0f)
 					continue;
 			}
+#endif
 	
 			RenderingBackend.BindConstantBuffer(RenderingBackend::ShaderResourceStage::Vertex, PerObjectConstantBufferHandle, 0);
 			RenderingBackend.UpdateConstantBuffer(PerObjectConstantBufferHandle, &PerObjectConstantBufferData);

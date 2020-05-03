@@ -106,10 +106,6 @@ namespace
 
 #define DEAD_PATH(...) ASSERT(false, TEXT("death path reached"))
 
-#define DEBUG_SCOPE_TIMER(TimerName) ScopeTimer<Timer::EResolution::Mills> CONCAT(ScopeTimer, __LINE__)(TimerName)
-#define DEF_DEBUG_SCOPE_TIMER_MICRO(TimerName) ScopeTimer<Timer::EResolution::Micro> CONCAT(ScopeTimer, __LINE__)(TimerName)
-#define DEF_DEBUG_SCOPE_TIMER_SEC(TimerName) ScopeTimer<Timer::EResolution::Sec> CONCAT(ScopeTimer, __LINE__)(TimerName)
-
 #else
 
 #define DEAD_PATH(...) __assume(0)

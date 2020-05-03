@@ -122,10 +122,12 @@ namespace Funky
 
 	public:
 		Engine();
-		static Core::IO::IIOSystem* GetIO();
+		static Core::IO::IIOSystem const * GetIO();
 		static Engine* GetEngine();
 		
 		FORCEINLINE Math::Vec2u GetWindowSize() const { return WindowSize; }
+		FORCEINLINE HWND GetHwnd() const { return hWnd; }
+
 
 		// move to subsystem
 		LRESULT __stdcall ProcessInput(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
