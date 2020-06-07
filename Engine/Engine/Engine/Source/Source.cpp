@@ -177,6 +177,10 @@ int main()//(i32 argc, char** argv)
 }
 #endif
 #ifdef ENGINE
+
+// clang
+// -Wno-pragma-once-outside-header 
+
 int main(i32 argc, char** argv)
 {
 	INIT_LOG();

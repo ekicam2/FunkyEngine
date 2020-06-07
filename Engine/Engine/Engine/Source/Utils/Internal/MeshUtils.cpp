@@ -165,7 +165,7 @@ Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadOBJFromFile(char const
 	return Ret;
 }
 
-Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadGLTFFromFile(char const* const pFilePath)
+Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadGLTFFromFile(char const* const pFilePath, bool bReverseIndices /*= false*/)
 {
 	tinygltf::Model model;
 	tinygltf::TinyGLTF loader;
@@ -236,24 +236,24 @@ Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadGLTFFromFile(char cons
 				Vertices[i].Normal.X = normals[i * 3 + 0];
 				Vertices[i].Normal.Y = normals[i * 3 + 1];
 				Vertices[i].Normal.Z = normals[i * 3 + 2];
+				Vertices[i].Normal = Vertices[i].Normal.RotateY(180.0f);
 			}
 		}
 
 		{
-			const tinygltf::Accessor& uvsAccessor = model.accessors[primitive.attributes["TEXCOORD_0"]];
-			const tinygltf::BufferView& uvsBufferView = model.bufferViews[uvsAccessor.bufferView];
-
-			const tinygltf::Buffer& uvsBuffer = model.buffers[uvsBufferView.buffer];
-			const float* uvs = reinterpret_cast<const float*>(&uvsBuffer.data[uvsBufferView.byteOffset + uvsAccessor.byteOffset]);
-
-			for (size_t i = 0; i < uvsAccessor.count; ++i)
-			{
-				Vertices[i].Texcoords.X = uvs[i * 2 + 0];
-				Vertices[i].Texcoords.Y = uvs[i * 2 + 1];
-			}
+			 //const tinygltf::Accessor& uvsAccessor = model.accessors[primitive.attributes["TEXCOORD_0"]];
+			 //const tinygltf::BufferView& uvsBufferView = model.bufferViews[uvsAccessor.bufferView];
+			 //
+			 //const tinygltf::Buffer& uvsBuffer = model.buffers[uvsBufferView.buffer];
+			 //const float* uvs = reinterpret_cast<const float*>(&uvsBuffer.data[uvsBufferView.byteOffset + uvsAccessor.byteOffset]);
+			 //
+			 //for (size_t i = 0; i < uvsAccessor.count; ++i)
+			 //{
+			 //	Vertices[i].Texcoords.X = uvs[i * 2 + 0];
+			 //	Vertices[i].Texcoords.Y = uvs[i * 2 + 1];
+			 //}
 		}
 
-		if(false)
 		{
 			const tinygltf::Accessor& indAccessor = model.accessors[primitive.indices];
 			const tinygltf::BufferView& indBufferView = model.bufferViews[indAccessor.bufferView];
@@ -261,10 +261,26 @@ Funky::MeshUtils::VertexIndexBuffer Funky::MeshUtils::LoadGLTFFromFile(char cons
 			const tinygltf::Buffer& indBuffer = model.buffers[indBufferView.buffer];
 			const u16* indices = reinterpret_cast<const u16*>(&indBuffer.data[indBufferView.byteOffset + indAccessor.byteOffset]);
 
-			Indices.reserve(indAccessor.count);
-			CHECK(Indices.size() == 0 && Indices.capacity() == indAccessor.count);
+			Indices.resize(indAccessor.count);
+			CHECK(Indices.size() == indAccessor.count && Indices.capacity() >= indAccessor.count);
 
-			for (size_t i = 0; i < indAccessor.count; ++i)
+			const size_t begin		= bReverseIndices ? indAccessor.count - 1 : 0;
+			const size_t end		= bReverseIndices ?  0					  : indAccessor.count;
+			const size_t step		= bReverseIndices ? -1					  : 1;
+
+			auto cmp = [](bool bReverseIndices, size_t i, size_t end) -> bool
+			{
+				if (bReverseIndices)
+				{
+					return i > end;
+				}
+				else
+				{
+					return i < end;
+				}
+			};
+
+			for (size_t i = begin; cmp(bReverseIndices, i, end); i += step)
 			{
 				Indices[i] = indices[i];
 			}

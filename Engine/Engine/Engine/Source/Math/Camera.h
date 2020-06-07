@@ -88,6 +88,8 @@ namespace Math
 			bViewDirty = true;
 		}
 
+		void LookAt(Math::Vec3f vPosition);
+
 		/**
 		* Rotates camera and clamp final rotation.
 		* @param vRotation an Euler rotation vector

@@ -9,6 +9,8 @@
 
 #include "MurmurHash3.h"
 
+#ifndef _MSC_VER
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wreserved-id-macro"
 #pragma clang diagnostic ignored "-Wold-style-cast"
@@ -17,6 +19,8 @@
 #pragma clang diagnostic ignored "-Wmissing-variable-declarations"
 #pragma clang diagnostic ignored "-Wextra-semi-stmt"
 #pragma clang diagnostic ignored "-Wcast-align"
+
+#endif
 
 int number;
 
@@ -344,4 +348,6 @@ void MurmurHash3_x64_128(const void* key, const int len,
 }
 
 //-----------------------------------------------------------------------------
+#ifndef _MSC_VER
 #pragma clang diagnostic pop
+#endif

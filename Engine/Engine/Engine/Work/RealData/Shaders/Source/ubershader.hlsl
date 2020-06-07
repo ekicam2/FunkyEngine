@@ -53,7 +53,7 @@ struct Light
 float4 PSMain(VSOutPSIn Input) : SV_TARGET0
 {
 	// lightning from right to left
-	float4 lightDirection = normalize(float4(1.0, 1.0, 0.0, 0.0));
+	float4 lightDirection = normalize(float4(1.0, 0.0, 0.0, 0.0));
 
 	//float4 pixelToCamera = (cameraPos - Input.vPosWS);
 	//float4 pixelToLight = normalize(lightPositionWS - Input.vPosWS);

@@ -21,7 +21,7 @@ namespace Funky
 
 		static VertexIndexBuffer LoadOBJFromFile(char const* const pFilePath, bool bReverse);
 		
-		static VertexIndexBuffer LoadGLTFFromFile(char const* const pFilePath);
+		static VertexIndexBuffer LoadGLTFFromFile(char const* const pFilePath, bool bReverseIndices = false);
 
 		//static VertexIndexBuffer CreateCube(f32 Colors[3], bool CCW = false);
 	};

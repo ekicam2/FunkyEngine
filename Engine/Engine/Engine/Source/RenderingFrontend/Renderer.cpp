@@ -73,25 +73,54 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene([[ma
 	const size sceneObjectsNum = sceneObjects.size();
 	for (size i = 0; (i < sceneObjectsNum && i < MAX_RENDER_PRIMITIVES); ++i)
 	{
-		[[maybe_unused]] VisibleObject* const sceneObject = &sceneObjects[i];
-
-		auto mesh = PrepareMeshFor(sceneObject);
-		auto [vs, ps] = PrepareMaterialFor(sceneObject);
-
+		VisibleObject * const sceneObject = &sceneObjects[i];
 		{
+			auto mesh		= PrepareMeshFor(sceneObject);
+			auto [vs, ps]	= PrepareMaterialFor(sceneObject);
 
 			ret->Objects[i].bIsValid = true;
 
-			ret->Objects[i].Mesh.VertexBuffer = RRManager->GetResource<Rendering::RBuffer>(mesh->VertexBuffer);
-			ret->Objects[i].Mesh.IndexBuffer = mesh->GetIndicesCount() > 0u ? RRManager->GetResource<Rendering::RBuffer>(mesh->IndexBuffer) : nullptr;
+			ret->Objects[i].Mesh.VertexBuffer	= RRManager->GetResource<Rendering::RBuffer>(mesh->VertexBuffer);
+			ret->Objects[i].Mesh.IndexBuffer	= mesh->GetIndicesCount() > 0u ? RRManager->GetResource<Rendering::RBuffer>(mesh->IndexBuffer) : nullptr;
 
 			ret->Objects[i].Shaders.VS = RRManager->GetResource<Rendering::RShader>(vs->ShaderHandle);
 			ret->Objects[i].Shaders.PS = RRManager->GetResource<Rendering::RShader>(ps->ShaderHandle);
 
-			ret->Objects[i].Position	= sceneObject->Position;
-			ret->Objects[i].Rotation	= sceneObject->Rotation;
-			ret->Objects[i].Scale		= sceneObject->Scale;
+			ret->Objects[i].Position = sceneObject->Position;
+			ret->Objects[i].Rotation = sceneObject->Rotation;
+			ret->Objects[i].Scale = sceneObject->Scale;
 		}
+
+		auto ParentModel = ret->Objects[i].GetModelMatrixNoScale();
+		if (size childrenCount = sceneObject->ChildrenCount; childrenCount > 0)
+		{
+			size j = 0;
+			while (i < sceneObjectsNum && i < MAX_RENDER_PRIMITIVES && j < (i + childrenCount))
+			{
+				++j;
+
+				VisibleObject* const currentVisible = &sceneObjects[i + j];
+				auto mesh							= PrepareMeshFor(currentVisible);
+				auto [vs, ps]						= PrepareMaterialFor(currentVisible);
+
+				ret->Objects[i + j].bIsValid	= true;
+				ret->Objects[i + j].ParentModel = ParentModel;
+
+				ret->Objects[i + j].Mesh.VertexBuffer = RRManager->GetResource<Rendering::RBuffer>(mesh->VertexBuffer);
+				ret->Objects[i + j].Mesh.IndexBuffer  = mesh->GetIndicesCount() > 0u ? RRManager->GetResource<Rendering::RBuffer>(mesh->IndexBuffer) : nullptr;
+
+				ret->Objects[i + j].Shaders.VS = RRManager->GetResource<Rendering::RShader>(vs->ShaderHandle);
+				ret->Objects[i + j].Shaders.PS = RRManager->GetResource<Rendering::RShader>(ps->ShaderHandle);
+
+				ret->Objects[i + j].Position = currentVisible->Position;
+				ret->Objects[i + j].Rotation = currentVisible->Rotation;
+				ret->Objects[i + j].Scale	 = currentVisible->Scale;
+			};
+
+			i += j;
+		}
+
+		
 	}
 
 	return ret;
@@ -137,15 +166,28 @@ void Funky::Rendering::Renderer::DrawScene(IScene* InScene)
 	
 			CHECK(nullptr != CurrentObject->Mesh.VertexBuffer);
 	
-			//Math::Mat4f Model = Math::Mat4f::Identity;
-			DirectX::XMMATRIX model = DirectX::XMMatrixScaling(CurrentObject->Scale, CurrentObject->Scale, CurrentObject->Scale); 
+			DirectX::XMMATRIX model = DirectX::XMMatrixIdentity();
+			//DirectX::XMMATRIX model = CurrentObject->ParentModel;
+
+			/*Math::Vec3f ParentPos(
+				DirectX::XMVectorGetX(CurrentObject->ParentModel.r[3])
+				, DirectX::XMVectorGetY(CurrentObject->ParentModel.r[3])
+				, DirectX::XMVectorGetZ(CurrentObject->ParentModel.r[3])
+			);*/
 			
 			model *= DirectX::XMMatrixRotationRollPitchYaw(
 				Math::ToRad(CurrentObject->Rotation.X), 
 				Math::ToRad(CurrentObject->Rotation.Y), 
 				Math::ToRad(CurrentObject->Rotation.Z)
 			);
-			model *= DirectX::XMMatrixTranslation(CurrentObject->Position.X, CurrentObject->Position.Y, CurrentObject->Position.Z);
+			model *= DirectX::XMMatrixTranslation(
+				/*ParentPos.X +*/ CurrentObject->Position.X, 
+				/*ParentPos.Y +*/ CurrentObject->Position.Y, 
+				/*ParentPos.Z +*/ CurrentObject->Position.Z
+			);
+			model *= DirectX::XMMatrixScaling(CurrentObject->Scale, CurrentObject->Scale, CurrentObject->Scale); 
+
+			model *= CurrentObject->ParentModel;
 
 			PerObjectConstantBufferData.MVP	  = model * vp;
 			PerObjectConstantBufferData.Model = model;

@@ -29,11 +29,24 @@ namespace Funky
 			Math::Vec3f	Rotation	= { 0.0f, 0.0f, 0.0f };
 			f32			Scale		= 1.0f;
 			
-			//DirectX::XMMATRIX Model;
+			DirectX::XMMATRIX ParentModel = DirectX::XMMatrixIdentity();
+			DirectX::XMMATRIX GetModelMatrixNoScale()
+			{
+				DirectX::XMMATRIX model = DirectX::XMMatrixRotationRollPitchYaw(
+					Math::ToRad(Rotation.X),
+					Math::ToRad(Rotation.Y),
+					Math::ToRad(Rotation.Z)
+				);
+				model *= DirectX::XMMatrixTranslation(Position.X, Position.Y, Position.Z);
+				model *= DirectX::XMMatrixScaling(Scale, Scale, Scale);
 
+				return model;
+			}
 
 			StaticMesh Mesh;
 			ShaderLink Shaders;
+
+			i32 ChildrenCount = 0;
 		};
 	}
 }

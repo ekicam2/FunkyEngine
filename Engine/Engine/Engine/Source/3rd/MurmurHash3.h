@@ -4,14 +4,19 @@
 //-----------------------------------------------------------------------------
 // MurmurHash3 was written by Austin Appleby, and is placed in the public
 // domain. The author hereby disclaims copyright to this source code.
+#ifndef _MSC_VER
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wreserved-id-macro"
 
+#endif
+
 #ifndef _MURMURHASH3_H_
 #define _MURMURHASH3_H_
 
+#ifndef _MSC_VER
 #pragma clang diagnostic pop
+#endif
 
 //-----------------------------------------------------------------------------
 // Platform-specific functions and macros

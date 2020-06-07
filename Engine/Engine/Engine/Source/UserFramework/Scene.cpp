@@ -9,18 +9,21 @@
 #include "RenderingFrontend\ShaderCompiler.h"
 
 
-const static Str terrainMeshPath = "RealData/Meshes/terrainplane.obj";
-const static Str robotMeshPath = "RealData/Meshes/Pirates/ship_dark.obj";
+const static Str terrainMeshPath	= "RealData/Meshes/Triangle/glTF/Triangle.gltf";//"RealData/Meshes/terrainplane.obj";
+const static Str parentMeshPath		= "RealData/Meshes/Duck/glTF/Duck.gltf"; //"RealData/Meshes/Pirates/ship_dark.obj";
+const static Str childMeshPath		= "RealData/Meshes/Avocado/glTF/Avocado.gltf"; //"RealData/Meshes/Pirates/ship_dark.obj";
+
 const static Str uberShaderPath = "RealData/Shaders/Source/ubershader.hlsl";
 
 //#define MESH_PATH 
-Funky::Asset::ID sceneObjectMesh		= Funky::Asset::ID::Zero;
+Funky::Asset::ID parentMesh				= Funky::Asset::ID::Zero;
+Funky::Asset::ID childMesh				= Funky::Asset::ID::Zero;
 Funky::Asset::ID sceneObjectMaterial	= Funky::Asset::ID::Zero;
 
 void Funky::Scene::Init()
 {
-	Asset::ID terrainMesh = Asset::ID::Zero;
-	Asset::ID terrainMaterial = Asset::ID::Zero;
+	Asset::ID terrainMesh		= Asset::ID::Zero;
+	Asset::ID terrainMaterial	= Asset::ID::Zero;
 	
 	auto& AR = Funky::AssetRegistry::GetInstance();
 	LOG("Load Scene Assets");
@@ -28,8 +31,8 @@ void Funky::Scene::Init()
 		DEBUG_SCOPE_TIMER(TEXT("Loading assets"));
 
 		terrainMesh			= AR.CreateAsset<Asset::StaticMesh>(terrainMeshPath, true);
-		sceneObjectMesh		= AR.CreateAsset<Asset::StaticMesh>(robotMeshPath, true);
-
+		parentMesh			= AR.CreateAsset<Asset::StaticMesh>(parentMeshPath, true);
+		childMesh			= AR.CreateAsset<Asset::StaticMesh>(parentMeshPath, false);
 		sceneObjectMaterial = terrainMaterial = AR.CreateAsset<Asset::Material>(Asset::Material::ERenderingTechnique::Ubershader);
 	}
 
@@ -37,22 +40,38 @@ void Funky::Scene::Init()
 	{
 		DEBUG_SCOPE_TIMER(TEXT("Init scene"));
 
-		InitTerrain({ 50, 50 }, terrainMesh, terrainMaterial);
-		Terrain->Foreach([]([[maybe_unused]]size i, Tilemap::Tile& tile)
+		Math::Vec2u TerrainSize = { 50, 50 };
+		InitTerrain(TerrainSize,
+			[=]([[maybe_unused]] size i, Tilemap::Tile& tile)
 			{
+				tile.Material	= sceneObjectMaterial;
+				tile.Mesh		= terrainMesh;
+				tile.Scale		= 5.00f;
+				tile.Rotation	= Math::Vec3f(-90.0f, 0.0f, 0.0f);
+
+				const size width = TerrainSize.X;
+				const Math::Vec2u pos((u32)i % (u32)width, (u32)i / (u32)width);
+				tile.Position	= Math::Vec3f((f32)pos.X, 0.0f, (f32)pos.Y);
 				tile.Position *= Math::Vec3f(5.0f, 1.0f, 5.0f);
 				tile.Position += Math::Vec3f(0.0f, -1.0f, 0.0f);
 			}
 		);
 
-		VisibleObject temp;
-		temp.Mesh		= sceneObjectMesh;
-		temp.Material	= sceneObjectMaterial;
+		VisibleObject tempPlayer;
+		tempPlayer.ChildrenCount = 1;
+		tempPlayer.Rotation = Math::Vec3f(0.0f, 180.0f, 0.0f);
+		tempPlayer.Scale = 1.0f;
+		tempPlayer.Mesh = parentMesh;
+		tempPlayer.Material = sceneObjectMaterial;
+		Objects.push_back(tempPlayer);
 
-		//temp.Position = Math::Vec3f(, );
-		Objects.push_back(temp);
-		Objects[0].Rotation = Math::Vec3f(0.0f, 180.0f, 0.0f);
-		Objects[0].Scale	= 0.25f;
+		VisibleObject tempPlayerMesh;
+		tempPlayerMesh.Position = Math::Vec3f(0.0f, -180.0f, 0.0f);
+		tempPlayerMesh.Rotation = Math::Vec3f(0.0f, 90.0f, 0.0f);
+		tempPlayerMesh.Scale = .25f;
+		tempPlayerMesh.Mesh = childMesh;
+		tempPlayerMesh.Material = sceneObjectMaterial;
+		Objects.push_back(tempPlayerMesh);
 	}
 
 
@@ -77,15 +96,14 @@ darray<Funky::VisibleObject> Funky::Scene::GetVisibleObjects()
 
 	//frustum culling
 
+	for (size i = 0; i < Objects.size(); ++i)
+		visibleObjects.push_back(Objects[i]);
 
 	const size terrainObjectsNum = Terrain->Data.size();
 	for (size i = 0; i < terrainObjectsNum; ++i)
-	{
 		visibleObjects.push_back(Terrain->Data[i]);
-	}
 
-	for (size i = 0; i < Objects.size(); ++i)
-		visibleObjects.push_back(Objects[i]);
+
 
 	return visibleObjects;
 }
@@ -93,26 +111,6 @@ darray<Funky::VisibleObject> Funky::Scene::GetVisibleObjects()
 Math::Camera* Funky::Scene::GetCamera()
 {
 	return &Camera;
-}
-
-void Funky::Scene::InitTerrain(Math::Vec2u const& Size, Asset::ID mesh, Asset::ID material)
-{
-	Terrain.Reset(new Tilemap());
-	Terrain->Size = Size;
-
-	for (size i = 0; i < Size.X * Size.Y; ++i)
-	{
-		Tilemap::Tile newTile;
-		const size width = Terrain->Size.X;
-		const Math::Vec2u pos((u32)i % (u32)width, (u32)i / (u32)width);
-
-		newTile.Material	= material;
-		newTile.Mesh		= mesh;
-		newTile.Position	= Math::Vec3f((f32)pos.X, 0.0f, (f32)pos.Y);
-		newTile.Scale		= 5.0f;
-
-		Terrain->Data.push_back(newTile);
-	}
 }
 
 void Funky::Scene::CaptureInput(f32 delta)
@@ -153,40 +151,26 @@ void Funky::Scene::CaptureInput(f32 delta)
 	{
 		auto moveDelta = Objects[0].GetForward() * delta * 0.02f;
 		Objects[0].Position += moveDelta;
-		camera->Translate(moveDelta);
+		//camera->Translate(moveDelta);
 	}
 
 	if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_DOWN))
 	{
 		auto moveDelta = -Objects[0].GetForward() * delta * 0.02f;
 		Objects[0].Position += moveDelta;
-		camera->Translate(moveDelta);
+		//camera->Translate(moveDelta);
 	}
 
 	// Mouse
 	{
-		//Rotations 
-		const float rotationSpeed = 0.2f;
-
-		if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_LEFT))
-		{
-			Objects[0].Rotation += (-Math::Vec::UP * rotationSpeed * delta);
-			
-			// const auto forward = Objects[0].GetForward();
-			// camera->Rotate(Objects[0].Rotation + camera->GetRotation());// (-Math::Vec::UP * rotationSpeed * delta));
-			// camera->SetPosition(Objects[0].Position + (-forward * 200.0f) + Math::Vec3f(0.0f, 166.0f, 0.0f), true);
-		}
-
-		if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_RIGHT))
-			Objects[0].Rotation += (Math::Vec::UP * rotationSpeed * delta);
-
+		
 
 		Engine const* const engine = Engine::GetEngine();
 		auto const hwnd = engine->GetHwnd();
 		POINT cursorPosition = { 0, 0 };
 		GetCursorPos(&cursorPosition);
 		
-
+		const float rotationSpeed = 0.2f;
 		if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::RMB))
 		{
 			RECT WindowRect = { 0, 0, 0, 0 };
@@ -216,11 +200,22 @@ void Funky::Scene::CaptureInput(f32 delta)
 				);
 			}
 		}
-		if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::TAB)
-			|| Engine::GetIO()->IsKeyPressed(Core::IO::EKey::LMB)
-			|| Engine::GetIO()->IsKeyPressed(Core::IO::EKey::SPACE))
+	
+		//Rotations 
+
+		if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_LEFT))
+			Objects[0].Rotation += (-Math::Vec::UP * rotationSpeed * delta);
+
+		if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::ARROW_RIGHT))
+			Objects[0].Rotation += (Math::Vec::UP * rotationSpeed * delta);
+
+		if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::SPACE))
 		{
-			
+			const f32 distance = 200.0f;
+			if (Engine::GetIO()->IsKeyPressed(Core::IO::EKey::TAB))
+				camera->SetPosition(Objects[0].Position + (-Objects[0].GetForward()/*.RotateY(90.0f)*/ * distance) + Math::Vec3f(0.0f, 100.0f, 0.0));
+
+			camera->LookAt(Objects[0].Position);
 		}
 	}
 }

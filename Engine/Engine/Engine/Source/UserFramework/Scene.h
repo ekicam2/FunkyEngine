@@ -17,6 +17,8 @@ namespace Funky
 			f32			Scale		= 0.0f;
 		};
 
+		size ChildrenCount = 0;
+
 		Asset::ID Mesh = Asset::ID::Zero;
 		Asset::ID Material = Asset::ID::Zero;
 		BoundingShpere BoundingSphere() const
@@ -74,6 +76,8 @@ namespace Funky
 		template <typename LAMBDA>
 		void Foreach(LAMBDA&& F)
 		{
+			if (Data.empty()) return;
+
 			const auto width = Data.size();
 			for (size i = 0; i < width; ++i)
 			{
@@ -98,7 +102,19 @@ namespace Funky
 		virtual Math::Camera* GetCamera() override;
 
 		Core::Memory::UniquePtr<Tilemap> Terrain;
-		void InitTerrain(Math::Vec2u const& Size, Asset::ID mesh, Asset::ID material);
+		template <typename LAMBDA>
+		void InitTerrain(Math::Vec2u const& Size, LAMBDA&& func)//Asset::ID mesh, Asset::ID material)
+		{
+			Terrain.Reset(new Tilemap());
+			Terrain->Size = Size;
+
+			for (size i = 0; i < Size.X * Size.Y; ++i)
+			{
+				Tilemap::Tile newTile;
+				func(i, newTile);
+				Terrain->Data.push_back(newTile);
+			}
+		}
 
 		void CaptureInput(f32 delta);
 	};

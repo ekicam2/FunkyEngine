@@ -13,7 +13,7 @@ Funky::Asset::StaticMesh* Funky::Asset::StaticMesh::Create(Str const& Path, bool
 	}
 	else if (Path.EndsWith(".gltf"))
 	{
-		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadGLTFFromFile(Path.GetBuffer());
+		Funky::MeshUtils::VertexIndexBuffer VI = MeshUtils::LoadGLTFFromFile(Path.GetBuffer(), bReverseIndices);
 		return Create(Path, VI.Vertices, VI.Indices);
 	}
 
