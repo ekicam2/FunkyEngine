@@ -8,28 +8,11 @@
 
 namespace Funky
 {
-	struct VisibleObject
+	struct Transform
 	{
-		struct BoundingShpere
-		{
-			Math::Vec3f Position	= Math::Vec3f(0.0f, 0.0f, 0.0f);
-			f32			Radius		= 0.0f;
-			f32			Scale		= 0.0f;
-		};
-
-		size ChildrenCount = 0;
-
-		Asset::ID Mesh = Asset::ID::Zero;
-		Asset::ID Material = Asset::ID::Zero;
-		BoundingShpere BoundingSphere() const
-		{
-			auto& ar = AssetRegistry::GetInstance();
-			Asset::StaticMesh const * mesh = ar.GetAsset<Asset::StaticMesh>(Mesh);
-			auto const aabb = mesh->GetAABB();
-			const f32 radius = Math::Max(aabb.Min, aabb.Max).Length();
-
-			return { Position, radius, Scale };
-		}
+		Math::Vec3f Position	= Math::Vec3f::Zero;
+		Math::Vec3f Rotation	= Math::Vec3f::Zero;
+		Math::Vec3f Scale		= { 1.0f, 1.0f, 1.0f };
 
 		Math::Vec3f GetForward() const
 		{
@@ -41,10 +24,33 @@ namespace Funky
 
 			return ret.Normalized();
 		}
+	};
 
-		Math::Vec3f Position = Math::Vec3f(0.0f, 0.0f, 0.0f);
-		Math::Vec3f Rotation = Math::Vec3f(0.0f, 0.0f, 0.0f);
-		f32 Scale = 1.0f;
+	struct BoundingShpere
+	{
+		Math::Vec3f Position	= Math::Vec3f(0.0f, 0.0f, 0.0f);
+		f32			Radius		= 0.0f;
+		f32			Scale		= 0.0f;
+	};
+
+	struct VisibleObject
+	{
+		size ChildrenCount = 0;
+
+		Asset::ID Mesh		= Asset::ID::Zero;
+		Asset::ID Material	= Asset::ID::Zero;
+
+		BoundingShpere BoundingSphere() const
+		{
+			auto& ar = AssetRegistry::GetInstance();
+			Asset::StaticMesh const * mesh = ar.GetAsset<Asset::StaticMesh>(Mesh);
+			auto const aabb = mesh->GetAABB();
+			const f32 radius = Math::Max(aabb.Min, aabb.Max).Length();
+
+			return { Transform.Position, radius, Transform.Scale.X };
+		}
+
+		Transform Transform;
 	};
 
 	struct IScene
@@ -59,63 +65,5 @@ namespace Funky
 
 	};
 
-	struct Tilemap
-	{
-		using  Tile = VisibleObject;
 
-		Math::Vec2u Size = Math::Vec2u::Zero;
-		Math::Vec3f Origin = Math::Vec3f::Zero;
-
-		Tile& GetAt(Math::Vec2u const& position)
-		{
-			const size index = position.X * Size.Y + position.X;
-			CHECK(index < Data.size());
-			return Data[index];
-		}
-
-		template <typename LAMBDA>
-		void Foreach(LAMBDA&& F)
-		{
-			if (Data.empty()) return;
-
-			const auto width = Data.size();
-			for (size i = 0; i < width; ++i)
-			{
-				F(i, Data[i]);
-			}
-		}
-
-		darray<Tile> Data;
-	};
-
-	struct Scene : public IScene
-	{
-		Scene() = default;
-
-		Math::Camera Camera;
-		darray<VisibleObject> Objects;
-
-		virtual void Init() override;
-		virtual void Shutdown() override {}
-		virtual void Tick([[maybe_unused]] f32 Delta) override;
-		virtual darray<VisibleObject> GetVisibleObjects() override;
-		virtual Math::Camera* GetCamera() override;
-
-		Core::Memory::UniquePtr<Tilemap> Terrain;
-		template <typename LAMBDA>
-		void InitTerrain(Math::Vec2u const& Size, LAMBDA&& func)//Asset::ID mesh, Asset::ID material)
-		{
-			Terrain.Reset(new Tilemap());
-			Terrain->Size = Size;
-
-			for (size i = 0; i < Size.X * Size.Y; ++i)
-			{
-				Tilemap::Tile newTile;
-				func(i, newTile);
-				Terrain->Data.push_back(newTile);
-			}
-		}
-
-		void CaptureInput(f32 delta);
-	};
 }

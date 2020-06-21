@@ -37,7 +37,7 @@ namespace Funky
 			template<typename LAMBDA>
 			void RegisterLambda(LAMBDA&& LambdaObj)
 			{
-				RegisteredList.push_back(new Callable<Ret(RemoveReference<LAMBDA>::Type::*)(Args...) const>(LambdaObj));
+				RegisteredList.push_back(new Callable<Ret(TypeTraits::RemoveReference<LAMBDA>::Type::*)(Args...) const>(LambdaObj));
 			}
 
 			void Broadcast(Args ...args)

@@ -18,6 +18,10 @@
 #include "Core/Tasks/ITask.h"
 #include "Core/Timer.h"
 
+#ifdef _DEBUG
+#include "Debug/EngineDebugScene.h"
+#endif // _DEBUG
+
 LRESULT CALLBACK ProcessInput(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	return Funky::Engine::GetEngine()->ProcessInput(hWnd, Message, wParam, lParam);
@@ -76,13 +80,12 @@ namespace Funky
 #pragma endregion
 
 
-bool Engine::Init(i32 Argc, char** Argv)
-{
-		ParseProgramArgs(Argc, Argv);
-
-		// load from engine .ini or .json IDC <3
-		SubsystemBitmask RequestedSubsystems = SubsystemBitmask::All;
-		return InitSubsystems(RequestedSubsystems);
+	bool Engine::Init(Engine::EngineInitDesc* initDesc)
+	{
+		ParseProgramArgs(initDesc->Argc, initDesc->Argv);
+		const bool succeed = InitSubsystems(initDesc->RequiredSubsystems);
+		initDesc->Initializer.Broadcast(this, succeed);
+		return succeed;
 	}
 
 	void Engine::Run()
@@ -93,9 +96,50 @@ bool Engine::Init(i32 Argc, char** Argv)
 #pragma region OSDependent
 		bool bGotMsg;
 
-		MSG  Msg;
-		Msg.message = WM_NULL;
-		Timer FrameTimer;
+		MSG msg;
+		msg.message = WM_NULL;
+
+#ifdef _DEBUG
+		struct FPSCounter 
+		{
+			FPSCounter(HWND inhWnd)
+			: hWnd(inhWnd)
+			{
+				Reset();
+				UpdateTitle();
+			}
+
+			void Tick(f32 dt)
+			{
+				timeAccumulator += dt;
+				framesCounter++;
+				if (timeAccumulator >= 1000.0f)
+				{
+					UpdateTitle();
+					Reset();
+				}
+			}
+
+			void Reset()
+			{
+				timeAccumulator = 0.0f;
+				framesCounter	= 0;
+			}
+
+			void UpdateTitle()
+			{
+				charx titleBuffer[256];
+				swprintf_s(titleBuffer, TEXT("Funky Engine Debug Build: FPS: %d"), framesCounter);
+				SetWindowText(hWnd, titleBuffer);
+			}
+
+			HWND hWnd;
+			f32 timeAccumulator;
+			i32 framesCounter;
+		} fpsCounter(hWnd);
+#endif // _DEBUG
+		
+		Timer frameTimer;
 #pragma endregion
 		while (bShouldRun)
 		{
@@ -104,21 +148,24 @@ bool Engine::Init(i32 Argc, char** Argv)
 #endif
 
 
-			float DeltaTime = (float)FrameTimer.Reset(Timer::EResolution::Mills);
+			const float deltaTime = (float)frameTimer.Reset(Timer::EResolution::Mills);
+#ifdef _DEBUG
+			fpsCounter.Tick(deltaTime);
+#endif // _DEBUG
 #pragma region OSDependent
-			bGotMsg = (PeekMessage(&Msg, NULL, 0U, 0U, PM_REMOVE) != 0);
+			bGotMsg = (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE) != 0);
 			if (bGotMsg)
 			{
 				// Translate and dispatch the message
-				TranslateMessage(&Msg);
-				DispatchMessage(&Msg);
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
 
 				IOSystem->Update();
 			}
-			//else
+			else
 #pragma endregion 
 			{
-				MainSceneManager->Tick(DeltaTime);
+				MainSceneManager->Tick(deltaTime);
 				RenderScene();
 			}
 		}
@@ -252,9 +299,6 @@ bool Engine::Init(i32 Argc, char** Argv)
 			LOG("Initializing SceneManager");
 			MainSceneManager.Reset(new SceneManager());
 
-			LOG("Initializing MainScene");
-			InitScene();
-
 			Result |= SubsystemBitmask::SceneManagement;
 
 		}
@@ -302,12 +346,6 @@ bool Engine::Init(i32 Argc, char** Argv)
 		return true;
 	}
 #pragma endregion
-
-	void Engine::InitScene()
-	{
-		auto CurrentScene = MainSceneManager->GetCurrentScene();
-		CurrentScene->Init();
-	}
 
 	Funky::SubsystemBitmask& operator|=(SubsystemBitmask& Lhs, SubsystemBitmask Rhs)
 	{

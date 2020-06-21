@@ -1,8 +1,5 @@
 #include "Macros.h"
 #include "Engine.h"
-#include "LogMacros.h"
-
-#include "Core/Utils.h"
 
 /**
  *	Valid defines
@@ -178,8 +175,15 @@ int main()//(i32 argc, char** argv)
 #endif
 #ifdef ENGINE
 
+
 // clang
 // -Wno-pragma-once-outside-header 
+
+#if !defined(_WINDLL)
+
+#ifdef _DEBUG
+#include "Debug/EngineDebugScene.h"
+#endif // _DEBUG
 
 int main(i32 argc, char** argv)
 {
@@ -188,10 +192,27 @@ int main(i32 argc, char** argv)
 	SetCurrentDirectory(
 		TEXT("G:\\Engine\\Engine\\Engine\\Engine\\Work")
 	);
-	
+
+	Funky::Engine::EngineInitDesc EngineInit = {};
+	EngineInit.Argc = argc;
+	EngineInit.Argv = argv;
+	EngineInit.RequiredSubsystems = Funky::SubsystemBitmask::All;
+#ifdef _DEBUG
+	EngineInit.Initializer.RegisterLambda([](Funky::Engine* inEngine, bool succeeded)
+		{
+			if (succeeded)
+			{
+				auto sceneManager = inEngine->GetSceneManager();
+				sceneManager->SetCurrenScene(sceneManager->RegisterScene(new Funky::EngineDebugScene()));
+				sceneManager->GetCurrentScene()->Init();
+			}
+		});
+#endif
+
 	{
+
 		Funky::Engine Engine;
-		if (Engine.Init(argc, argv))
+		if (Engine.Init(&EngineInit))
 			Engine.Run();
 	
 		if (!Engine.Shutdown())
@@ -200,4 +221,5 @@ int main(i32 argc, char** argv)
 	
 	return 0;
 }
+#endif
 #endif

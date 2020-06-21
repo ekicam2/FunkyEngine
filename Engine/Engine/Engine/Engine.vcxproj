@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug dll msvc|x64">
+      <Configuration>Debug dll msvc</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
@@ -23,6 +27,12 @@
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug dll msvc|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -38,11 +48,18 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug dll msvc|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>Intermediate\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(MSBuildProjectName)\Build\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug dll msvc|x64'">
     <IntDir>Intermediate\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)$(MSBuildProjectName)\Build\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
@@ -60,9 +77,27 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/D "ENGINE_MODULE=" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d3d11.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)..\..\..\..\Build\x64\Debug\;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug dll msvc|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>Source\FunkyMath;Source\3rd\sdl;Source\;Source\3rd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/D "ENGINE_MODULE=__declspec(dllexport)" %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir)..\..\..\..\Build\x64\Debug\;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -83,7 +118,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>d3d11.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)Work</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -98,6 +133,7 @@
     <ClInclude Include="Source\Core\Assets\Asset.h" />
     <ClInclude Include="Source\Core\Assets\AssetRegistry.h" />
     <ClInclude Include="Source\Core\Assets\Shader.h" />
+    <ClInclude Include="Source\Core\Assets\Texture.h" />
     <ClInclude Include="Source\Core\Containers.h" />
     <ClInclude Include="Source\Core\Events\EngineEvents.h" />
     <ClInclude Include="Source\Core\Events\ICallable.h" />
@@ -123,6 +159,7 @@
     <ClInclude Include="Source\Core\Timer.h" />
     <ClInclude Include="Source\Core\Utils.h" />
     <ClInclude Include="Source\DebugMacros.h" />
+    <ClInclude Include="Source\Debug\EngineDebugScene.h" />
     <ClInclude Include="Source\Math\Matrix4.h" />
     <ClInclude Include="Source\Math\Vector4.h" />
     <ClInclude Include="Source\RenderingBackend\Internal\DX11\DX11Marker.h" />
@@ -160,12 +197,14 @@
     <ClInclude Include="Source\Utils\NoiseGenerator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\3rd\implementation\stb_image.cpp" />
     <ClCompile Include="Source\3rd\MurmurHash3.cpp" />
-    <ClCompile Include="Source\3rd\TinyGLTFLoader.cpp" />
+    <ClCompile Include="Source\3rd\implementation\TinyGLTFLoader.cpp" />
     <ClCompile Include="Source\3rd\TinyObjectLoader.cpp" />
     <ClCompile Include="Source\Core\Assets\AssetRegistry.cpp" />
     <ClCompile Include="Source\Core\Assets\Shader.cpp" />
     <ClCompile Include="Source\Core\Assets\StaticMesh.cpp" />
+    <ClCompile Include="Source\Core\Assets\Texture.cpp" />
     <ClCompile Include="Source\Core\Events\EngineEvents.cpp" />
     <ClCompile Include="Source\Core\Events\Event.h" />
     <ClCompile Include="Source\Core\IIOSystem.cpp" />
@@ -179,7 +218,7 @@
     <ClCompile Include="Source\Core\Thread\IThread.cpp" />
     <ClCompile Include="Source\Core\Thread\ThreadPool.cpp" />
     <ClCompile Include="Source\Core\Timer.cpp" />
-    <ClCompile Include="Source\Math\Camera.cpp" />
+    <ClCompile Include="Source\Debug\EngineDebugScene.cpp" />
     <ClCompile Include="Source\RenderingBackend\Internal\DX11\DX11Core.cpp" />
     <ClCompile Include="Source\Engine.cpp" />
     <ClCompile Include="Source\Core\Assets\Material.cpp" />

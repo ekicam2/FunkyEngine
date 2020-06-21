@@ -111,7 +111,7 @@ namespace Funky
 			{
 				using namespace TypeTraits;
 
-				if (IsArray<PtrType>::Value)
+				if (IsArray<ObjectType>::Value)
 					delete[] Object;
 				else
 					delete Object;

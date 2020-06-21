@@ -4,6 +4,8 @@
 #include "BasicTypes.h"
 #include "3rd/MurmurHash3.h"
 #include "Core/Containers.h"
+#include "LogMacros.h"
+#include "DebugMacros.h"
 
 namespace Funky
 {

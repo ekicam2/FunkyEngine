@@ -86,9 +86,9 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene([[ma
 			ret->Objects[i].Shaders.VS = RRManager->GetResource<Rendering::RShader>(vs->ShaderHandle);
 			ret->Objects[i].Shaders.PS = RRManager->GetResource<Rendering::RShader>(ps->ShaderHandle);
 
-			ret->Objects[i].Position = sceneObject->Position;
-			ret->Objects[i].Rotation = sceneObject->Rotation;
-			ret->Objects[i].Scale = sceneObject->Scale;
+			ret->Objects[i].Position = sceneObject->Transform.Position;
+			ret->Objects[i].Rotation = sceneObject->Transform.Rotation;
+			ret->Objects[i].Scale	 = sceneObject->Transform.Scale.X;
 		}
 
 		auto ParentModel = ret->Objects[i].GetModelMatrixNoScale();
@@ -112,9 +112,9 @@ Funky::Rendering::RenderView* Funky::Rendering::Renderer::CreateRenderScene([[ma
 				ret->Objects[i + j].Shaders.VS = RRManager->GetResource<Rendering::RShader>(vs->ShaderHandle);
 				ret->Objects[i + j].Shaders.PS = RRManager->GetResource<Rendering::RShader>(ps->ShaderHandle);
 
-				ret->Objects[i + j].Position = currentVisible->Position;
-				ret->Objects[i + j].Rotation = currentVisible->Rotation;
-				ret->Objects[i + j].Scale	 = currentVisible->Scale;
+				ret->Objects[i + j].Position = currentVisible->Transform.Position;
+				ret->Objects[i + j].Rotation = currentVisible->Transform.Rotation;
+				ret->Objects[i + j].Scale	 = currentVisible->Transform.Scale.X;
 			};
 
 			i += j;

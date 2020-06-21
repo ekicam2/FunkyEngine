@@ -22,6 +22,7 @@
 
 namespace Funky
 {
+	/** Used in @EngineArguments Read Oly set.*/
 	struct ARGValue
 	{
 		union
@@ -40,6 +41,7 @@ namespace Funky
 #endif
 	};
 
+	/** Passed to the init method so we know what to initialize and what to not. */
 	enum class SubsystemBitmask : u8
 	{
 		None			= 0,
@@ -57,6 +59,7 @@ namespace Funky
 
 	bool operator&(SubsystemBitmask Lhs, SubsystemBitmask Rhs);
 
+	/** Main class of the engine, at some point it will be replaced with more static functions, or set of singleton getters.*/
 	class Engine final
 	{
 		struct EngineArguments
@@ -121,25 +124,42 @@ namespace Funky
 		};
 
 	public:
-		Engine();
-		static Core::IO::IIOSystem const * GetIO();
-		static Engine* GetEngine();
+		ENGINE_MODULE Engine();
+		void								ENGINE_MODULE RequestExit() { bShouldRun = false; }
+
+		static Core::IO::IIOSystem const *	ENGINE_MODULE GetIO();
+		static Engine*						ENGINE_MODULE GetEngine(); //!< This one should be replaced
 		
-		FORCEINLINE Math::Vec2u GetWindowSize() const { return WindowSize; }
-		FORCEINLINE HWND GetHwnd() const { return hWnd; }
+		SceneManager* ENGINE_MODULE GetSceneManager() const { return MainSceneManager;}
 
 
-		// move to subsystem
-		LRESULT __stdcall ProcessInput(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+		/** These below should be moved to the Platform::Window */
+		FORCEINLINE Math::Vec2u ENGINE_MODULE GetWindowSize()	const { return WindowSize; }
+		FORCEINLINE HWND		ENGINE_MODULE GetHwnd()			const { return hWnd; }
+		/** END */
 
-		bool Init(i32 Argc, char** Argv);
-		void Run();
-		bool Shutdown();
+		struct EngineInitDesc
+		{
+			i32 Argc;
+			char** Argv;
+			SubsystemBitmask RequiredSubsystems = SubsystemBitmask::All;
+			Core::Event<void(Engine*, bool)> Initializer;
+		};
+		bool ENGINE_MODULE Init(EngineInitDesc* initDesc);
+		void ENGINE_MODULE Run();
+		bool ENGINE_MODULE Shutdown();
 
+		/** What is scene, what is rendering. Move to the game itself I DONT GIVE A FUCK.*/
 		void RenderScene();
 
+		/** This one should be independent from Engine state. */
 		AssetRegistry* GetAssetRegistry() { return AssetManager; }
+
+		/** */
 		Rendering::RenderingBackend* GetRenderingBackend() { return RenderingBackend.Get(); }
+
+		/** This one belongs to the Platform::IO */
+		LRESULT __stdcall ProcessInput(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	private:
 		void ParseProgramArgs(i32 Argc, char** Argv);
@@ -149,8 +169,6 @@ namespace Funky
 		[[nodiscard]]
 		bool CreateAndShowWindow(Math::Vec2u const& windowSize);
 		bool bShouldRun = true;
-
-		void InitScene();
 
 		static Engine* _Engine;
 
@@ -164,12 +182,15 @@ namespace Funky
 			Core::Memory::UniquePtr<Core::Thread::ThreadPool> ThreadPool;
 #endif
 		Core::Memory::UniquePtr<SceneManager> MainSceneManager;
-			Core::Memory::UniquePtr<Rendering::IRenderer> Renderer;
-				Core::Memory::UniquePtr<Rendering::RenderingBackend> RenderingBackend;
+			
+		Core::Memory::UniquePtr<Rendering::IRenderer> Renderer;
+			Core::Memory::UniquePtr<Rendering::RenderingBackend> RenderingBackend;
 		// subsystems END
 
+		/** These below should be moved to the Platform::Window */
 		Math::Vec2u WindowSize = Math::Vec2u::Zero;
 		HWND hWnd;
 		HINSTANCE hInstance = GetModuleHandle(NULL);
+		/** END */
 	};
 }

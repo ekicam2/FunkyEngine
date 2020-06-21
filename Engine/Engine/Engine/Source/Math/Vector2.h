@@ -75,6 +75,7 @@ namespace Math
 
 	using Vec2f = Vector2D<f32>; //!< Template instance for 2 dimensional float vector 
 	using Vec2d = Vector2D<f64>; //!< Template instance for 2 dimensional double vector 
+	using Vec2i = Vector2D<i32>; //!< Template instance for 2 dimensional unsigned vector 
 	using Vec2u = Vector2D<u32>; //!< Template instance for 2 dimensional unsigned vector 
 }
 

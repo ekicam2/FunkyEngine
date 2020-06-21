@@ -9,6 +9,7 @@
 #include "Material.h"
 #include "Shader.h"
 #include "StaticMesh.h"
+#include "Texture.h"
 
 
 namespace Funky
@@ -19,8 +20,6 @@ namespace Funky
 		template<typename T>
 		using AssetMap = map<Asset::ID, Core::Memory::UniquePtr<T>>;
 
-		inline static const Str AssetExtension = ".fkasset";
-
 #ifdef _DEBUG
 		inline static const Str BaseAssetsPath = "RealData\\";
 #else
@@ -28,12 +27,10 @@ namespace Funky
 #endif
 		inline static const Str MeshAssetsPath		= "Meshes\\";
 		inline static const Str MaterialAssetsPath	= "Materials\\";
-		inline static const Str ShaderAssetsPath	= "Shaders\\";
+		inline static const Str ShaderAssetsPath    = "Shaders\\";
+		inline static const Str TextureAssetPath    = "Texture\\";
 
 		AssetRegistry();
-
-		bool IsMeshLoaded(Asset::ID const& MeshID) { return (MeshAssets.find(MeshID) != MeshAssets.end()); }
-		bool LoadMesh(Asset::ID const& MeshID) { return MeshID.v[0] > 0; }
 
 		static AssetRegistry& GetInstance()
 		{
@@ -83,6 +80,7 @@ namespace Funky
 		AssetMap<Asset::StaticMesh> MeshAssets;
 		AssetMap<Asset::Material>	MaterialAssets;
 		AssetMap<Asset::Shader>		ShadersAssets;
+		AssetMap<Asset::Texture>	TexturesAssets;
 	};
 
 }

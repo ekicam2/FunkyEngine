@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Math.h"
+#include <DirectXMath.h>
+
 namespace Funky
 {
 	namespace Rendering
